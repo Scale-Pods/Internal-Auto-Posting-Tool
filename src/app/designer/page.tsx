@@ -165,64 +165,63 @@ async function handleFileUpload() {
     <div className="min-h-screen bg-background text-on-background">
       {/* Top Nav — contextual designer toolbar */}
       <header className="sticky top-0 z-40 h-16 bg-[#131313]/80 backdrop-blur-xl shadow-sm shadow-black/50">
-        <div className="flex justify-between items-center px-8 w-full h-16 max-w-[1920px] mx-auto">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <span className="text-xl font-[900] text-white">Designer Workspace</span>
-              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border border-primary/20">Designer Portal</span>
+        <div className="flex justify-between items-center px-4 md:px-8 w-full h-16 max-w-[1920px] mx-auto">
+          <div className="flex items-center gap-4 md:gap-8 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+              <span className="text-lg md:text-xl font-[900] text-white truncate">Designer Workspace</span>
+              <span className="hidden sm:inline-block bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase border border-primary/20">Designer Portal</span>
             </div>
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
               <span className="text-gray-400 hover:text-white transition-colors cursor-pointer">Canvas</span>
               <span className="text-primary border-b-2 border-primary pb-5 translate-y-[10px]">Assets</span>
               <span className="text-gray-400 hover:text-white transition-colors cursor-pointer">Templates</span>
               <span className="text-gray-400 hover:text-white transition-colors cursor-pointer">Review</span>
             </nav>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-gray-400 hover:text-white transition-colors">
-              <span className="material-symbols-outlined">notifications</span>
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+            <button className="p-1 md:p-2 text-gray-400 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">notifications</span>
             </button>
-            <button className="px-4 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition-colors">Save Draft</button>
-            <button className="bg-primary text-on-primary px-5 py-1.5 rounded-lg text-sm font-bold shadow-[0_0_20px_rgba(192,193,255,0.2)] hover:scale-[1.02] transition-all">Publish</button>
+            <button className="hidden sm:inline-block bg-primary text-on-primary px-4 md:px-5 py-1.5 rounded-lg text-xs md:text-sm font-bold shadow-[0_0_20px_rgba(192,193,255,0.2)] hover:scale-[1.02] transition-all">Publish</button>
           </div>
         </div>
       </header>
 
-      <main className="pt-8 pb-12 px-8 max-w-[1920px] mx-auto space-y-12">
+      <main className="pt-6 md:pt-8 pb-12 px-4 md:px-8 max-w-[1920px] mx-auto space-y-8 md:space-y-12 text-left">
         {/* Header */}
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
-            <p className="text-primary-fixed-dim font-medium tracking-widest text-xs uppercase">Creative Core</p>
-            <h1 className="text-5xl font-[900] tracking-tighter text-white">Designer Workspace</h1>
-            <p className="text-on-surface-variant max-w-xl leading-relaxed">Centralized asset management and production environment. Orchestrate visual campaigns with precision.</p>
+            <p className="text-primary-fixed-dim font-medium tracking-widest text-[10px] md:text-xs uppercase">Creative Core</p>
+            <h1 className="text-3xl md:text-5xl font-[900] tracking-tighter text-white">Designer Workspace</h1>
+            <p className="text-on-surface-variant max-w-xl leading-relaxed text-sm md:text-base">Centralized asset management and production environment. Orchestrate visual campaigns with precision.</p>
           </div>
-          <div className="flex items-center gap-4 bg-surface-container-low p-2 rounded-xl ghost-border">
-            <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-lg text-sm font-medium hover:bg-surface-bright transition-colors">
-              <span className="material-symbols-outlined text-sm">filter_list</span> Filters
+          <div className="flex items-center gap-2 md:gap-4 bg-surface-container-low p-2 rounded-xl ghost-border overflow-x-auto">
+            <button className="whitespace-nowrap flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-lg text-xs md:text-sm font-medium hover:bg-surface-bright transition-colors shrink-0">
+              <span className="material-symbols-outlined text-sm md:text-base">filter_list</span> Filters
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-lg text-sm font-medium hover:bg-surface-bright transition-colors">
-              <span className="material-symbols-outlined text-sm">calendar_today</span> Timeline
+            <button className="whitespace-nowrap flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-lg text-xs md:text-sm font-medium hover:bg-surface-bright transition-colors shrink-0">
+              <span className="material-symbols-outlined text-sm md:text-base">calendar_today</span> Timeline
             </button>
           </div>
         </section>
 
         {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             { icon: "pending_actions", color: "text-sp-tertiary", bgColor: "bg-sp-tertiary/10", label: "Pending Reviews", value: uploadedTasks.filter(d => d.status === 'Awaiting Review').length.toString(), badge: "Active", badgeColor: "text-sp-tertiary bg-sp-tertiary/10" },
             { icon: "verified_user", color: "text-sp-secondary", bgColor: "bg-sp-secondary/10", label: "Approved", value: uploadedTasks.filter(d => d.status === 'Ready for Publishing').length.toString(), badge: "High Rate", badgeColor: "text-sp-secondary bg-sp-secondary/10" },
             { icon: "cloud_upload", color: "text-sp-primary", bgColor: "bg-sp-primary/10", label: "Uploads Today", value: uploadedTasks.length.toString(), badge: "Live Data", badgeColor: "text-sp-primary bg-sp-primary/10" },
             { icon: "rocket_launch", color: "text-on-surface", bgColor: "bg-white/5", label: "Active Campaigns", value: activeCampaigns.toString().padStart(2, '0'), badge: "Active", badgeColor: "text-gray-500 bg-white/5" },
           ].map((s) => (
-            <div key={s.label} className="bg-surface-container-low p-6 rounded-xl ghost-border group hover:bg-surface-container-high transition-all">
+            <div key={s.label} className="bg-surface-container-low p-5 md:p-6 rounded-xl ghost-border group hover:bg-surface-container-high transition-all">
               <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 ${s.bgColor} rounded-xl`}>
-                  <span className={`material-symbols-outlined ${s.color}`}>{s.icon}</span>
+                <div className={`p-2.5 md:p-3 ${s.bgColor} rounded-xl`}>
+                  <span className={`material-symbols-outlined ${s.color} text-xl md:text-2xl`}>{s.icon}</span>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.badgeColor}`}>{s.badge}</span>
+                <span className={`text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full ${s.badgeColor}`}>{s.badge}</span>
               </div>
-              <h3 className="text-on-surface-variant text-sm font-medium">{s.label}</h3>
-              <p className="text-3xl font-[900] text-white mt-1">{s.value}</p>
+              <h3 className="text-on-surface-variant text-xs md:text-sm font-medium">{s.label}</h3>
+              <p className="text-2xl md:text-3xl font-[900] text-white mt-1">{s.value}</p>
             </div>
           ))}
         </section>

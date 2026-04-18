@@ -74,7 +74,7 @@ function ThemeToggle() {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
@@ -95,7 +95,27 @@ export default function Sidebar() {
   const activeBg = isDesigner ? "bg-sp-tertiary/10" : "bg-[#1c1b1b]";
 
   return (
-    <aside className="flex flex-col h-screen p-6 w-64 border-r border-white/5 bg-[#0e0e0e] fixed left-0 top-0 z-50 shadow-2xl shadow-indigo-500/5">
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] md:hidden animate-in fade-in duration-300" 
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={`
+        flex flex-col h-screen p-6 w-72 border-r border-white/5 bg-[#0e0e0e] fixed left-0 top-0 z-[60] shadow-2xl transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0 md:w-64
+      `}>
+        {/* Mobile Close Button */}
+        <button 
+          onClick={onClose}
+          className="md:hidden absolute top-6 right-6 p-2 text-gray-500 hover:text-white transition-colors"
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
       {/* Brand */}
       <div className="mb-8 flex items-center gap-3">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDesigner ? "bg-sp-tertiary" : "bg-primary"}`}>
@@ -235,5 +255,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }

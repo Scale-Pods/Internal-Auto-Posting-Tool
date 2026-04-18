@@ -277,40 +277,40 @@ export default function PublishingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface text-left">
       {/* Header */}
-      <div className="px-8 pt-8 pb-4">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="min-w-0">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] font-bold uppercase tracking-widest mb-3">
               Publishing Engine
             </div>
-            <h1 className="text-3xl font-[900] text-white tracking-tight">Ready to Post</h1>
-            <p className="text-sm text-on-surface-variant mt-1 max-w-xl">
+            <h1 className="text-3xl md:text-4xl font-[900] text-white tracking-tight truncate">Ready to Post</h1>
+            <p className="text-xs md:text-sm text-on-surface-variant mt-1 max-w-xl">
               Design, review and publish content platform by platform.
             </p>
           </div>
-          <Link href="/" className="text-sm font-bold text-sp-primary hover:underline flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Dashboard
+          <Link href="/" className="text-xs md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0">
+            <span className="material-symbols-outlined text-base">arrow_back</span> Back to Dashboard
           </Link>
         </div>
 
         {/* Platform Tabs */}
-        <div className="flex items-center gap-1 mt-6 border-b border-white/5">
+        <div className="flex items-center gap-1 mt-6 border-b border-white/5 overflow-x-auto no-scrollbar">
           {PLATFORM_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActivePlatform(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-bold transition-all relative ${
+              className={`flex items-center gap-2 px-4 md:px-5 py-3 text-xs md:text-sm font-bold transition-all relative whitespace-nowrap ${
                 activePlatform === tab.id
                   ? "text-white"
                   : "text-on-surface-variant hover:text-white"
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+              <span className="material-symbols-outlined text-[16px] md:text-[18px]">{tab.icon}</span>
               {tab.label}
               {counts[tab.id] > 0 && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold ${
                   activePlatform === tab.id
                     ? "bg-sp-primary text-black"
                     : "bg-white/10 text-gray-400"
@@ -322,7 +322,7 @@ export default function PublishingPage() {
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sp-primary rounded-t-full" />
               )}
               {tab.id === "linkedin" && (
-                <span className="text-[9px] font-bold bg-white/5 text-gray-500 px-1.5 py-0.5 rounded uppercase">Soon</span>
+                <span className="text-[8px] md:text-[9px] font-bold bg-white/5 text-gray-500 px-1 py-0.5 md:px-1.5 rounded uppercase">Soon</span>
               )}
             </button>
           ))}
@@ -330,27 +330,27 @@ export default function PublishingPage() {
       </div>
 
       {/* Content Grid */}
-      <div className="px-8 pt-6 pb-12 w-full max-w-6xl">
+      <div className="px-4 md:px-8 pt-6 pb-12 w-full max-w-6xl">
         {activePlatform === "linkedin" ? (
-          <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center">
-            <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">work</span>
-            <h3 className="text-xl font-bold text-white">LinkedIn Publishing</h3>
-            <p className="text-on-surface-variant max-w-sm mt-2">LinkedIn integration is coming in the next phase. Stay tuned!</p>
+          <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
+            <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">work</span>
+            <h3 className="text-lg md:text-xl font-bold text-white">LinkedIn Publishing</h3>
+            <p className="text-on-surface-variant max-w-sm mt-2 text-sm">LinkedIn integration is coming in the next phase. Stay tuned!</p>
           </div>
         ) : filteredDeliverables.length === 0 ? (
-          <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center">
-            <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">
+          <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
+            <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">
               {activePlatform === "instagram" ? "photo_camera" : "language"}
             </span>
-            <h3 className="text-xl font-bold text-white">No {activePlatform === "instagram" ? "Instagram" : "Website"} Posts Ready</h3>
-            <p className="text-on-surface-variant max-w-sm mt-2">
+            <h3 className="text-lg md:text-xl font-bold text-white">No {activePlatform === "instagram" ? "Instagram" : "Website"} Posts Ready</h3>
+            <p className="text-on-surface-variant max-w-sm mt-2 text-sm">
               {activePlatform === "instagram"
                 ? "Upload designs in the Designer portal and set the platform to Instagram."
                 : "Upload designs in the Designer portal and set the platform to Website Social Feed."}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredDeliverables.map((item) => (
               <div key={item.id} className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden group flex flex-col relative">
                 {/* Media Preview */}
@@ -420,21 +420,21 @@ export default function PublishingPage() {
       </div>
 
       {/* Publishing History */}
-      <div className="px-8 pb-16 w-full max-w-6xl">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+      <div className="px-4 md:px-8 pb-16 w-full max-w-6xl">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
           <span className="material-symbols-outlined text-sp-tertiary">history</span>
           Publishing History
         </h2>
         <div className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-[#1c1b1b] text-xs text-on-surface-variant uppercase tracking-widest font-bold border-b border-white/5">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10">
+            <table className="w-full text-left min-w-[700px]">
+              <thead className="bg-[#1c1b1b] text-[10px] md:text-xs text-on-surface-variant uppercase tracking-widest font-bold border-b border-white/5">
                 <tr>
-                  <th className="px-6 py-4">Content</th>
-                  <th className="px-6 py-4">Client</th>
-                  <th className="px-6 py-4">Platform</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 flex-1 text-right">Actions</th>
+                  <th className="px-4 md:px-6 py-4">Content</th>
+                  <th className="px-4 md:px-6 py-4">Client</th>
+                  <th className="px-4 md:px-6 py-4">Platform</th>
+                  <th className="px-4 md:px-6 py-4">Status</th>
+                  <th className="px-4 md:px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
@@ -563,8 +563,8 @@ export default function PublishingPage() {
       {/* REVIEW MODAL                                    */}
       {/* ═══════════════════════════════════════════════ */}
       {reviewTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-surface border border-white/10 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-surface border border-white/10 md:rounded-2xl max-w-5xl w-full h-full md:max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
             
             <button onClick={handleCloseReview} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors">
               <span className="material-symbols-outlined text-sm">close</span>
@@ -624,7 +624,7 @@ export default function PublishingPage() {
             </div>
 
             {/* Right — Form */}
-            <div className="w-full md:w-1/2 p-8 overflow-y-auto bg-[#161616]">
+            <div className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto bg-[#161616]">
               {/* Modal Header */}
               <div className="mb-6">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-widest mb-2 ${

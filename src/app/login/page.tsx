@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 soft-gradient-bg relative">
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 soft-gradient-bg relative text-left">
       {/* Decorative corners */}
       <div className="fixed top-12 left-12 w-32 h-32 opacity-10 pointer-events-none">
         <div className="absolute inset-0 border-t border-l border-green-800"></div>
@@ -51,10 +51,10 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="login-glass border border-white/40 rounded-3xl overflow-hidden shadow-2xl shadow-green-600/10 p-10">
-          <div className="mb-8">
-            <h2 className="font-[900] text-2xl text-gray-800 mb-1">Welcome back</h2>
-            <p className="text-green-800/70 text-sm">Access your enterprise workspace.</p>
+        <div className="login-glass border border-white/40 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-green-600/10 p-6 md:p-10">
+          <div className="mb-6 md:mb-8">
+            <h2 className="font-[900] text-xl md:text-2xl text-gray-800 mb-1">Welcome back</h2>
+            <p className="text-green-800/70 text-xs md:text-sm">Access your enterprise workspace.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -136,7 +136,7 @@ export default function LoginPage() {
               <div className="flex-grow border-t border-green-600/10"></div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => quickLogin("designer")}
                 className="flex items-center justify-center gap-3 py-3 px-4 bg-white/40 border border-white/60 rounded-xl hover:bg-white/60 transition-all"

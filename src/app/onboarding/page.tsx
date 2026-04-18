@@ -91,10 +91,10 @@ export default function OnboardingPage() {
 
   /* ─── Main Onboarding Layout ─────────────────────────── */
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-surface">
+    <div className="min-h-screen lg:h-screen overflow-x-hidden flex flex-col bg-surface text-left">
       {/* ── Page Header ─────────────────────────────── */}
-      <div className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex-shrink-0 px-4 md:px-8 pt-6 pb-4 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sp-primary/10 border border-sp-primary/20 text-sp-primary text-[9px] font-bold uppercase tracking-widest">
             Onboarding Phase 01
           </div>
@@ -102,7 +102,7 @@ export default function OnboardingPage() {
             <h1 className="text-xl font-[900] text-white tracking-tight">
               Configure Your <span className="text-sp-primary">Marketing AI</span>
             </h1>
-            <p className="text-xs text-on-surface-variant mt-0.5">Provide business details to calibrate AI agents for optimal conversion.</p>
+            <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Provide business details to calibrate AI agents for optimal conversion.</p>
           </div>
         </div>
         {/* AI Potential badge */}
@@ -123,13 +123,13 @@ export default function OnboardingPage() {
       </div>
 
       {/* ── Form Body (2-panel) ──────────────────────── */}
-      <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-5 gap-0 min-h-0">
+      <div className="flex-1 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-5 gap-0 min-h-0">
         
         {/* LEFT: Main Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-3 overflow-y-auto custom-scrollbar p-8 flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="lg:col-span-3 overflow-y-auto custom-scrollbar p-6 md:p-8 flex flex-col gap-5">
 
           {/* Row 1: Business Name + Industry */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Business Name *</label>
               <input
@@ -169,7 +169,7 @@ export default function OnboardingPage() {
           </div>
 
           {/* Row 4: Goal + Tone */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Primary Goal *</label>
               <select value={goal} onChange={(e) => setGoal(e.target.value)} required
@@ -191,21 +191,21 @@ export default function OnboardingPage() {
           {/* Row 5: Platforms */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Target Platforms</label>
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {PLATFORMS.map((p) => {
                 const active = selectedPlatforms.includes(p.id);
                 return (
                   <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
-                    className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl border transition-all hover:scale-105 text-center ${
+                    className={`flex flex-col items-center justify-center py-2 md:py-3 px-2 rounded-xl border transition-all hover:scale-105 text-center ${
                       active
                         ? "border-sp-primary bg-sp-primary/10 shadow-[0_0_12px_rgba(192,193,255,0.15)]"
                         : "bg-surface-container-low border-outline-variant/20 hover:border-sp-primary/30 hover:bg-surface-container"
                     }`}>
-                    <span className={`material-symbols-outlined text-lg mb-1 ${active ? "text-sp-primary" : "text-gray-500"}`}
+                    <span className={`material-symbols-outlined text-base md:text-lg mb-1 ${active ? "text-sp-primary" : "text-gray-500"}`}
                       style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
                       {p.icon}
                     </span>
-                    <span className={`text-[10px] font-bold ${active ? "text-white" : "text-gray-400"}`}>{p.label}</span>
+                    <span className={`text-[9px] md:text-[10px] font-bold ${active ? "text-white" : "text-gray-400"}`}>{p.label}</span>
                   </button>
                 );
               })}
@@ -233,7 +233,7 @@ export default function OnboardingPage() {
         </form>
 
         {/* RIGHT: Info Panel */}
-        <div className="lg:col-span-2 border-l border-white/5 bg-surface-container-lowest overflow-y-auto custom-scrollbar p-8 flex flex-col gap-5">
+        <div className="lg:col-span-2 border-l border-white/5 bg-surface-container-lowest overflow-y-auto custom-scrollbar p-6 md:p-8 flex flex-col gap-5">
           
           {/* Step tracker */}
           <div>

@@ -31,9 +31,9 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen p-10 bg-surface">
+    <div className="min-h-screen p-4 md:p-10 bg-surface">
       {/* Header */}
-      <header className="mb-12 flex justify-between items-end">
+      <header className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <p className="text-sp-primary font-medium tracking-widest text-xs uppercase mb-2">Agency OS</p>
           <h1 className="text-4xl font-[900] tracking-tight text-white mb-2">Welcome back, {userName}</h1>
@@ -103,10 +103,10 @@ export default function DashboardPage() {
       {/* Pipeline Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Pipeline Steps */}
-        <section className="lg:col-span-2">
+        <section className="lg:col-span-2 order-2 lg:order-1">
           <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-white/5 shadow-xl">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-[#1c1b1b]">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-[#1c1b1b]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2 text-base md:text-xl">
                 <span className="material-symbols-outlined text-sp-primary">account_tree</span>
                 Agency OS Pipeline
               </h2>
@@ -120,19 +120,19 @@ export default function DashboardPage() {
                 { step: "05", icon: "fact_check", color: "text-sp-error", title: "Client Content Approval", desc: "Client reviews uploaded media and approves for publishing", href: "/review", action: "Review Content" },
                 { step: "06", icon: "rocket_launch", color: "text-sp-secondary", title: "Auto-Posting Engine", desc: "Publish approved and designed content to platforms", href: "/publishing", action: "Publish Now" },
               ].map((item) => (
-                <div key={item.step} className="p-6 flex items-start gap-4 hover:bg-surface-container-high transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-xs font-[900] text-gray-500">
+                <div key={item.step} className="p-4 md:p-6 flex items-start gap-4 hover:bg-surface-container-high transition-colors">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-[10px] md:text-xs font-[900] text-gray-500">
                     {item.step}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <h4 className="text-white font-bold flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row justify-between mb-1 gap-1 sm:gap-4">
+                      <h4 className="text-white font-bold flex items-center gap-2 truncate text-sm md:text-base">
                         <span className={`material-symbols-outlined text-base ${item.color}`}>{item.icon}</span>
                         {item.title}
                       </h4>
-                      <Link href={item.href} className={`text-xs font-bold ${item.color} hover:underline`}>{item.action} →</Link>
+                      <Link href={item.href} className={`text-[10px] md:text-xs font-bold ${item.color} hover:underline shrink-0`}>{item.action} →</Link>
                     </div>
-                    <p className="text-on-surface-variant text-sm">{item.desc}</p>
+                    <p className="text-on-surface-variant text-[11px] md:text-sm">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -141,12 +141,12 @@ export default function DashboardPage() {
         </section>
 
         {/* Right Panel */}
-        <section className="space-y-6">
-          <div className="bg-surface-container-high p-8 rounded-2xl border border-white/5 relative overflow-hidden group">
+        <section className="space-y-6 order-1 lg:order-2">
+          <div className="bg-surface-container-high p-6 md:p-8 rounded-2xl border border-white/5 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-sp-primary/5 to-transparent"></div>
             <div className="relative z-10">
               <h3 className="text-xl font-bold text-white mb-4">Quick Actions</h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                 <Link href="/clients" className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 py-3 px-4 rounded-xl font-medium transition-all flex items-center gap-3">
                   <span className="material-symbols-outlined text-sp-primary text-sm">people</span>
                   Manage Clients
@@ -181,10 +181,10 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      {/* Floating FAB */}
-      <div className="fixed bottom-10 right-10 z-50">
-        <button className="w-14 h-14 rounded-full bg-sp-primary text-on-primary shadow-2xl flex items-center justify-center hover:scale-110 transition-transform hover:shadow-[0_0_30px_rgba(192,193,255,0.4)]">
-          <span className="material-symbols-outlined text-3xl">support_agent</span>
+      {/* Floating FAB - hidden on mobile if desired, or styled smaller */}
+      <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50">
+        <button className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-sp-primary text-on-primary shadow-2xl flex items-center justify-center hover:scale-110 transition-transform hover:shadow-[0_0_30px_rgba(192,193,255,0.4)]">
+          <span className="material-symbols-outlined text-2xl md:text-3xl">support_agent</span>
         </button>
       </div>
     </div>

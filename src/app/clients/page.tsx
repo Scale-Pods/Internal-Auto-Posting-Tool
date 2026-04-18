@@ -496,38 +496,38 @@ export default function ClientsPage() {
         </div>
       )}
       
-      <div className="px-12 pb-12 space-y-10 max-w-[1400px] mx-auto">
+      <div className="px-4 md:px-12 pb-12 space-y-10 max-w-[1400px] mx-auto">
         {/* Top Bar */}
-      <header className="sticky top-0 z-40 h-16 bg-[#131313]/80 backdrop-blur-xl flex justify-between items-center px-8 border-b border-white/5 -mx-12">
-        <h2 className="text-xl font-[900] text-white ml-4">Client Management</h2>
-        <div className="flex items-center gap-6 mr-4">
+      <header className="sticky top-0 z-40 h-16 bg-[#131313]/80 backdrop-blur-xl flex justify-between items-center px-4 md:px-8 border-b border-white/5 -mx-4 md:-mx-12">
+        <h2 className="text-lg md:text-xl font-[900] text-white ml-2 md:ml-4">Client Management</h2>
+        <div className="flex items-center gap-4 md:gap-6 mr-2 md:mr-4">
           <span className="material-symbols-outlined cursor-pointer text-gray-400 hover:text-white transition-colors">notifications</span>
           <span className="material-symbols-outlined cursor-pointer text-gray-400 hover:text-white transition-colors">help_outline</span>
         </div>
       </header>
 
       {/* Header + Stats */}
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-[900] text-white tracking-tight">Active Clients</h1>
-          <div className="flex gap-8 items-center bg-surface-container-low p-4 rounded-xl ghost-border px-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 text-left">
+        <div className="space-y-4 w-full">
+          <h1 className="text-3xl md:text-4xl font-[900] text-white tracking-tight">Active Clients</h1>
+          <div className="flex flex-wrap gap-4 md:gap-8 items-center bg-surface-container-low p-4 rounded-xl ghost-border px-6">
             <div className="flex flex-col">
-              <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Total Clients</span>
-              <span className="text-2xl font-[900] text-white">{clients.length}</span>
+              <span className="text-gray-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest">Total Clients</span>
+              <span className="text-xl md:text-2xl font-[900] text-white">{clients.length}</span>
             </div>
-            <div className="h-8 w-px bg-white/10"></div>
+            <div className="hidden sm:block h-8 w-px bg-white/10"></div>
             <div className="flex flex-col">
-              <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Growth Focused</span>
-              <span className="text-2xl font-[900] text-sp-secondary">{growthCount}</span>
+              <span className="text-gray-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest">Growth Focused</span>
+              <span className="text-xl md:text-2xl font-[900] text-sp-secondary">{growthCount}</span>
             </div>
-            <div className="h-8 w-px bg-white/10"></div>
+            <div className="hidden sm:block h-8 w-px bg-white/10"></div>
             <div className="flex flex-col">
-              <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Sales Oriented</span>
-              <span className="text-2xl font-[900] text-sp-tertiary">{salesCount}</span>
+              <span className="text-gray-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest">Sales Oriented</span>
+              <span className="text-xl md:text-2xl font-[900] text-sp-tertiary">{salesCount}</span>
             </div>
           </div>
         </div>
-        <Link href="/onboarding" className="bg-sp-primary text-on-primary px-8 py-4 rounded-xl font-[900] text-sm tracking-wide shadow-[0_0_30px_rgba(192,193,255,0.2)] hover:scale-[1.02] transition-transform flex items-center gap-2">
+        <Link href="/onboarding" className="w-full lg:w-auto bg-sp-primary text-on-primary px-8 py-4 rounded-xl font-[900] text-sm tracking-wide shadow-[0_0_30px_rgba(192,193,255,0.2)] hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
           <span className="material-symbols-outlined text-lg">person_add</span>
           ADD NEW CLIENT
         </Link>
@@ -573,15 +573,15 @@ export default function ClientsPage() {
                       <div className="w-6 h-6 rounded-full border-2 border-sp-primary border-t-transparent animate-spin"></div>
                    </div>
                 )}
-                <div className="flex items-start gap-6">
-                  <div className={`h-16 w-16 shrink-0 rounded-xl flex items-center justify-center font-[900] text-xl border ${colorClass}`}>
+                <div className="flex items-start gap-4 md:gap-6">
+                  <div className={`h-12 w-12 md:h-16 md:w-16 shrink-0 rounded-xl flex items-center justify-center font-[900] text-lg md:text-xl border ${colorClass}`}>
                     {initials}
                   </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-bold text-white group-hover:text-sp-primary transition-colors">{name}</h3>
-                        <p className="text-gray-500 text-sm">{client["Business Type"]}</p>
+                  <div className="flex-1 space-y-3 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0">
+                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-sp-primary transition-colors truncate">{name}</h3>
+                        <p className="text-gray-500 text-xs md:text-sm truncate">{client["Business Type"]}</p>
                       </div>
                       <div className="relative">
                         <button onClick={(e) => { e.stopPropagation(); setMenuOpenFor(menuOpenFor === i ? null : i); }} className="text-gray-600 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5">
