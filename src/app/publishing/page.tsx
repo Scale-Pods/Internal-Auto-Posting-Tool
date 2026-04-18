@@ -355,11 +355,11 @@ export default function PublishingPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {filteredDeliverables.map((item) => (
-              <div key={item.id} className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden group flex flex-col relative">
+              <div key={item.id} className="bg-surface-container-low rounded-xl md:rounded-2xl border border-white/5 overflow-hidden group flex flex-row md:flex-col relative h-[140px] md:h-auto pb-0">
                 {/* Media Preview */}
-                <div className="w-full aspect-[4/3] bg-surface-container-highest relative flex items-center justify-center border-b border-white/5 overflow-hidden">
+                <div className="w-[35%] max-w-[140px] md:max-w-none md:w-full h-full md:h-auto md:aspect-[4/3] bg-surface-container-highest flex-shrink-0 relative flex items-center justify-center border-r md:border-r-0 md:border-b border-white/5 overflow-hidden">
                   {item.media_url ? (
                     (() => {
                       const firstUrl = item.media_url.split(",")[0];
@@ -370,51 +370,51 @@ export default function PublishingPage() {
                             <div className="w-full h-full relative cursor-pointer" onClick={(e) => { e.currentTarget.querySelector('video')?.play() }}>
                               <video src={firstUrl} className="w-full h-full object-cover" muted loop playsInline />
                               <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-transparent transition-colors">
-                                 <span className="material-symbols-outlined text-4xl text-white drop-shadow-md">play_circle</span>
+                                 <span className="material-symbols-outlined text-3xl md:text-4xl text-white drop-shadow-md">play_circle</span>
                               </div>
                             </div>
                           ) : (
                             <img src={firstUrl} alt={item.task_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                           )}
                           {isMulti && (
-                             <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md border border-white/10 flex items-center gap-1 z-10 shadow-lg">
-                               <span className="material-symbols-outlined text-[14px] text-white">view_carousel</span>
-                               <span className="text-[10px] font-bold text-white leading-none">{item.media_url.split(",").length}</span>
+                             <div className="absolute bottom-1.5 md:bottom-2 right-1.5 md:right-2 bg-black/60 backdrop-blur-md px-1.5 md:px-2 py-0.5 md:py-1 rounded-md border border-white/10 flex items-center gap-1 z-10 shadow-lg">
+                               <span className="material-symbols-outlined text-[10px] md:text-[14px] text-white">view_carousel</span>
+                               <span className="text-[8px] md:text-[10px] font-bold text-white leading-none">{item.media_url.split(",").length}</span>
                              </div>
                           )}
                         </>
                       );
                     })()
                   ) : (
-                    <span className="material-symbols-outlined text-6xl text-white/10">image</span>
+                    <span className="material-symbols-outlined text-4xl md:text-6xl text-white/10">image</span>
                   )}
                   {/* Platform Badge */}
-                  <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-lg border flex items-center gap-1.5 backdrop-blur-md ${
+                  <div className={`absolute top-1.5 md:top-4 left-1.5 md:left-auto md:right-4 px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-md md:rounded-lg border flex items-center gap-1 md:gap-1.5 backdrop-blur-md shadow-lg ${
                     activePlatform === "instagram"
                       ? "bg-gradient-to-r from-purple-900/80 to-pink-900/80 border-purple-500/30"
                       : "bg-blue-900/80 border-blue-500/30"
                   }`}>
-                    <span className="material-symbols-outlined text-[14px] text-white">
+                    <span className="material-symbols-outlined text-[10px] md:text-[14px] text-white">
                       {activePlatform === "instagram" ? "photo_camera" : "language"}
                     </span>
-                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                    <span className="text-[8px] md:text-[10px] font-bold text-white uppercase tracking-wider hidden md:inline-block">
                       {activePlatform === "instagram" ? "Instagram" : "Website"}
                     </span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4 md:p-5 flex-1 flex flex-col">
-                  <p className="text-[10px] md:text-xs font-bold text-sp-primary mb-1 uppercase tracking-widest leading-none">{item.clients?.business_name || "Unknown Client"}</p>
-                  <h3 className="text-[17px] md:text-lg font-bold text-white leading-tight mb-1.5">{item.task_name}</h3>
-                  <p className="text-[13px] md:text-xs text-on-surface-variant line-clamp-2 md:line-clamp-2 mb-4 leading-relaxed">{item.topic}</p>
+                <div className="p-3 md:p-5 flex-1 flex flex-col justify-center md:justify-start min-w-0">
+                  <p className="text-[9px] md:text-[10px] lg:text-xs font-bold text-sp-primary mb-1 md:mb-1.5 uppercase tracking-widest leading-none truncate">{item.clients?.business_name || "Unknown Client"}</p>
+                  <h3 className="text-[13px] md:text-[17px] lg:text-lg font-bold text-white leading-tight mb-1 md:mb-1.5 line-clamp-2 md:line-clamp-2">{item.task_name}</h3>
+                  <p className="text-[10px] md:text-[13px] lg:text-xs text-on-surface-variant line-clamp-1 md:line-clamp-2 mb-2 md:mb-4 leading-snug md:leading-relaxed">{item.topic}</p>
                   <div className="mt-auto">
                     <button
                       onClick={() => handleOpenReview(item)}
-                      className="w-full bg-white/10 text-white border border-white/20 py-3 md:py-2.5 rounded-xl text-[13px] md:text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/20 transition-all shadow-sm"
+                      className="w-full bg-white/10 text-white border border-white/20 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[11px] md:text-[13px] lg:text-sm font-bold flex items-center justify-center gap-1 md:gap-2 hover:bg-white/20 transition-all shadow-sm"
                     >
-                      <span className="material-symbols-outlined text-[18px]">edit_note</span>
-                      Review & Publish
+                      <span className="material-symbols-outlined text-[14px] md:text-[18px]">edit_note</span>
+                      Review <span className="hidden md:inline">& Publish</span>
                     </button>
                   </div>
                 </div>
@@ -431,13 +431,13 @@ export default function PublishingPage() {
           Publishing History
         </h2>
         <div className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden">
-          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10">
-            <table className="w-full text-left min-w-[700px]">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 bg-[#141414]">
+            <table className="w-full text-left min-w-[600px] md:min-w-[700px]">
               <thead className="bg-[#1c1b1b] text-[10px] md:text-xs text-on-surface-variant uppercase tracking-widest font-bold border-b border-white/5">
                 <tr>
                   <th className="px-4 md:px-6 py-4">Content</th>
                   <th className="px-4 md:px-6 py-4">Client</th>
-                  <th className="px-4 md:px-6 py-4">Platform</th>
+                  <th className="hidden md:table-cell px-4 md:px-6 py-4">Platform</th>
                   <th className="px-4 md:px-6 py-4">Status</th>
                   <th className="px-4 md:px-6 py-4 text-right">Actions</th>
                 </tr>
