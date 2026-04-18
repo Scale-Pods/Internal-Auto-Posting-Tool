@@ -186,11 +186,12 @@ export default function ReviewPage() {
 
       {/* Reject Modal */}
       {rejectingId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setRejectingId(null)}></div>
-          <div className="relative z-10 bg-surface-container-low border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 p-6">
-            <h3 className="text-xl font-[900] text-white mb-2">Request Rework</h3>
-            <p className="text-sm text-on-surface-variant mb-6">Let the designer know what needs to be changed.</p>
+          <div className="relative z-10 bg-surface-container-low border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 p-6 animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0 absolute bottom-0 md:static">
+            <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6 md:hidden" />
+            <h3 className="text-lg md:text-xl font-[900] text-white mb-2">Request Rework</h3>
+            <p className="text-xs md:text-sm text-on-surface-variant mb-6">Let the designer know what needs to be changed.</p>
             
             <textarea 
               value={reworkComment}

@@ -402,23 +402,28 @@ async function handleFileUpload() {
       {/* ASSET UPLOAD MODAL                      */}
       {/* ═══════════════════════════════════════ */}
       {selectedTask && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !isUploading && setSelectedTask(null)}></div>
-          <div className="relative z-10 bg-surface-container-low border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#1c1b1b]">
+          <div className="relative z-10 bg-surface-container-low border border-white/10 md:rounded-2xl shadow-2xl w-full max-w-lg min-h-screen md:min-h-0 md:max-h-[90vh] flex flex-col flex-1 overflow-hidden animate-in zoom-in-95">
+            {!isUploading && (
+              <button onClick={() => setSelectedTask(null)} className="absolute top-4 right-4 md:static md:hidden z-50 p-1.5 bg-black/50 border border-white/10 rounded-full text-white transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            )}
+            <div className="p-5 md:p-6 pt-12 md:pt-6 border-b border-white/5 flex justify-between items-center bg-[#1c1b1b] shrink-0">
               <div>
-                <h3 className="text-xl font-[900] text-white">Upload Creative Asset</h3>
-                <p className="text-on-surface-variant text-sm mt-1">Assigning to: <span className="text-sp-primary font-bold">{selectedTask.task_name}</span></p>
-                <p className="text-on-surface-variant text-xs mt-1">Designer: <span className="text-sp-secondary font-bold">{currentDesigner}</span></p>
+                <h3 className="text-lg md:text-xl font-[900] text-white">Upload Creative Asset</h3>
+                <p className="text-on-surface-variant text-xs md:text-sm mt-1">Assigning to: <span className="text-sp-primary font-bold">{selectedTask.task_name}</span></p>
+                <p className="text-on-surface-variant text-[10px] md:text-xs mt-1">Designer: <span className="text-sp-secondary font-bold">{currentDesigner}</span></p>
               </div>
               {!isUploading && (
-                <button onClick={() => setSelectedTask(null)} className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+                <button onClick={() => setSelectedTask(null)} className="hidden md:block p-2 rounded-lg hover:bg-white/5 transition-colors">
                   <span className="material-symbols-outlined text-gray-400">close</span>
                 </button>
               )}
             </div>
             
-            <div className="p-8 space-y-6">
+            <div className="p-5 md:p-8 space-y-6 overflow-y-auto pb-24 md:pb-8 flex-1">
               <div className="bg-surface-container-highest p-4 rounded-xl border border-white/5">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Campaign</p>
                 <p className="text-sm text-white font-medium">{selectedTask.clients?.business_name || "Unknown"} • {selectedTask.platform}</p>

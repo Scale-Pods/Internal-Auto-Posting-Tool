@@ -568,15 +568,15 @@ export default function PublishingPage() {
       {/* REVIEW MODAL                                    */}
       {/* ═══════════════════════════════════════════════ */}
       {reviewTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-surface border border-white/10 md:rounded-2xl max-w-5xl w-full h-full md:max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto md:overflow-hidden">
+          <div className="bg-surface border border-white/10 md:rounded-2xl max-w-5xl w-full min-h-screen md:min-h-0 md:h-full md:max-h-[90vh] md:overflow-hidden flex flex-col md:flex-row shadow-2xl relative pt-12 md:pt-0">
             
-            <button onClick={handleCloseReview} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors">
+            <button onClick={handleCloseReview} className="absolute top-4 right-4 z-[60] w-8 h-8 flex items-center justify-center bg-black/50 border border-white/20 text-white rounded-full hover:bg-red-500 transition-colors">
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
 
             {/* Left — Media Preview */}
-            <div className="w-full md:w-1/2 bg-surface-container-highest border-r border-white/5 flex items-center justify-center p-6 relative">
+            <div className="w-full h-[40vh] shrink-0 md:h-auto md:w-1/2 md:flex-1 bg-black md:bg-surface-container-highest border-b md:border-b-0 md:border-r border-white/5 flex items-center justify-center p-2 md:p-6 relative">
               {(() => {
                 if (!reviewTask.media_url) return (
                   <div className="text-on-surface-variant flex flex-col items-center gap-3">
@@ -592,34 +592,34 @@ export default function PublishingPage() {
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
                     {currentUrl.toLowerCase().endsWith(".mp4") ? (
-                      <video src={currentUrl} controls className="w-full h-auto max-h-[85vh] object-contain rounded-xl shadow-lg border border-white/10" />
+                      <video src={currentUrl} controls className="w-full h-full md:h-auto md:max-h-[85vh] object-contain rounded-md md:rounded-xl shadow-lg border border-white/10" />
                     ) : (
-                      <img src={currentUrl} alt="Preview" className="w-full h-auto max-h-[85vh] object-contain rounded-xl shadow-lg border border-white/10" />
+                      <img src={currentUrl} alt="Preview" className="w-full h-full md:h-auto md:max-h-[85vh] object-contain rounded-md md:rounded-xl shadow-lg border border-white/10" />
                     )}
                     
                     {isMulti && (
                       <>
                         <button 
                           onClick={() => setCarouselIndex(prev => prev > 0 ? prev - 1 : urls.length - 1)}
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
+                          className="absolute left-1 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
                         >
-                          <span className="material-symbols-outlined">chevron_left</span>
+                          <span className="material-symbols-outlined md:text-[24px] text-[18px]">chevron_left</span>
                         </button>
                         <button 
                           onClick={() => setCarouselIndex(prev => prev < urls.length - 1 ? prev + 1 : 0)}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
+                          className="absolute right-1 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
                         >
-                          <span className="material-symbols-outlined">chevron_right</span>
+                          <span className="material-symbols-outlined md:text-[24px] text-[18px]">chevron_right</span>
                         </button>
                         
-                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
+                        <div className="absolute bottom-2 md:bottom-4 left-0 right-0 flex justify-center gap-1.5 md:gap-2 z-20">
                            {urls.map((_: any, idx: number) => (
-                             <div key={idx} className={`h-2 rounded-full transition-all ${idx === carouselIndex ? 'w-6 bg-sp-primary' : 'w-2 bg-white/50'}`} />
+                             <div key={idx} className={`h-1.5 md:h-2 rounded-full transition-all ${idx === carouselIndex ? 'w-4 md:w-6 bg-sp-primary' : 'w-1.5 md:w-2 bg-white/50'}`} />
                            ))}
                         </div>
-                        <div className="absolute top-4 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2 shadow-lg">
-                           <span className="material-symbols-outlined text-[14px] text-sp-primary">view_carousel</span>
-                           <span className="text-[10px] font-bold text-white uppercase tracking-wider">{carouselIndex + 1} / {urls.length}</span>
+                        <div className="absolute top-2 left-2 md:top-4 md:left-4 z-20 bg-black/70 backdrop-blur-md px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 md:gap-2 shadow-lg">
+                           <span className="material-symbols-outlined text-[12px] md:text-[14px] text-sp-primary">view_carousel</span>
+                           <span className="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">{carouselIndex + 1} / {urls.length}</span>
                         </div>
                       </>
                     )}
@@ -629,7 +629,7 @@ export default function PublishingPage() {
             </div>
 
             {/* Right — Form */}
-            <div className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto bg-[#161616]">
+            <div className="w-full md:w-1/2 md:flex-1 p-5 md:p-8 overflow-y-visible md:overflow-y-auto bg-[#161616] pb-24 md:pb-8">
               {/* Modal Header */}
               <div className="mb-6">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-widest mb-2 ${
