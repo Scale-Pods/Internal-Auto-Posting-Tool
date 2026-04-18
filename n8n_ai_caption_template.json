@@ -1,0 +1,175 @@
+{
+  "name": "Agency OS: AI Caption Generator (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-caption",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        250,
+        300
+      ],
+      "id": "1",
+      "name": "Webhook (Dashboard Request)",
+      "webhookId": "saas-ai-caption"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.client_name }} - {{ $json.body.topic }} (Platform: {{ $json.body.platform }})",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a professional social media manager.\n\nGenerate ONE high-converting caption for the provided client and topic. \n\nSTRUCTURE:\n1. Hook: 1 punchy first line.\n2. Body: 2-3 value-driven sentences with moderate emojis.\n3. CTA: Clear instruction (e.g., \"Click link in bio\").\n\nOUTPUT FORMAT:\nYou MUST return a JSON object with strictly these keys:\n{\n  \"caption\": \"Your full text here\",\n  \"hashtags\": \"#Five #Relevant #Hashtags\"\n}\n\nIMPORTANT: Do NOT include markdown blocks (```json). Do NOT include preamble. Return ONLY the JSON object."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        500,
+        300
+      ],
+      "id": "2",
+      "name": "AI Caption Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        300
+      ],
+      "id": "3",
+      "name": "Respond to Dashboard",
+      "webhookId": "saas-ai-caption"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        500
+      ],
+      "id": "4",
+      "name": "GPT-4o mini",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIALS_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"caption\": { \"type\": \"string\" },\n    \"hashtags\": { \"type\": \"string\" }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        500
+      ],
+      "id": "5",
+      "name": "JSON Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "caption",
+              "value": "={{ $json.output.caption || $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "h1",
+              "name": "hashtags",
+              "value": "={{ $json.output.hashtags || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        750,
+        300
+      ],
+      "id": "6",
+      "name": "Final Format"
+    }
+  ],
+  "connections": {
+    "Webhook (Dashboard Request)": {
+      "main": [
+        [
+          {
+            "node": "AI Caption Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Caption Agent": {
+      "main": [
+        [
+          {
+            "node": "Final Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Caption Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Caption Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Format": {
+      "main": [
+        [
+          {
+            "node": "Respond to Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

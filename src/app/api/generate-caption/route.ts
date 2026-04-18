@@ -6,66 +6,78 @@ export async function POST(req: NextRequest) {
 
     const n8nUrl = process.env.NEXT_PUBLIC_N8N_AI_WEBHOOK;
     if (!n8nUrl) {
-      return NextResponse.json({ error: "AI webhook URL not configured" }, { status: 500 });
+      return NextResponse.json({ error: "AI webhook URL not configured in environment variables." }, { status: 500 });
     }
+
+    // Set a timeout for the n8n request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     const res = await fetch(n8nUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const text = await res.text();
       console.error("[AI Caption] n8n error:", text);
-      return NextResponse.json({ error: `n8n returned ${res.status}: ${text}` }, { status: res.status });
+      return NextResponse.json({ 
+        error: `n8n automation returned an error (${res.status}).`,
+        details: text 
+      }, { status: res.status });
     }
 
     const rawText = await res.text();
     console.log("[AI Caption] Raw n8n response:", rawText);
 
-    if (!rawText || rawText.trim() === "" || rawText.trim() === '""') {
-      return NextResponse.json(
-        { error: "n8n returned an empty response. Check the OpenAI node output in n8n Executions." },
-        { status: 500 }
-      );
+    if (!rawText || rawText.trim() === "" || rawText.trim() === "[]" || rawText.trim() === '""') {
+       return NextResponse.json({ 
+         error: "AI returned an empty response.",
+         details: "The n8n workflow finished but provided no data. Please check your n8n OpenAI node and Webhook Response settings."
+       }, { status: 500 });
     }
 
     let data: any;
     try {
       data = JSON.parse(rawText);
     } catch {
-      // If it's plain text from AI, wrap it
-      return NextResponse.json({ caption: rawText, hashtags: "" });
+      // If NOT JSON (raw string), check if it's potentially useful text
+      if (rawText.length > 5) {
+        return NextResponse.json({ caption: rawText, hashtags: "" });
+      }
+      return NextResponse.json({ error: "Received malformed data from AI." }, { status: 500 });
     }
 
-    // n8n may return an array when using "All Incoming Items"
+    // Handle n8n wrapping in [ { ... } ]
     if (Array.isArray(data)) {
+      if (data.length === 0 || (data.length === 1 && Object.keys(data[0]).length === 0)) {
+        return NextResponse.json({ 
+          error: "AI returned an empty object.", 
+          details: "Structure received: [ {} ]. Ensure n8n Respond to Webhook node is returning the LangChain output." 
+        }, { status: 500 });
+      }
       data = data[0];
     }
 
-    // Langchain Agent wraps output in { output: { caption, hashtags } }
+    // Handle Langchain Agent wrapping
     if (data.output) {
       data = data.output;
     }
 
-    // Also handle deeply nested json string inside output
-    if (typeof data === "string") {
-      try { data = JSON.parse(data); } catch { /* use as-is */ }
+    // If data is still a string (likely nested JSON in string), try parsing again
+    if (typeof data === "string" && (data.startsWith("{") || data.startsWith("["))) {
+      try { data = JSON.parse(data); } catch { /* ignore */ }
     }
-
-    // Extract caption from various possible OpenAI output structures:
-    // Structure 1: { message: { content: "..." } }
-    // Structure 2: { choices: [{ message: { content: "..." } }] }
-    // Structure 3: { text: "..." }
-    // Structure 4: { caption: "...", hashtags: "..." } (already formatted)
-    // Structure 5: { content: "..." }
 
     let captionText = "";
     let hashtagsText = "";
 
+    // Exhaustive search for caption in common AI/n8n response structures
     if (data.caption) {
-      // Already in our expected format
       captionText = data.caption;
       hashtagsText = data.hashtags || "";
     } else if (data.message?.content) {
@@ -76,29 +88,38 @@ export async function POST(req: NextRequest) {
       captionText = data.text;
     } else if (data.content) {
       captionText = data.content;
-    } else if (typeof data === "string") {
+    } else if (typeof data === "string" && data.length > 0) {
       captionText = data;
-    } else {
-      // Last resort: stringify it so we can see what n8n actually sent
-      console.error("[AI Caption] Unknown structure:", JSON.stringify(data));
-      captionText = JSON.stringify(data);
     }
 
-    // If the AI returned JSON inside the text, try to parse it
-    if (captionText.startsWith("{")) {
-      try {
-        const parsed = JSON.parse(captionText);
-        if (parsed.caption) captionText = parsed.caption;
-        if (parsed.hashtags) hashtagsText = parsed.hashtags;
-      } catch {
-        // Not JSON, just use it as-is
-      }
+    // Double-check if the AI returned a JSON string inside the captionText field
+    if (captionText.trim().startsWith("{")) {
+       try {
+         const inner = JSON.parse(captionText);
+         if (inner.caption) captionText = inner.caption;
+         if (inner.hashtags) hashtagsText = inner.hashtags;
+       } catch { /* not json */ }
     }
 
-    return NextResponse.json({ caption: captionText, hashtags: hashtagsText });
+    // Final Validation: Ensure we don't return "{}" or similar noise
+    if (!captionText || captionText.trim() === "{}" || captionText.trim() === "[]") {
+        return NextResponse.json({ 
+          error: "Failed to extract caption.",
+          details: "The AI responded, but we couldn't find a valid caption in the output. Structure: " + JSON.stringify(data).slice(0, 100)
+        }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      caption: captionText.trim(), 
+      hashtags: hashtagsText.trim() 
+    });
     
   } catch (err: any) {
     console.error("[AI Caption] Proxy error:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const isTimeout = err.name === 'AbortError';
+    return NextResponse.json({ 
+      error: isTimeout ? "Request timed out." : "Bridge error.",
+      details: isTimeout ? "n8n took too long to respond (Limit: 30s)." : err.message
+    }, { status: 500 });
   }
 }

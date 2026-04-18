@@ -132,16 +132,21 @@ export default function PublishingPage() {
           client_name: reviewTask.clients?.business_name,
         }),
       });
-      if (!res.ok) throw new Error((await res.json()).error || "AI request failed");
+
       const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.details || data.error || "AI request failed");
+      }
+
       if (activePlatform === "instagram") {
-        if (data.caption) setCaption(data.caption);
-        if (data.hashtags) setHashtags(data.hashtags);
+        if (data.caption && data.caption !== "{}") setCaption(data.caption);
+        if (data.hashtags && data.hashtags !== "{}") setHashtags(data.hashtags);
       } else if (activePlatform === "website") {
-        if (data.caption) setWebExcerpt(data.caption.slice(0, 200));
+        if (data.caption && data.caption !== "{}") setWebExcerpt(data.caption.slice(0, 200));
       }
     } catch (err: any) {
-      alert("AI generation failed: " + err.message);
+      alert("AI Generation Issue:\n" + err.message);
     } finally {
       setIsGenerating(false);
     }
