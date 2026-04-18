@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/item"
 import { Progress } from "@/components/ui/progress"
 import { Spinner } from "@/components/ui/spinner"
+import RadialPulseLoader from "@/components/RadialPulseLoader";
 
 type Platform = "instagram" | "website" | "linkedin";
 
@@ -35,6 +36,7 @@ export default function PublishingPage() {
   // Publishing States
   const [isPublishing, setIsPublishing] = useState<string | null>(null);
   const [reviewTask, setReviewTask] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // ── Instagram Modal State ──
   const [caption, setCaption] = useState("");
@@ -69,10 +71,11 @@ export default function PublishingPage() {
       .in("status", ["Ready for Publishing", "Published"])
       .order("created_at", { ascending: false });
 
-    if (error) { console.error("Fetch error:", error); return; }
+    if (error) { console.error("Fetch error:", error); setIsLoading(false); return; }
     const items = data || [];
     setDeliverables(items.filter((d) => d.status === "Ready for Publishing"));
     setPublishedItems(items.filter((d) => d.status === "Published"));
+    setIsLoading(false);
   }
 
   // Filter ready items by active platform
@@ -330,7 +333,15 @@ export default function PublishingPage() {
 
       {/* Content Grid */}
       <div className="px-4 md:px-8 pt-6 pb-12 w-full max-w-6xl">
-        {activePlatform === "linkedin" ? (
+        {isLoading ? (
+          <div className="py-32 flex flex-col items-center justify-center">
+            <RadialPulseLoader 
+              size={120} 
+              color="#c0c1ff" 
+              text="Syncing Engine..."
+            />
+          </div>
+        ) : activePlatform === "linkedin" ? (
           <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
             <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">work</span>
             <h3 className="text-lg md:text-xl font-bold text-white">LinkedIn Publishing</h3>
