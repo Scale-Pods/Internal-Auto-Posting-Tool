@@ -286,62 +286,64 @@ export default function PublishingPage() {
 
   return (
     <div className="min-h-screen bg-surface text-left">
-      {/* Header */}
-      <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 px-2.5 md:px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] md:text-[11px] font-bold uppercase tracking-widest mb-3">
-              Publishing Engine
+      {isLoading ? (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-surface z-[200]">
+          <RadialPulseLoader 
+            size={160} 
+            color="#c0c1ff" 
+            text="Syncing Engine..."
+          />
+        </div>
+      ) : (
+        <>
+          {/* Header */}
+          <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 px-2.5 md:px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] md:text-[11px] font-bold uppercase tracking-widest mb-3">
+                  Publishing Engine
+                </div>
+                <h1 className="text-4xl md:text-4xl font-[900] text-white tracking-tighter truncate leading-none pt-1">Ready to Post</h1>
+                <p className="text-[13px] md:text-sm text-on-surface-variant mt-2 md:mt-1 max-w-xl">
+                  Design, review and publish content platform by platform.
+                </p>
+              </div>
+              <Link href="/" className="text-[13px] md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0 mb-2 md:mb-0">
+                <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
+              </Link>
             </div>
-            <h1 className="text-4xl md:text-4xl font-[900] text-white tracking-tighter truncate leading-none pt-1">Ready to Post</h1>
-            <p className="text-[13px] md:text-sm text-on-surface-variant mt-2 md:mt-1 max-w-xl">
-              Design, review and publish content platform by platform.
-            </p>
-          </div>
-          <Link href="/" className="text-[13px] md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0 mb-2 md:mb-0">
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
-          </Link>
-        </div>
 
-        {/* Platform Tabs */}
-        <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-2">
-          {PLATFORM_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActivePlatform(tab.id)}
-              className={`flex items-center gap-2 px-6 md:px-5 py-3 rounded-full text-[13px] md:text-sm font-black transition-all whitespace-nowrap border ${
-                activePlatform === tab.id
-                  ? "bg-white text-black border-white shadow-lg shadow-white/5"
-                  : "bg-white/5 text-on-surface-variant border-white/5 hover:border-white/10"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px] md:text-[20px]">{tab.icon}</span>
-              {tab.label}
-              {counts[tab.id] > 0 && (
-                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
-                  activePlatform === tab.id
-                    ? "bg-black text-white"
-                    : "bg-white/10 text-gray-400"
-                }`}>
-                  {counts[tab.id]}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content Grid */}
-      <div className="px-4 md:px-8 pt-6 pb-12 w-full max-w-6xl">
-        {isLoading ? (
-          <div className="py-32 flex flex-col items-center justify-center">
-            <RadialPulseLoader 
-              size={120} 
-              color="#c0c1ff" 
-              text="Syncing Engine..."
-            />
+            {/* Platform Tabs */}
+            <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-2">
+              {PLATFORM_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePlatform(tab.id)}
+                  className={`flex items-center gap-2 px-6 md:px-5 py-3 rounded-full text-[13px] md:text-sm font-black transition-all whitespace-nowrap border ${
+                    activePlatform === tab.id
+                      ? "bg-white text-black border-white shadow-lg shadow-white/5"
+                      : "bg-white/5 text-on-surface-variant border-white/5 hover:border-white/10"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] md:text-[20px]">{tab.icon}</span>
+                  {tab.label}
+                  {counts[tab.id] > 0 && (
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
+                      activePlatform === tab.id
+                        ? "bg-black text-white"
+                        : "bg-white/10 text-gray-400"
+                    }`}>
+                      {counts[tab.id]}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : activePlatform === "linkedin" ? (
+
+          {/* Content Grid */}
+          <div className="px-4 md:px-8 pt-6 pb-12 w-full max-w-6xl">
+            {activePlatform === "linkedin" ? (
           <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
             <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">work</span>
             <h3 className="text-lg md:text-xl font-bold text-white">LinkedIn Publishing</h3>
@@ -881,6 +883,8 @@ export default function PublishingPage() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
