@@ -31,15 +31,22 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Mobile Header */}
-          <header className="md:hidden h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#0e0e0e] sticky top-0 z-30">
-            <div className="flex items-center gap-2">
-              <img src="/logo-light.png" alt="ScalePods" className="h-6 -ml-1 object-contain" />
+          <header className="md:hidden h-20 flex items-center justify-between px-6 border-b border-white/5 bg-[#0a0a0a]/90 backdrop-blur-xl sticky top-0 z-[100]">
+            <div className="flex items-center">
+              <img 
+                src="/logo-light.png" 
+                alt="ScalePods" 
+                className="h-7 w-auto object-contain"
+                onError={(e) => {
+                  console.error("Logo failed to load");
+                }}
+              />
             </div>
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white transition-all active:scale-95"
             >
-              <span className="material-symbols-outlined">menu</span>
+              <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
           </header>
 

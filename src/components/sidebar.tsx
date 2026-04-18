@@ -117,11 +117,9 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
           <span className="material-symbols-outlined">close</span>
         </button>
       {/* Brand */}
-      <div className="mb-8 flex flex-col items-start gap-1">
-        <img src="/logo-light.png" alt="ScalePods" className="h-7 md:h-8 object-contain" />
-        <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mt-1 ${isDesigner ? "text-sp-tertiary/60" : "text-primary/60"}`}>
-          {isDesigner ? "Designer Portal" : "Marketing Automation"}
-        </p>
+      <div className="mb-10 flex flex-col items-start gap-2 pt-2">
+        <img src="/logo-light.png" alt="ScalePods" className="h-8 w-auto object-contain" />
+        <div className={`h-0.5 w-10 mt-1 rounded-full ${isDesigner ? "bg-sp-tertiary" : "bg-primary"}`} />
       </div>
 
       {/* Role Badge */}

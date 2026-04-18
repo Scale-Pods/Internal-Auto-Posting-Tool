@@ -301,33 +301,27 @@ export default function PublishingPage() {
         </div>
 
         {/* Platform Tabs */}
-        <div className="flex items-center gap-1 mt-6 border-b border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-2">
           {PLATFORM_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActivePlatform(tab.id)}
-              className={`flex items-center gap-2 px-4 md:px-5 py-3 text-xs md:text-sm font-bold transition-all relative whitespace-nowrap ${
+              className={`flex items-center gap-2 px-6 md:px-5 py-3 rounded-full text-[13px] md:text-sm font-black transition-all whitespace-nowrap border ${
                 activePlatform === tab.id
-                  ? "text-white"
-                  : "text-on-surface-variant hover:text-white"
+                  ? "bg-white text-black border-white shadow-lg shadow-white/5"
+                  : "bg-white/5 text-on-surface-variant border-white/5 hover:border-white/10"
               }`}
             >
-              <span className="material-symbols-outlined text-[16px] md:text-[18px]">{tab.icon}</span>
+              <span className="material-symbols-outlined text-[18px] md:text-[20px]">{tab.icon}</span>
               {tab.label}
               {counts[tab.id] > 0 && (
-                <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold ${
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
                   activePlatform === tab.id
-                    ? "bg-sp-primary text-black"
+                    ? "bg-black text-white"
                     : "bg-white/10 text-gray-400"
                 }`}>
                   {counts[tab.id]}
                 </span>
-              )}
-              {activePlatform === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sp-primary rounded-t-full" />
-              )}
-              {tab.id === "linkedin" && (
-                <span className="text-[8px] md:text-[9px] font-bold bg-white/5 text-gray-500 px-1 py-0.5 md:px-1.5 rounded uppercase">Soon</span>
               )}
             </button>
           ))}
@@ -355,11 +349,11 @@ export default function PublishingPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredDeliverables.map((item) => (
-              <div key={item.id} className="bg-surface-container-low rounded-xl md:rounded-2xl border border-white/5 overflow-hidden group flex flex-row md:flex-col relative h-[140px] md:h-auto pb-0">
-                {/* Media Preview */}
-                <div className="w-[35%] max-w-[140px] md:max-w-none md:w-full h-full md:h-auto md:aspect-[4/3] bg-surface-container-highest flex-shrink-0 relative flex items-center justify-center border-r md:border-r-0 md:border-b border-white/5 overflow-hidden">
+              <div key={item.id} className="bg-surface-container-low rounded-2xl md:rounded-3xl border border-white/5 overflow-hidden group flex flex-col relative shadow-xl hover:border-white/20 transition-all duration-300">
+                {/* Media Preview - 1:1 on mobile, 4:3 on desktop */}
+                <div className="w-full aspect-square md:aspect-[4/3] bg-surface-container-highest relative flex items-center justify-center overflow-hidden">
                   {item.media_url ? (
                     (() => {
                       const firstUrl = item.media_url.split(",")[0];
@@ -369,52 +363,62 @@ export default function PublishingPage() {
                           {firstUrl.toLowerCase().endsWith(".mp4") ? (
                             <div className="w-full h-full relative cursor-pointer" onClick={(e) => { e.currentTarget.querySelector('video')?.play() }}>
                               <video src={firstUrl} className="w-full h-full object-cover" muted loop playsInline />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-transparent transition-colors">
-                                 <span className="material-symbols-outlined text-3xl md:text-4xl text-white drop-shadow-md">play_circle</span>
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] group-hover:bg-transparent transition-all">
+                                 <span className="material-symbols-outlined text-5xl md:text-6xl text-white drop-shadow-2xl scale-90 md:scale-100">play_circle</span>
                               </div>
                             </div>
                           ) : (
-                            <img src={firstUrl} alt={item.task_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <img src={firstUrl} alt={item.task_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out" />
                           )}
-                          {isMulti && (
-                             <div className="absolute bottom-1.5 md:bottom-2 right-1.5 md:right-2 bg-black/60 backdrop-blur-md px-1.5 md:px-2 py-0.5 md:py-1 rounded-md border border-white/10 flex items-center gap-1 z-10 shadow-lg">
-                               <span className="material-symbols-outlined text-[10px] md:text-[14px] text-white">view_carousel</span>
-                               <span className="text-[8px] md:text-[10px] font-bold text-white leading-none">{item.media_url.split(",").length}</span>
-                             </div>
-                          )}
+                          
+                          {/* Floating Indicators */}
+                          <div className="absolute top-4 left-4 flex gap-2 z-20">
+                            {isMulti && (
+                               <div className="bg-black/70 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-lg scale-90 md:scale-100">
+                                 <span className="material-symbols-outlined text-[14px] text-white">view_carousel</span>
+                                 <span className="text-[11px] font-black text-white leading-none">{item.media_url.split(",").length}</span>
+                               </div>
+                            )}
+                          </div>
+
+                          <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full border flex items-center gap-1.5 backdrop-blur-md shadow-lg scale-90 md:scale-100 ${
+                            activePlatform === "instagram"
+                              ? "bg-gradient-to-r from-purple-600/90 to-pink-600/90 border-white/20"
+                              : "bg-blue-600/90 border-white/20"
+                          }`}>
+                            <span className="material-symbols-outlined text-[14px] text-white">
+                              {activePlatform === "instagram" ? "photo_camera" : "language"}
+                            </span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                              {activePlatform === "instagram" ? "INSTAGRAM" : "WEBSITE"}
+                            </span>
+                          </div>
                         </>
                       );
                     })()
                   ) : (
-                    <span className="material-symbols-outlined text-4xl md:text-6xl text-white/10">image</span>
+                    <span className="material-symbols-outlined text-6xl text-white/10">image</span>
                   )}
-                  {/* Platform Badge */}
-                  <div className={`absolute top-1.5 md:top-4 left-1.5 md:left-auto md:right-4 px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-md md:rounded-lg border flex items-center gap-1 md:gap-1.5 backdrop-blur-md shadow-lg ${
-                    activePlatform === "instagram"
-                      ? "bg-gradient-to-r from-purple-900/80 to-pink-900/80 border-purple-500/30"
-                      : "bg-blue-900/80 border-blue-500/30"
-                  }`}>
-                    <span className="material-symbols-outlined text-[10px] md:text-[14px] text-white">
-                      {activePlatform === "instagram" ? "photo_camera" : "language"}
-                    </span>
-                    <span className="text-[8px] md:text-[10px] font-bold text-white uppercase tracking-wider hidden md:inline-block">
-                      {activePlatform === "instagram" ? "Instagram" : "Website"}
-                    </span>
-                  </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-3 md:p-5 flex-1 flex flex-col justify-center md:justify-start min-w-0">
-                  <p className="text-[9px] md:text-[10px] lg:text-xs font-bold text-sp-primary mb-1 md:mb-1.5 uppercase tracking-widest leading-none truncate">{item.clients?.business_name || "Unknown Client"}</p>
-                  <h3 className="text-[13px] md:text-[17px] lg:text-lg font-bold text-white leading-tight mb-1 md:mb-1.5 line-clamp-2 md:line-clamp-2">{item.task_name}</h3>
-                  <p className="text-[10px] md:text-[13px] lg:text-xs text-on-surface-variant line-clamp-1 md:line-clamp-2 mb-2 md:mb-4 leading-snug md:leading-relaxed">{item.topic}</p>
+                {/* Content Area */}
+                <div className="p-5 md:p-6 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="bg-sp-primary/10 text-sp-primary px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-sp-primary/20 leading-none">
+                      {item.clients?.business_name || "CLIENT"}
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-[19px] md:text-xl font-black text-white leading-tight mb-2 tracking-tight">{item.task_name}</h3>
+                  <p className="text-[14px] md:text-sm text-on-surface-variant line-clamp-2 mb-6 font-medium leading-relaxed opacity-80">{item.topic || item.post_type}</p>
+                  
                   <div className="mt-auto">
                     <button
                       onClick={() => handleOpenReview(item)}
-                      className="w-full bg-white/10 text-white border border-white/20 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[11px] md:text-[13px] lg:text-sm font-bold flex items-center justify-center gap-1 md:gap-2 hover:bg-white/20 transition-all shadow-sm"
+                      className="w-full bg-white text-black py-4 md:py-3.5 rounded-2xl text-[14px] md:text-sm font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all active:scale-[0.98] shadow-lg shadow-black/20"
                     >
-                      <span className="material-symbols-outlined text-[14px] md:text-[18px]">edit_note</span>
-                      Review <span className="hidden md:inline">& Publish</span>
+                      <span className="material-symbols-outlined font-black">bolt</span>
+                      Review & Publish
                     </button>
                   </div>
                 </div>
