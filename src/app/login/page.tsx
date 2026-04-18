@@ -15,13 +15,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 600));
-    const user = login(email, password);
+    
+    // Call the new async database-backed login
+    const user = await loginAsync(email, password);
+    
     if (!user) {
-      setError("Invalid credentials. Please try again.");
+      setError("Invalid credentials. Please contact administration.");
       setLoading(false);
       return;
     }
+    
     router.push(user.role === "designer" ? "/designer" : "/");
   }
 

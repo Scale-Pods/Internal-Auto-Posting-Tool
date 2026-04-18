@@ -37,17 +37,30 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 src="/logo-light.png" 
                 alt="ScalePods" 
                 className="h-10 w-auto object-contain drop-shadow-2xl"
-                onError={(e) => {
-                  console.error("Logo failed to load");
-                }}
               />
             </div>
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-gray-300 hover:text-white transition-all active:scale-90"
-            >
-              <span className="material-symbols-outlined text-[28px]">menu</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => {
+                  const isDark = document.documentElement.classList.contains("dark");
+                  const next = !isDark;
+                  document.documentElement.classList.toggle("dark", next);
+                  document.documentElement.classList.toggle("light", !next);
+                  localStorage.setItem("sp_theme", next ? "dark" : "light");
+                  // Force a re-render if needed, but CSS variables will update instantly
+                }}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-gray-300 hover:text-white transition-all active:scale-90"
+                title="Toggle Theme"
+              >
+                <span className="material-symbols-outlined text-[24px]">dark_mode</span>
+              </button>
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-gray-300 hover:text-white transition-all active:scale-90"
+              >
+                <span className="material-symbols-outlined text-[28px]">menu</span>
+              </button>
+            </div>
           </header>
 
           <main className="flex-1 min-h-screen bg-surface overflow-y-auto custom-scrollbar md:ml-64 transition-all">

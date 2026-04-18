@@ -163,36 +163,35 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
           );
         })}
 
-        {/* Settings section — only for users */}
-        {!isDesigner && (
-          <>
-            <div className="pt-4 pb-2 px-4">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
-                Settings
-              </span>
-            </div>
-            <Link
-              href="/onboarding"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-                pathname === "/onboarding"
-                  ? `${accentColor} ${activeBg} font-semibold`
-                  : "text-gray-500 hover:text-white hover:bg-[#1c1b1b] hover:scale-[1.01]"
-              }`}
-            >
-              <span
-                className="material-symbols-outlined text-xl"
-                style={pathname === "/onboarding" ? { fontVariationSettings: "'FILL' 1" } : {}}
-              >
-                person_add
-              </span>
-              <span className="font-medium">Onboarding</span>
-            </Link>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-[#1c1b1b] hover:scale-[1.01] transition-all duration-200">
-              <span className="material-symbols-outlined text-xl">settings</span>
-              <span className="font-medium">Settings</span>
-            </button>
-          </>
-        )}
+        {/* Settings section */}
+        <div className="pt-4 pb-2 px-4">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
+            System
+          </span>
+        </div>
+        <Link
+          href="/onboarding"
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+            pathname === "/onboarding"
+              ? `${accentColor} ${activeBg} font-semibold`
+              : "text-gray-500 hover:text-white hover:bg-[#1c1b1b] hover:scale-[1.01]"
+          }`}
+        >
+          <span
+            className="material-symbols-outlined text-xl"
+            style={pathname === "/onboarding" ? { fontVariationSettings: "'FILL' 1" } : {}}
+          >
+            person_add
+          </span>
+          <span className="font-medium">Add Client</span>
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-400/5 transition-all duration-200 group"
+        >
+          <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">logout</span>
+          <span className="font-medium">Logout Profile</span>
+        </button>
       </nav>
 
       {/* Bottom Section */}
