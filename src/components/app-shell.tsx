@@ -32,11 +32,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Mobile Header */}
           <header className="md:hidden h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#0e0e0e] sticky top-0 z-30">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-on-primary text-lg">polymer</span>
-              </div>
-              <h1 className="text-lg font-[900] tracking-tighter text-white">ScalePods</h1>
+            <div className="flex items-center gap-2">
+              <img src="/logo-light.png" alt="ScalePods" className="h-6 -ml-1 object-contain" />
             </div>
             <button 
               onClick={() => setIsSidebarOpen(true)}

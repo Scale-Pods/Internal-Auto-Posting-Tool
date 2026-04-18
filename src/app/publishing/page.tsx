@@ -287,16 +287,16 @@ export default function PublishingPage() {
       <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] font-bold uppercase tracking-widest mb-3">
+            <div className="inline-flex items-center gap-2 px-2.5 md:px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] md:text-[11px] font-bold uppercase tracking-widest mb-3">
               Publishing Engine
             </div>
-            <h1 className="text-3xl md:text-4xl font-[900] text-white tracking-tight truncate">Ready to Post</h1>
-            <p className="text-xs md:text-sm text-on-surface-variant mt-1 max-w-xl">
+            <h1 className="text-4xl md:text-4xl font-[900] text-white tracking-tighter truncate leading-none pt-1">Ready to Post</h1>
+            <p className="text-[13px] md:text-sm text-on-surface-variant mt-2 md:mt-1 max-w-xl">
               Design, review and publish content platform by platform.
             </p>
           </div>
-          <Link href="/" className="text-xs md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0">
-            <span className="material-symbols-outlined text-base">arrow_back</span> Back to Dashboard
+          <Link href="/" className="text-[13px] md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0 mb-2 md:mb-0">
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
           </Link>
         </div>
 
@@ -404,14 +404,14 @@ export default function PublishingPage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex-1 flex flex-col">
-                  <p className="text-xs font-bold text-sp-primary mb-1 uppercase tracking-widest">{item.clients?.business_name || "Unknown Client"}</p>
-                  <h3 className="text-lg font-bold text-white leading-tight mb-2">{item.task_name}</h3>
-                  <p className="text-xs text-on-surface-variant line-clamp-2 mb-4">{item.topic}</p>
+                <div className="p-4 md:p-5 flex-1 flex flex-col">
+                  <p className="text-[10px] md:text-xs font-bold text-sp-primary mb-1 uppercase tracking-widest leading-none">{item.clients?.business_name || "Unknown Client"}</p>
+                  <h3 className="text-[17px] md:text-lg font-bold text-white leading-tight mb-1.5">{item.task_name}</h3>
+                  <p className="text-[13px] md:text-xs text-on-surface-variant line-clamp-2 md:line-clamp-2 mb-4 leading-relaxed">{item.topic}</p>
                   <div className="mt-auto">
                     <button
                       onClick={() => handleOpenReview(item)}
-                      className="w-full bg-white/10 text-white border border-white/20 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/20 transition-all"
+                      className="w-full bg-white/10 text-white border border-white/20 py-3 md:py-2.5 rounded-xl text-[13px] md:text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/20 transition-all shadow-sm"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit_note</span>
                       Review & Publish

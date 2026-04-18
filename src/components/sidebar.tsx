@@ -117,21 +117,11 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
           <span className="material-symbols-outlined">close</span>
         </button>
       {/* Brand */}
-      <div className="mb-8 flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDesigner ? "bg-sp-tertiary" : "bg-primary"}`}>
-          <span
-            className="material-symbols-outlined text-on-primary text-xl"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            {isDesigner ? "brush" : "polymer"}
-          </span>
-        </div>
-        <div>
-          <h1 className="text-xl font-[900] tracking-tighter text-white">ScalePods</h1>
-          <p className={`text-[10px] uppercase tracking-widest font-bold ${isDesigner ? "text-sp-tertiary/60" : "text-primary/60"}`}>
-            {isDesigner ? "Designer Portal" : "Marketing Automation"}
-          </p>
-        </div>
+      <div className="mb-8 flex flex-col items-start gap-1">
+        <img src="/logo-light.png" alt="ScalePods" className="h-7 md:h-8 object-contain" />
+        <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mt-1 ${isDesigner ? "text-sp-tertiary/60" : "text-primary/60"}`}>
+          {isDesigner ? "Designer Portal" : "Marketing Automation"}
+        </p>
       </div>
 
       {/* Role Badge */}
