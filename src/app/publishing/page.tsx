@@ -247,373 +247,316 @@ export default function PublishingPage() {
   }
 
   return (
-    <div className="bg-surface antialiased min-h-screen flex flex-col pt-24 pb-32 selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+    <div className="bg-surface antialiased min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
       
-      {/* ── TopAppBar ── */}
-      <header className="fixed top-0 w-full z-[100] flex justify-between items-center px-8 py-4 bg-[#1c1b1b] backdrop-blur-[40px] shadow-[0_4px_60px_rgba(229,226,225,0.06)]">
-        <button className="text-sp-primary hover:bg-surface-container-highest/50 transition-all p-2 rounded-full flex items-center justify-center active:scale-95">
-          <span className="material-symbols-outlined">menu</span>
-        </button>
-        <h1 className="text-xl font-black text-sp-primary uppercase tracking-tighter">Ready to Post</h1>
-        <div className="h-10 w-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary-container/20 hover:scale-105 transition-transform active:scale-95 cursor-pointer">
-          <img src="https://lh3.googleusercontent.com/a/ACg8ocL8_Q3H0_6Uu_x-rWJ9p8p9o3p9o3p9o3=s96-c" alt="Profile" className="w-full h-full object-cover" />
-        </div>
-      </header>
+      {/* ── MOBILE VIEW (STITCH DESIGN) ── */}
+      <div className="block md:hidden pt-24 pb-32">
+        {/* TopAppBar */}
+        <header className="fixed top-0 w-full z-[100] flex justify-between items-center px-8 py-4 bg-[#1c1b1b] backdrop-blur-[40px] shadow-[0_4px_60px_rgba(229,226,225,0.06)]">
+          <button className="text-sp-primary hover:bg-surface-container-highest/50 transition-all p-2 rounded-full flex items-center justify-center active:scale-95">
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <h1 className="text-xl font-black text-sp-primary uppercase tracking-tighter">Ready to Post</h1>
+          <div className="h-10 w-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary-container/20 hover:scale-105 transition-transform active:scale-95 cursor-pointer">
+            <img src="https://lh3.googleusercontent.com/a/ACg8ocL8_Q3H0_6Uu_x-rWJ9p8p9o3p9o3p9o3=s96-c" alt="Profile" className="w-full h-full object-cover" />
+          </div>
+        </header>
 
-      <main className="flex-grow px-4 md:px-8 max-w-4xl mx-auto w-full">
-        <AnimatePresence mode="wait">
-          {currentView === "feed" ? (
-            <motion.div
-              key="feed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Filter Pills */}
-              <div className="flex space-x-3 overflow-x-auto pb-6 hide-scrollbar relative w-full mb-8 pt-4">
-                {PLATFORM_TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActivePlatform(tab.id)}
-                    className={`px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold tracking-tight transition-all flex items-center gap-2 ${
-                      activePlatform === tab.id
-                        ? "bg-primary-container text-on-primary-container shadow-[0_4px_20px_rgba(192,193,255,0.15)]"
-                        : "bg-surface-container-highest text-on-surface hover:bg-surface-variant"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                    {tab.label}
-                    {counts[tab.id as keyof typeof counts] > 0 && (
-                      <span className="ml-1 opacity-60 text-xs text-on-primary-container">({counts[tab.id as keyof typeof counts]})</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Grid */}
-              <div className="flex flex-col gap-8">
-                {filteredDeliverables.length === 0 ? (
-                  <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center">
-                    <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">inbox</span>
-                    <h3 className="text-lg font-bold">No tasks ready</h3>
-                  </div>
-                ) : (
-                  filteredDeliverables.map((item, idx) => (
-                    <motion.article
-                      key={item.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className="bg-surface-container-low rounded-lg p-4 flex flex-col md:flex-row gap-6 shadow-[0_10px_40px_rgba(229,226,225,0.03)] relative overflow-hidden group border border-outline-variant/15"
+        <main className="flex-grow px-4 max-w-4xl mx-auto w-full">
+          <AnimatePresence mode="wait">
+            {currentView === "feed" ? (
+              <motion.div
+                key="feed"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Filter Pills */}
+                <div className="flex space-x-3 overflow-x-auto pb-6 hide-scrollbar relative w-full mb-8 pt-4">
+                  {PLATFORM_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActivePlatform(tab.id)}
+                      className={`px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold tracking-tight transition-all flex items-center gap-2 ${
+                        activePlatform === tab.id
+                          ? "bg-primary-container text-on-primary-container shadow-[0_4px_20px_rgba(192,193,255,0.15)]"
+                          : "bg-surface-container-highest text-on-surface hover:bg-surface-variant"
+                      }`}
                     >
-                      <div className="w-full md:w-1/2 aspect-square rounded-md overflow-hidden relative">
-                        <img 
-                          src={item.media_url?.split(",")[0]} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                          alt="Preview" 
-                        />
-                        <div className="absolute top-4 right-4 bg-secondary text-on-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg z-10">
-                          {item.clients?.business_name || "CLIENT"}
-                        </div>
-                      </div>
-                      <div className="w-full md:w-1/2 flex flex-col justify-between py-2">
-                        <div>
-                          <h2 className="text-lg font-bold tracking-tight text-on-surface mb-2">{item.task_name}</h2>
-                          <p className="text-sm text-on-surface-variant leading-relaxed line-clamp-3 mb-4">
-                            {item.topic || "Review this content artifact for your brand consistency and engagement."}
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-outline">
-                            <span className="flex items-center gap-1">
-                              <span className="material-symbols-outlined text-base">calendar_today</span>
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="material-symbols-outlined text-base">bolt</span>
-                              Ready
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleOpenReview(item)}
-                          className="mt-6 w-full bg-gradient-to-br from-primary-container to-sp-primary text-black font-black text-sm py-4 rounded-full shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-                        >
-                          <span className="material-symbols-outlined">send</span>
-                          Review & Publish
-                        </button>
-                      </div>
-                    </motion.article>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="history"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="pt-4"
-            >
-              <div className="mb-12">
-                <h2 className="text-6xl font-black leading-tight tracking-tight text-on-surface mb-2">History</h2>
-                <p className="text-sm font-medium text-on-surface-variant max-w-xl leading-relaxed">
-                  Your recently published artifacts. Review or curate your digital gallery.
-                </p>
-              </div>
-
-              <div className="flex overflow-x-auto gap-4 pb-4 mb-8 hide-scrollbar">
-                {HISTORY_TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setHistoryPlatform(tab.id)}
-                    className={`px-6 py-2 rounded-full text-sm font-bold shrink-0 transition-all ${
-                      historyPlatform === tab.id
-                        ? "bg-primary-container text-on-primary-container shadow-lg"
-                        : "bg-surface-container-highest text-on-surface hover:bg-surface-variant"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredHistory.map((item, idx) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="bg-surface-container-low rounded-lg p-4 group relative overflow-hidden transition-all duration-300 hover:shadow-2xl border border-white/5"
-                  >
-                    <div className="absolute top-6 right-6 z-10 flex gap-2">
-                      <div className="bg-surface-dim/80 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-bold text-secondary flex items-center gap-1 shadow-lg">
-                        <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                        Live
-                      </div>
-                    </div>
-                    <div className="rounded-md overflow-hidden aspect-square mb-6 relative group-hover:scale-[1.02] transition-transform duration-500 bg-surface-container-highest">
-                      {item.media_url ? (
-                        <img src={item.media_url.split(",")[0]} className="w-full h-full object-cover" alt="History" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center p-8 text-center italic text-sm text-on-surface-variant">
-                          "Published content artifact"
-                        </div>
+                      <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                      {tab.label}
+                      {counts[tab.id as keyof typeof counts] > 0 && (
+                        <span className="ml-1 opacity-60 text-xs">({counts[tab.id as keyof typeof counts]})</span>
                       )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-8">
+                  {filteredDeliverables.length === 0 ? (
+                    <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center">
+                      <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">inbox</span>
+                      <h3 className="text-lg font-bold">No tasks ready</h3>
                     </div>
-                    <div className="flex flex-col gap-2">
-                       <h3 className="text-lg font-bold text-on-surface tracking-tight truncate">{item.task_name}</h3>
-                       <p className="text-[10px] text-outline mb-4">
-                         Published {new Date(item.updated_at || item.created_at).toLocaleDateString()}
-                       </p>
-                       <div className="flex gap-3 mt-auto pt-4 border-t border-white/5">
-                        <a
-                          href={(() => {
-                            try {
-                              const meta = JSON.parse(item.rework_comments || "{}");
-                              return meta.ig_post_url || meta.website_url || "#";
-                            } catch(e) { return "#"; }
-                          })()}
-                          target="_blank"
-                          className="flex-1 bg-surface-container-highest hover:bg-surface-variant text-sp-primary text-xs font-bold py-3 rounded-full transition-all flex justify-center items-center gap-2 border border-outline-variant/20"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-                          View
-                        </a>
-                        <button 
-                          onClick={async () => {
-                            if (!confirm("Remove from Agency OS history?")) return;
-                            await supabase.from("content_deliverables").delete().eq("id", item.id);
-                            setPublishedItems(prev => prev.filter(p => p.id !== item.id));
-                          }}
-                          className="w-12 h-12 bg-surface-container-highest hover:bg-error-container/20 text-outline hover:text-error rounded-full flex justify-center items-center transition-all border border-outline-variant/20"
-                        >
-                          <span className="material-symbols-outlined">delete</span>
-                        </button>
-                       </div>
+                  ) : (
+                    filteredDeliverables.map((item, idx) => (
+                      <motion.article
+                        key={item.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="bg-surface-container-low rounded-lg p-4 flex flex-col gap-6 shadow-xl border border-outline-variant/15"
+                      >
+                        <div className="w-full aspect-square rounded-md overflow-hidden relative">
+                          <img src={item.media_url?.split(",")[0]} className="w-full h-full object-cover" alt="Preview" />
+                        </div>
+                        <div className="w-full flex flex-col justify-between">
+                          <h2 className="text-lg font-bold tracking-tight text-on-surface mb-2">{item.task_name}</h2>
+                          <p className="text-sm text-on-surface-variant line-clamp-3 mb-4">{item.topic}</p>
+                          <button
+                            onClick={() => handleOpenReview(item)}
+                            className="w-full bg-gradient-to-br from-primary-container to-sp-primary text-black font-black text-sm py-4 rounded-full shadow-lg"
+                          >
+                            Review & Publish
+                          </button>
+                        </div>
+                      </motion.article>
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="pt-4"
+              >
+                <div className="mb-12">
+                  <h2 className="text-6xl font-black leading-tight tracking-tight text-on-surface mb-2">History</h2>
+                </div>
+                {/* ...Mobile History... */}
+                <div className="grid grid-cols-1 gap-8">
+                  {filteredHistory.map((item) => (
+                    <div key={item.id} className="bg-surface-container-low rounded-lg p-4 border border-white/5">
+                       <img src={item.media_url?.split(",")[0]} className="w-full aspect-square object-cover rounded-md mb-4" alt="Hx" />
+                       <h3 className="font-bold text-on-surface">{item.task_name}</h3>
                     </div>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+
+        {/* BottomNavBar */}
+        <nav className="fixed bottom-0 left-0 w-full z-[101] flex justify-around items-center px-6 pb-10 pt-4 bg-[#131313]/60 backdrop-blur-[32px] rounded-t-[32px] shadow-[0_-10px_60px_rgba(0,0,0,0.5)]">
+          <button onClick={() => setCurrentView("feed")} className={`flex flex-col items-center ${currentView === "feed" ? "text-sp-primary" : "text-on-surface/40"}`}>
+            <span className="material-symbols-outlined text-2xl">grid_view</span>
+            <span className="text-[10px] uppercase font-bold mt-1">Feed</span>
+          </button>
+          <Link href="/" className="flex flex-col items-center bg-sp-primary text-black rounded-full px-6 py-2">
+            <span className="material-symbols-outlined text-2xl">add_circle</span>
+            <span className="text-[10px] uppercase font-black mt-1">Publish</span>
+          </Link>
+          <button onClick={() => setCurrentView("history")} className={`flex flex-col items-center ${currentView === "history" ? "text-sp-primary" : "text-on-surface/40"}`}>
+            <span className="material-symbols-outlined text-2xl">history</span>
+            <span className="text-[10px] uppercase font-bold mt-1">History</span>
+          </button>
+           <button className="flex flex-col items-center text-on-surface/40">
+            <span className="material-symbols-outlined text-2xl">settings</span>
+            <span className="text-[10px] uppercase font-bold mt-1">Settings</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* ── DESKTOP VIEW (RESTORED DASHBOARD) ── */}
+      <div className="hidden md:block">
+        <div className="px-8 pt-8 pb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[11px] font-bold uppercase tracking-widest mb-3">
+                Publishing Engine
               </div>
-            </motion.div>
+              <h1 className="text-4xl font-[900] text-white tracking-tighter truncate leading-none pt-1">Ready to Post</h1>
+              <p className="text-sm text-on-surface-variant mt-1 max-w-xl">
+                Design, review and publish content platform by platform.
+              </p>
+            </div>
+            <Link href="/" className="text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 shrink-0">
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-2">
+            {PLATFORM_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActivePlatform(tab.id)}
+                className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm font-black transition-all border ${
+                  activePlatform === tab.id
+                    ? "bg-white text-black border-white shadow-lg"
+                    : "bg-white/5 text-on-surface-variant border-white/5 hover:border-white/10"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[20px]">{tab.icon}</span>
+                {tab.label}
+                {counts[tab.id as keyof typeof counts] > 0 && (
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activePlatform === tab.id ? "bg-black text-white" : "bg-white/10 text-gray-400"}`}>
+                    {counts[tab.id as keyof typeof counts]}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="px-8 pt-6 pb-12 w-full max-w-6xl">
+          {filteredDeliverables.length === 0 ? (
+             <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center">
+               <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">inbox</span>
+               <h3 className="text-xl font-bold text-white">No {activePlatform} Posts Ready</h3>
+             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredDeliverables.map((item) => (
+                <div key={item.id} className="bg-surface-container-low rounded-3xl border border-white/5 overflow-hidden group flex flex-col relative shadow-xl hover:border-white/20 transition-all duration-300">
+                  <div className="w-full aspect-[4/3] bg-surface-container-highest relative flex items-center justify-center overflow-hidden">
+                    {item.media_url ? (
+                      <img src={item.media_url.split(",")[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    ) : (
+                      <span className="material-symbols-outlined text-6xl text-white/10">image</span>
+                    )}
+                  </div>
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="bg-sp-primary/10 text-sp-primary px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-sp-primary/20 leading-none self-start mb-3">
+                       {item.clients?.business_name}
+                    </div>
+                    <h3 className="text-xl font-black text-white leading-tight mb-2 tracking-tight">{item.task_name}</h3>
+                    <p className="text-sm text-on-surface-variant line-clamp-2 mb-6 font-medium leading-relaxed opacity-80">{item.topic}</p>
+                    <button
+                      onClick={() => handleOpenReview(item)}
+                      className="mt-auto w-full bg-white text-black py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 hover:bg-gray-200"
+                    >
+                      Review & Publish
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </AnimatePresence>
-      </main>
+        </div>
 
-      {/* ── BottomNavBar ── */}
-      <nav className="fixed bottom-0 left-0 w-full z-[101] flex justify-around items-center px-6 pb-10 pt-4 bg-[#131313]/60 backdrop-blur-[32px] rounded-t-[32px] shadow-[0_-10px_60px_rgba(0,0,0,0.5)]">
-        <button 
-          onClick={() => setCurrentView("feed")}
-          className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-90 ${
-            currentView === "feed" ? "text-sp-primary" : "text-on-surface/40 hover:text-on-surface"
-          }`}
-        >
-          <span className={`material-symbols-outlined text-2xl ${currentView === "feed" ? "fill-1" : ""}`}>grid_view</span>
-          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">Feed</span>
-        </button>
+        <div className="px-8 pb-16 w-full max-w-6xl">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <span className="material-symbols-outlined text-sp-tertiary">history</span>
+            Publishing History
+          </h2>
+          <div className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-[#1c1b1b] text-xs text-on-surface-variant uppercase tracking-widest font-bold border-b border-white/5">
+                <tr>
+                  <th className="px-6 py-4">Content</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {publishedItems.map((row) => (
+                  <tr key={row.id} className="hover:bg-surface-container-high transition-colors">
+                    <td className="px-6 py-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded bg-black/40 overflow-hidden shrink-0 border border-white/5">
+                         {row.media_url && <img src={row.media_url.split(",")[0]} className="w-full h-full object-cover" />}
+                      </div>
+                      <span className="font-bold text-white">{row.task_name}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                       <span className="text-sp-secondary font-bold text-xs">PUBLISHED</span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                       <button onClick={async () => {
+                          if (!confirm("Delete?")) return;
+                          await supabase.from("content_deliverables").delete().eq("id", row.id);
+                          setPublishedItems(prev => prev.filter(p => p.id !== row.id));
+                       }} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg">
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        <Link href="/" className="flex flex-col items-center justify-center bg-gradient-to-br from-sp-primary to-primary text-black rounded-full px-6 py-2 shadow-2xl active:scale-95 transition-transform">
-          <span className="material-symbols-outlined text-2xl">add_circle</span>
-          <span className="text-[10px] uppercase font-black tracking-widest mt-1">Publish</span>
-        </Link>
-
-        <button 
-          onClick={() => setCurrentView("history")}
-          className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-90 ${
-            currentView === "history" ? "text-sp-primary" : "text-on-surface/40 hover:text-on-surface"
-          }`}
-        >
-          <span className={`material-symbols-outlined text-2xl ${currentView === "history" ? "fill-1" : ""}`}>history</span>
-          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">History</span>
-        </button>
-
-        <button className="flex flex-col items-center justify-center text-on-surface/40 hover:text-on-surface active:scale-90 transition-all">
-          <span className="material-symbols-outlined text-2xl">settings</span>
-          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">Settings</span>
-        </button>
-      </nav>
-
-      {/* ── Review Modal ── */}
+      {/* ── RESPONSIVE REVIEW MODAL ── */}
       <AnimatePresence>
         {reviewTask && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md overflow-y-auto no-scrollbar"
-          >
-            <div className="max-w-xl mx-auto min-h-screen pb-24">
-              <header className="sticky top-0 w-full z-50 flex justify-between items-center px-8 py-6">
-                <button onClick={handleCloseReview} className="text-sp-primary p-2 bg-surface-container-highest/40 backdrop-blur-xl rounded-full">
-                  <span className="material-symbols-outlined">close</span>
-                </button>
-                <h2 className="font-bold text-sp-primary uppercase tracking-tighter">Review & Publish</h2>
-                <div className="w-10" />
-              </header>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm overflow-y-auto no-scrollbar">
+            
+            {/* MOBILE MODAL */}
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="block md:hidden bg-surface max-w-xl w-full min-h-screen pb-24 relative"
+            >
+                <header className="sticky top-0 w-full z-50 flex justify-between items-center px-8 py-6 bg-surface/80 backdrop-blur-xl">
+                  <button onClick={handleCloseReview} className="text-sp-primary p-2 bg-surface-container-highest/40 rounded-full">
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                  <h2 className="font-bold text-sp-primary uppercase tracking-tighter">Review</h2>
+                  <div className="w-10" />
+                </header>
+                <div className="px-6 flex flex-col gap-6">
+                  <div className="aspect-square w-full rounded-md overflow-hidden bg-black">
+                     <img src={reviewTask.media_url?.split(",")[carouselIndex]} className="w-full h-full object-contain" alt="" />
+                  </div>
+                  <button onClick={generateAIContent} className="w-full bg-sp-primary text-black py-4 rounded-full font-black">Generate AI Caption</button>
+                  <textarea value={caption} onChange={(e)=>setCaption(e.target.value)} className="w-full bg-surface-container-high p-4 rounded-xl min-h-[150px] focus:outline-none" />
+                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} className="w-full bg-sp-primary text-black py-4 rounded-full font-black">Publish Now</button>
+                </div>
+            </motion.div>
 
-              <main className="px-6 flex flex-col gap-8">
-                <section className="bg-surface-container-low rounded-lg p-6 shadow-2xl relative glass-edge">
-                   <div className="absolute top-10 right-10 z-20 bg-secondary text-on-secondary px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest">
-                      Ready
-                   </div>
-                   
-                   <div className="aspect-square w-full relative overflow-hidden rounded-md bg-surface-container-lowest">
-                      {reviewTask.media_url?.split(",")[carouselIndex].endsWith(".mp4") ? (
-                        <video 
-                          src={reviewTask.media_url.split(",")[carouselIndex]} 
-                          className="w-full h-full object-cover" 
-                          controls autoPlay muted loop 
-                        />
-                      ) : (
-                        <img 
-                          src={reviewTask.media_url?.split(",")[carouselIndex]} 
-                          className="w-full h-full object-cover" 
-                          alt="Review" 
-                        />
-                      )}
-                      
-                      {reviewTask.media_url?.includes(",") && (
-                        <>
-                          <button 
-                            onClick={() => setCarouselIndex(p => Math.max(0, p - 1))}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-surface/40 backdrop-blur-xl p-3 rounded-full text-on-surface"
-                          >
-                            <span className="material-symbols-outlined">chevron_left</span>
-                          </button>
-                          <button 
-                            onClick={() => setCarouselIndex(p => Math.min(reviewTask.media_url.split(",").length - 1, p + 1))}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-surface/40 backdrop-blur-xl p-3 rounded-full text-on-surface"
-                          >
-                            <span className="material-symbols-outlined">chevron_right</span>
-                          </button>
-                        </>
-                      )}
-                   </div>
+            {/* DESKTOP MODAL */}
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="hidden md:flex bg-surface border border-white/10 rounded-2xl max-w-5xl w-full h-[85vh] overflow-hidden shadow-2xl relative"
+            >
+               <button onClick={handleCloseReview} className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center bg-black/50 border border-white/20 text-white rounded-full hover:bg-red-500">
+                <span className="material-symbols-outlined text-sm">close</span>
+               </button>
+               <div className="w-1/2 bg-black flex items-center justify-center p-6 border-r border-white/5">
+                  <img src={reviewTask.media_url?.split(",")[carouselIndex]} className="max-w-full max-h-full object-contain shadow-2xl rounded-xl" />
+               </div>
+               <div className="w-1/2 p-10 flex flex-col bg-[#161616] overflow-y-auto">
+                  <h2 className="text-2xl font-[900] text-white tracking-tight mb-2">{reviewTask.task_name}</h2>
+                  <p className="text-sm font-medium text-sp-tertiary mb-8">Client: {reviewTask.clients?.business_name}</p>
+                  
+                  <button onClick={generateAIContent} disabled={isGenerating} className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm mb-6 flex items-center justify-center gap-2">
+                    {isGenerating ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <span className="material-symbols-outlined text-sm">auto_awesome</span>}
+                    AI Generate Caption
+                  </button>
 
-                   <div className="flex justify-center gap-3 pt-4">
-                      {reviewTask.media_url?.split(",").map((_: any, idx: number) => (
-                        <div key={idx} className={`w-2 h-2 rounded-full transition-all ${idx === carouselIndex ? 'bg-sp-primary shadow-[0_0_8px_#c0c1ff]' : 'bg-surface-container-highest'}`} />
-                      ))}
-                   </div>
-                </section>
+                  <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Caption</label>
+                  <textarea value={caption} onChange={(e)=>setCaption(e.target.value)} rows={8} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-sp-primary/50 resize-none mb-6" />
+                  
+                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} disabled={!!isPublishing} className="w-full bg-sp-primary text-black py-4 rounded-xl font-black flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined">send</span>
+                    {isPublishing ? "Processing..." : "Publish Now"}
+                  </button>
+               </div>
+            </motion.div>
 
-                <section className="flex flex-col gap-6">
-                   <button 
-                    onClick={generateAIContent}
-                    disabled={isGenerating}
-                    className="w-full relative group overflow-hidden rounded-full p-[1px] shadow-2xl transition-all active:scale-[0.98]"
-                   >
-                     <div className="absolute inset-0 bg-gradient-to-r from-primary-container to-sp-primary opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                     <div className="relative bg-gradient-to-br from-[#c0c1ff] to-[#e1dfff] rounded-full px-6 py-4 flex items-center justify-center gap-3">
-                        {isGenerating ? (
-                          <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                        ) : (
-                          <span className="material-symbols-outlined text-black fill-1">auto_awesome</span>
-                        )}
-                        <span className="font-headline font-black text-black">Generate AI Caption</span>
-                     </div>
-                   </button>
-
-                   <div className="flex flex-col gap-2">
-                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-black ml-4">Caption</label>
-                     <textarea 
-                        value={caption}
-                        onChange={(e) => setCaption(e.target.value)}
-                        className="w-full bg-surface-container-lowest text-on-surface p-6 rounded-md min-h-[160px] resize-none focus:outline-none placeholder:text-outline-variant font-body text-sm border-none shadow-xl"
-                        placeholder="Engage your audience..."
-                      />
-                   </div>
-
-                   <div className="flex flex-col gap-2">
-                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-black ml-4">Hashtags</label>
-                     <div className="relative">
-                        <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-outline-variant">tag</span>
-                        <input 
-                          value={hashtags}
-                          onChange={(e) => setHashtags(e.target.value)}
-                          className="w-full bg-surface-container-lowest text-on-surface py-4 pl-14 pr-6 rounded-full focus:outline-none text-sm border-none shadow-xl"
-                          placeholder="automation, design..."
-                        />
-                     </div>
-                   </div>
-
-                   {/* Publishing Loader */}
-                   {isPublishing === reviewTask.id && (
-                     <div className="p-4 bg-primary-container/10 rounded-2xl border border-primary-container/20 animate-in">
-                        <p className="text-xs font-bold text-sp-primary mb-2 flex items-center gap-2">
-                           <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
-                           {publishMessage}
-                        </p>
-                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-sp-primary"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${publishProgress}%` }}
-                          />
-                        </div>
-                     </div>
-                   )}
-
-                   <div className="flex gap-4 mt-4 pb-12">
-                      <button className="flex-1 rounded-full border border-outline-variant/20 bg-transparent text-sp-primary font-bold text-sm py-4 active:scale-95">
-                        Schedule
-                      </button>
-                      <button 
-                        onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish}
-                        disabled={!!isPublishing}
-                        className="flex-[2] rounded-full bg-gradient-to-br from-primary-container to-sp-primary text-black font-black text-sm py-4 shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-outlined fill-1">send</span>
-                        {isPublishing ? "Publishing..." : "Publish Now"}
-                      </button>
-                   </div>
-                </section>
-              </main>
-            </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
