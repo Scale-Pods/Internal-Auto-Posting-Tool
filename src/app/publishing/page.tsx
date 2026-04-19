@@ -5,25 +5,23 @@ import { useRouter } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemMedia,
-  ItemTitle,
-  ItemGroup
-} from "@/components/ui/item"
-import { Progress } from "@/components/ui/progress"
-import { Spinner } from "@/components/ui/spinner"
+import { motion, AnimatePresence } from "framer-motion";
 import RadialPulseLoader from "@/components/RadialPulseLoader";
 
-type Platform = "instagram" | "website" | "linkedin";
+type Platform = "instagram" | "website" | "linkedin" | "all" | "twitter";
+type ViewState = "feed" | "history" | "settings";
 
 const PLATFORM_TABS: { id: Platform; label: string; icon: string }[] = [
   { id: "instagram", label: "Instagram", icon: "photo_camera" },
   { id: "website", label: "Website", icon: "language" },
   { id: "linkedin", label: "LinkedIn", icon: "work" },
+];
+
+const HISTORY_TABS: { id: Platform; label: string }[] = [
+  { id: "all", label: "All Posts" },
+  { id: "instagram", label: "Instagram" },
+  { id: "twitter", label: "Twitter" },
+  { id: "linkedin", label: "LinkedIn" },
 ];
 
 export default function PublishingPage() {
@@ -32,13 +30,15 @@ export default function PublishingPage() {
   const [deliverables, setDeliverables] = useState<any[]>([]);
   const [publishedItems, setPublishedItems] = useState<any[]>([]);
   const [activePlatform, setActivePlatform] = useState<Platform>("instagram");
+  const [historyPlatform, setHistoryPlatform] = useState<Platform>("all");
+  const [currentView, setCurrentView] = useState<ViewState>("feed");
 
   // Publishing States
   const [isPublishing, setIsPublishing] = useState<string | null>(null);
   const [reviewTask, setReviewTask] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ── Instagram Modal State ──
+  // ── Modal / Form State ──
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [postType, setPostType] = useState<"FEED" | "STORY" | "CAROUSEL">("FEED");
@@ -56,7 +56,7 @@ export default function PublishingPage() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [publishProgress, setPublishProgress] = useState(0);
-  const [publishMessage, setPublishMessage] = useState("Uploading media content and posting...");
+  const [publishMessage, setPublishMessage] = useState("Uploading...");
 
   useEffect(() => {
     const user = getUser();
@@ -78,13 +78,15 @@ export default function PublishingPage() {
     setIsLoading(false);
   }
 
-  // Filter ready items by active platform
   const filteredDeliverables = deliverables.filter((d) => {
-    const target = d.platform_target || "instagram";
-    if (activePlatform === "instagram") return target === "instagram" || target === "Instagram";
-    if (activePlatform === "website") return target === "website";
-    if (activePlatform === "linkedin") return target === "linkedin";
-    return false;
+    const target = (d.platform_target || "instagram").toLowerCase();
+    return target === activePlatform.toLowerCase();
+  });
+
+  const filteredHistory = publishedItems.filter((item) => {
+    if (historyPlatform === "all") return true;
+    const target = (item.platform_target || item.platform || "instagram").toLowerCase();
+    return target === historyPlatform.toLowerCase();
   });
 
   function slugify(text: string) {
@@ -96,11 +98,7 @@ export default function PublishingPage() {
     if (activePlatform === "instagram") {
       setCaption(task.topic || "");
       setHashtags("");
-      if (task.media_url && task.media_url.includes(",")) {
-        setPostType("CAROUSEL");
-      } else {
-        setPostType("FEED");
-      }
+      setPostType(task.media_url?.includes(",") ? "CAROUSEL" : "FEED");
     } else if (activePlatform === "website") {
       setWebTitle(task.task_name || "");
       setWebSlug(slugify(task.task_name || ""));
@@ -115,11 +113,9 @@ export default function PublishingPage() {
 
   function handleCloseReview() {
     setReviewTask(null);
-    setPostType("FEED");
     setCarouselIndex(0);
-    setCaption(""); setHashtags("");
-    setWebTitle(""); setWebSlug(""); setWebExcerpt(""); setWebCategory("insights");
-    setWebTags(""); setWebBody(""); setWebCtaLabel("Learn More"); setWebCtaUrl("https://scalepods.co/contact");
+    setCaption("");
+    setHashtags("");
   }
 
   async function generateAIContent() {
@@ -135,27 +131,22 @@ export default function PublishingPage() {
           client_name: reviewTask.clients?.business_name,
         }),
       });
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.details || data.error || "AI failed");
       
-      if (!res.ok) {
-        throw new Error(data.details || data.error || "AI request failed");
-      }
-
       if (activePlatform === "instagram") {
-        if (data.caption && data.caption !== "{}") setCaption(data.caption);
-        if (data.hashtags && data.hashtags !== "{}") setHashtags(data.hashtags);
+        if (data.caption) setCaption(data.caption);
+        if (data.hashtags) setHashtags(data.hashtags);
       } else if (activePlatform === "website") {
-        if (data.caption && data.caption !== "{}") setWebExcerpt(data.caption.slice(0, 200));
+        if (data.caption) setWebExcerpt(data.caption.slice(0, 200));
       }
     } catch (err: any) {
-      alert("AI Generation Issue:\n" + err.message);
+      alert("AI Issue: " + err.message);
     } finally {
       setIsGenerating(false);
     }
   }
 
-  // ── Instagram Publish ──
   async function handleInstagramPublish() {
     if (!reviewTask) return;
     const taskId = reviewTask.id;
@@ -164,10 +155,6 @@ export default function PublishingPage() {
     setPublishMessage("Connecting to API...");
     const finalCaption = hashtags ? `${caption}\n\n${hashtags}` : caption;
     
-    const urls = reviewTask.media_url ? reviewTask.media_url.split(",") : [];
-    const isVideo = urls.some((u: string) => u.toLowerCase().endsWith(".mp4"));
-    const isCarousel = urls.length > 1;
-    
     try {
       const res = await fetch("/api/publish-instagram", {
         method: "POST",
@@ -175,12 +162,11 @@ export default function PublishingPage() {
         body: JSON.stringify({ 
           media_url: reviewTask.media_url, 
           caption: postType === "STORY" ? "" : finalCaption,
-          media_type: postType === "STORY" ? "STORIES" : (isCarousel ? "CAROUSEL" : (isVideo ? "REELS" : "IMAGE"))
+          media_type: postType === "STORY" ? "STORIES" : (postType === "CAROUSEL" ? "CAROUSEL" : (reviewTask.media_url.endsWith(".mp4") ? "REELS" : "IMAGE"))
         }),
       });
 
-      if (!res.body) throw new Error("Streaming not supported or failed to connect to API.");
-      
+      if (!res.body) throw new Error("Stream failed");
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let finalData: any = null;
@@ -188,56 +174,34 @@ export default function PublishingPage() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const events = chunk.split("\n\n");
-        
+        const events = decoder.decode(value).split("\n\n");
         for (const ev of events) {
           if (ev.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(ev.slice(6));
-              
-              if (data.progress) setPublishProgress(data.progress);
-              if (data.message) setPublishMessage(data.message);
-              
-              if (data.success) {
-                  finalData = data;
-              }
-              if (data.error) {
-                  throw new Error(data.details?.message || "Publish failed");
-              }
-            } catch(e) {
-               // Ignore partial json chunks if any
-            }
+            const data = JSON.parse(ev.slice(6));
+            if (data.progress) setPublishProgress(data.progress);
+            if (data.message) setPublishMessage(data.message);
+            if (data.success) finalData = data;
+            if (data.error) throw new Error(data.error);
           }
         }
       }
 
-      if (!finalData) throw new Error("API stream closed unexpectedly.");
-
-      // Success! 
-      setPublishProgress(100);
-      setPublishMessage("Success!");
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
       await supabase.from("content_deliverables").update({ 
-        status: "Published", 
-        topic: finalCaption,
-        rework_comments: JSON.stringify({ ig_post_id: finalData.ig_post_id, ig_post_url: finalData.ig_post_url })
+        status: "Published", topic: finalCaption,
+        rework_comments: JSON.stringify({ ig_post_id: finalData?.ig_post_id, ig_post_url: finalData?.ig_post_url })
       }).eq("id", taskId);
-      alert(`🚀 Posted to Instagram!\n${finalData.ig_post_url}`);
-      setDeliverables((prev) => prev.filter((d) => d.id !== taskId));
-      setPublishedItems((prev) => [{ ...reviewTask, status: "Published" }, ...prev]);
+
+      setDeliverables(prev => prev.filter(d => d.id !== taskId));
+      setPublishedItems(prev => [{ ...reviewTask, status: "Published", rework_comments: JSON.stringify({ ig_post_id: finalData?.ig_post_id, ig_post_url: finalData?.ig_post_url }) }, ...prev]);
       handleCloseReview();
+      alert(`🚀 Posted!\n${finalData.ig_post_url}`);
     } catch (err: any) {
       alert("❌ " + err.message);
     } finally {
-      setPublishProgress(0);
       setIsPublishing(null);
     }
   }
 
-  // ── Website Publish ──
   async function handleWebsitePublish() {
     if (!reviewTask) return;
     const taskId = reviewTask.id;
@@ -247,29 +211,20 @@ export default function PublishingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: webTitle,
-          excerpt: webExcerpt,
-          body: webBody,
-          hero_image: reviewTask.media_url,
-          category: webCategory,
-          tags: webTags.split(",").map((t) => t.trim()).filter(Boolean),
-          cta_label: webCtaLabel,
-          cta_url: webCtaUrl,
-          deliverable_id: taskId,
+          title: webTitle, excerpt: webExcerpt, body: webBody,
+          hero_image: reviewTask.media_url, category: webCategory,
+          tags: webTags.split(",").map(t => t.trim()), cta_label: webCtaLabel,
+          cta_url: webCtaUrl, deliverable_id: taskId
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.details || data.error || "Website publish failed");
+      if (!res.ok) throw new Error(data.error);
 
-      await supabase.from("content_deliverables").update({ 
-        status: "Published",
-        rework_comments: JSON.stringify({ website_url: data.url, website_slug: data.slug })
-      }).eq("id", taskId);
-      
-      setDeliverables((prev) => prev.filter((d) => d.id !== taskId));
-      setPublishedItems((prev) => [{ ...reviewTask, status: "Published", rework_comments: JSON.stringify({ website_url: data.url, website_slug: data.slug }) }, ...prev]);
+      await supabase.from("content_deliverables").update({ status: "Published" }).eq("id", taskId);
+      setDeliverables(prev => prev.filter(d => d.id !== taskId));
+      setPublishedItems(prev => [{ ...reviewTask, status: "Published" }, ...prev]);
       handleCloseReview();
-      alert(`🌐 Live on Scalepods!\nURL: ${data.url}`);
+      alert("🌐 Live on Scalepods!");
     } catch (err: any) {
       alert("❌ " + err.message);
     } finally {
@@ -277,615 +232,388 @@ export default function PublishingPage() {
     }
   }
 
-  // Count per platform
   const counts = {
-    instagram: deliverables.filter((d) => !d.platform_target || d.platform_target === "instagram" || d.platform_target === "Instagram").length,
-    website: deliverables.filter((d) => d.platform_target === "website").length,
-    linkedin: deliverables.filter((d) => d.platform_target === "linkedin").length,
+    instagram: deliverables.filter(d => (d.platform_target || "instagram").toLowerCase() === "instagram").length,
+    website: deliverables.filter(d => (d.platform_target || "").toLowerCase() === "website").length,
+    linkedin: deliverables.filter(d => (d.platform_target || "").toLowerCase() === "linkedin").length,
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-surface z-[200]">
+        <RadialPulseLoader size={160} color="#c0c1ff" text="Syncing Engine..." />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-surface text-left">
-      {isLoading ? (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-surface z-[200]">
-          <RadialPulseLoader 
-            size={160} 
-            color="#c0c1ff" 
-            text="Syncing Engine..."
-          />
+    <div className="bg-surface antialiased min-h-screen flex flex-col pt-24 pb-32 selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+      
+      {/* ── TopAppBar ── */}
+      <header className="fixed top-0 w-full z-[100] flex justify-between items-center px-8 py-4 bg-[#1c1b1b] backdrop-blur-[40px] shadow-[0_4px_60px_rgba(229,226,225,0.06)]">
+        <button className="text-sp-primary hover:bg-surface-container-highest/50 transition-all p-2 rounded-full flex items-center justify-center active:scale-95">
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+        <h1 className="text-xl font-black text-sp-primary uppercase tracking-tighter">Ready to Post</h1>
+        <div className="h-10 w-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary-container/20 hover:scale-105 transition-transform active:scale-95 cursor-pointer">
+          <img src="https://lh3.googleusercontent.com/a/ACg8ocL8_Q3H0_6Uu_x-rWJ9p8p9o3p9o3p9o3=s96-c" alt="Profile" className="w-full h-full object-cover" />
         </div>
-      ) : (
-        <>
-          {/* Header */}
-          <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 px-2.5 md:px-3 py-1 rounded-full bg-sp-secondary/10 border border-sp-secondary/20 text-sp-secondary text-[10px] md:text-[11px] font-bold uppercase tracking-widest mb-3">
-                  Publishing Engine
-                </div>
-                <h1 className="text-4xl md:text-4xl font-[900] text-white tracking-tighter truncate leading-none pt-1">Ready to Post</h1>
-                <p className="text-[13px] md:text-sm text-on-surface-variant mt-2 md:mt-1 max-w-xl">
-                  Design, review and publish content platform by platform.
-                </p>
-              </div>
-              <Link href="/" className="text-[13px] md:text-sm font-bold text-sp-primary hover:underline flex items-center gap-2 self-start md:self-auto shrink-0 mb-2 md:mb-0">
-                <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
-              </Link>
-            </div>
+      </header>
 
-            {/* Platform Tabs */}
-            <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-2">
-              {PLATFORM_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActivePlatform(tab.id)}
-                  className={`flex items-center gap-2 px-6 md:px-5 py-3 rounded-full text-[13px] md:text-sm font-black transition-all whitespace-nowrap border ${
-                    activePlatform === tab.id
-                      ? "bg-white text-black border-white shadow-lg shadow-white/5"
-                      : "bg-white/5 text-on-surface-variant border-white/5 hover:border-white/10"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px] md:text-[20px]">{tab.icon}</span>
-                  {tab.label}
-                  {counts[tab.id] > 0 && (
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
-                      activePlatform === tab.id
-                        ? "bg-black text-white"
-                        : "bg-white/10 text-gray-400"
-                    }`}>
-                      {counts[tab.id]}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Content Grid */}
-          <div className="px-4 md:px-8 pt-6 pb-12 w-full max-w-6xl">
-            {activePlatform === "linkedin" ? (
-          <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
-            <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">work</span>
-            <h3 className="text-lg md:text-xl font-bold text-white">LinkedIn Publishing</h3>
-            <p className="text-on-surface-variant max-w-sm mt-2 text-sm">LinkedIn integration is coming in the next phase. Stay tuned!</p>
-          </div>
-        ) : filteredDeliverables.length === 0 ? (
-          <div className="py-16 md:py-24 text-center border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center p-6">
-            <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-700 mb-4">
-              {activePlatform === "instagram" ? "photo_camera" : "language"}
-            </span>
-            <h3 className="text-lg md:text-xl font-bold text-white">No {activePlatform === "instagram" ? "Instagram" : "Website"} Posts Ready</h3>
-            <p className="text-on-surface-variant max-w-sm mt-2 text-sm">
-              {activePlatform === "instagram"
-                ? "Upload designs in the Designer portal and set the platform to Instagram."
-                : "Upload designs in the Designer portal and set the platform to Website Social Feed."}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {filteredDeliverables.map((item) => (
-              <div key={item.id} className="bg-surface-container-low rounded-2xl md:rounded-3xl border border-white/5 overflow-hidden group flex flex-col relative shadow-xl hover:border-white/20 transition-all duration-300">
-                {/* Media Preview - 1:1 on mobile, 4:3 on desktop */}
-                <div className="w-full aspect-square md:aspect-[4/3] bg-surface-container-highest relative flex items-center justify-center overflow-hidden">
-                  {item.media_url ? (
-                    (() => {
-                      const firstUrl = item.media_url.split(",")[0];
-                      const isMulti = item.media_url.includes(",");
-                      return (
-                        <>
-                          {firstUrl.toLowerCase().endsWith(".mp4") ? (
-                            <div className="w-full h-full relative cursor-pointer" onClick={(e) => { e.currentTarget.querySelector('video')?.play() }}>
-                              <video src={firstUrl} className="w-full h-full object-cover" muted loop playsInline />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] group-hover:bg-transparent transition-all">
-                                 <span className="material-symbols-outlined text-5xl md:text-6xl text-white drop-shadow-2xl scale-90 md:scale-100">play_circle</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <img src={firstUrl} alt={item.task_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out" />
-                          )}
-                          
-                          {/* Floating Indicators */}
-                          <div className="absolute top-4 left-4 flex gap-2 z-20">
-                            {isMulti && (
-                               <div className="bg-black/70 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-lg scale-90 md:scale-100">
-                                 <span className="material-symbols-outlined text-[14px] text-white">view_carousel</span>
-                                 <span className="text-[11px] font-black text-white leading-none">{item.media_url.split(",").length}</span>
-                               </div>
-                            )}
-                          </div>
-
-                          <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full border flex items-center gap-1.5 backdrop-blur-md shadow-lg scale-90 md:scale-100 ${
-                            activePlatform === "instagram"
-                              ? "bg-gradient-to-r from-purple-600/90 to-pink-600/90 border-white/20"
-                              : "bg-blue-600/90 border-white/20"
-                          }`}>
-                            <span className="material-symbols-outlined text-[14px] text-white">
-                              {activePlatform === "instagram" ? "photo_camera" : "language"}
-                            </span>
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                              {activePlatform === "instagram" ? "INSTAGRAM" : "WEBSITE"}
-                            </span>
-                          </div>
-                        </>
-                      );
-                    })()
-                  ) : (
-                    <span className="material-symbols-outlined text-6xl text-white/10">image</span>
-                  )}
-                </div>
-
-                {/* Content Area */}
-                <div className="p-5 md:p-6 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="bg-sp-primary/10 text-sp-primary px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-sp-primary/20 leading-none">
-                      {item.clients?.business_name || "CLIENT"}
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-[19px] md:text-xl font-black text-white leading-tight mb-2 tracking-tight">{item.task_name}</h3>
-                  <p className="text-[14px] md:text-sm text-on-surface-variant line-clamp-2 mb-6 font-medium leading-relaxed opacity-80">{item.topic || item.post_type}</p>
-                  
-                  <div className="mt-auto">
-                    <button
-                      onClick={() => handleOpenReview(item)}
-                      className="w-full bg-white text-black py-4 md:py-3.5 rounded-2xl text-[14px] md:text-sm font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all active:scale-[0.98] shadow-lg shadow-black/20"
-                    >
-                      <span className="material-symbols-outlined font-black">bolt</span>
-                      Review & Publish
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Publishing History */}
-      <div className="px-4 md:px-8 pb-16 w-full max-w-6xl">
-        <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span className="material-symbols-outlined text-sp-tertiary">history</span>
-          Publishing History
-        </h2>
-        <div className="bg-surface-container-low rounded-2xl border border-white/5 overflow-hidden">
-          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 bg-[#141414]">
-            <table className="w-full text-left min-w-[600px] md:min-w-[700px]">
-              <thead className="bg-[#1c1b1b] text-[10px] md:text-xs text-on-surface-variant uppercase tracking-widest font-bold border-b border-white/5">
-                <tr>
-                  <th className="px-4 md:px-6 py-4">Content</th>
-                  <th className="px-4 md:px-6 py-4">Client</th>
-                  <th className="hidden md:table-cell px-4 md:px-6 py-4">Platform</th>
-                  <th className="px-4 md:px-6 py-4">Status</th>
-                  <th className="px-4 md:px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
-                {publishedItems.length === 0 ? (
-                  <tr><td colSpan={4} className="px-6 py-12 text-center text-on-surface-variant">No publishing history yet.</td></tr>
-                ) : (
-                  publishedItems.map((row) => (
-                    <tr key={row.id} className="hover:bg-surface-container-high transition-colors">
-                      <td className="px-6 py-4 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded bg-black/40 overflow-hidden shrink-0 flex items-center justify-center border border-white/5 relative">
-                          {row.media_url ? (
-                            row.media_url.includes(",") ? (
-                              <>
-                                <img src={row.media_url.split(",")[0]} alt="" className="w-full h-full object-cover" />
-                                <div className="absolute inset-x-0 bottom-0 py-0.5 bg-black/60 flex items-center justify-center">
-                                  <span className="material-symbols-outlined text-[10px] text-white">view_carousel</span>
-                                </div>
-                              </>
-                            ) : (
-                              row.media_url.endsWith(".mp4") ? (
-                                <video src={row.media_url} className="w-full h-full object-cover" muted />
-                              ) : (
-                                <img src={row.media_url} alt="" className="w-full h-full object-cover" />
-                              )
-                            )
-                          ) : (
-                            <span className="material-symbols-outlined text-gray-500 text-sm">description</span>
-                          )}
-                        </div>
-                        <div>
-                          <span className="font-bold text-white block">{row.task_name}</span>
-                          <span className="text-[10px] text-on-surface-variant line-clamp-1 max-w-[250px]">{row.topic}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-white font-medium">{row.clients?.business_name || "Unknown"}</td>
-                      <td className="px-6 py-4">
-                        <span className="bg-white/5 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider text-gray-300">
-                          {row.platform_target || row.platform || "Instagram"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="flex items-center gap-2 text-sp-secondary font-bold text-xs uppercase tracking-wider mb-2">
-                          <span className="material-symbols-outlined text-sm">check_circle</span>Published
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          {(() => {
-                            let url = ""; let id = "";
-                            try {
-                              const meta = JSON.parse(row.rework_comments || "{}");
-                              url = meta.ig_post_url || meta.website_url || "";
-                              id = meta.ig_post_id || meta.website_slug || "";
-                            } catch (e) {}
-
-                            const isWebsite = row.platform_target === "website";
-
-                            return (
-                              <>
-                                {url && (
-                                  <a href={url} target="_blank" rel="noopener noreferrer" className="p-2 bg-sp-primary/10 text-sp-primary hover:bg-sp-primary hover:text-black rounded-lg transition-colors flex items-center" title="View Post">
-                                    <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-                                  </a>
-                                )}
-                                <button 
-                                  onClick={async () => {
-                                    const platform = row.platform_target || row.platform || "instagram";
-                                    const isIG = platform.toLowerCase().includes("instagram") || (!isWebsite);
-                                    
-                                    const confirmMsg = isIG
-                                      ? "This will remove the post from Agency OS database.\n\n⚠️ Note: Instagram does NOT allow deleting posts via API. After removing from the database, you'll be redirected to the post on Instagram where you can delete it manually (tap ⋯ → Delete).\n\nContinue?"
-                                      : "Are you sure? This will delete the post from the database and the live website.";
-                                    
-                                    if (!confirm(confirmMsg)) return;
-                                    
-                                    try {
-                                      setIsPublishing(row.id);
-                                      
-                                      // For website posts, delete from website_content table too
-                                      if (isWebsite && id) {
-                                        await supabase.from("website_content").delete().eq("slug", id);
-                                      }
-                                      
-                                      // Delete from Agency OS database
-                                      await supabase.from("content_deliverables").delete().eq("id", row.id);
-                                      setPublishedItems(prev => prev.filter(p => p.id !== row.id));
-                                      
-                                      if (isIG && url) {
-                                        // Open Instagram post so user can manually delete
-                                        alert("✅ Removed from Agency OS!\n\nOpening Instagram now — tap the ⋯ menu on the post and select 'Delete' to remove it from Instagram too.");
-                                        window.open(url, "_blank");
-                                      } else if (isIG) {
-                                        alert("✅ Removed from Agency OS!\n\n⚠️ To also delete from Instagram, open the Instagram app, find the post, tap ⋯ → Delete.");
-                                      } else {
-                                        alert("🗑️ Post deleted from database and live website!");
-                                      }
-                                    } catch (err: any) {
-                                      alert("Error deleting: " + err.message);
-                                    } finally {
-                                      setIsPublishing(null);
-                                    }
-                                  }}
-                                  className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center" title="Delete Post"
-                                >
-                                  {isPublishing === row.id ? (
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                  ) : (
-                                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                                  )}
-                                </button>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════ */}
-      {/* REVIEW MODAL                                    */}
-      {/* ═══════════════════════════════════════════════ */}
-      {reviewTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto md:overflow-hidden">
-          <div className="bg-surface border border-white/10 md:rounded-2xl max-w-5xl w-full min-h-screen md:min-h-0 md:h-full md:max-h-[90vh] md:overflow-hidden flex flex-col md:flex-row shadow-2xl relative pt-12 md:pt-0">
-            
-            <button onClick={handleCloseReview} className="absolute top-4 right-4 z-[60] w-8 h-8 flex items-center justify-center bg-black/50 border border-white/20 text-white rounded-full hover:bg-red-500 transition-colors">
-              <span className="material-symbols-outlined text-sm">close</span>
-            </button>
-
-            {/* Left — Media Preview */}
-            <div className="w-full h-[40vh] shrink-0 md:h-auto md:w-1/2 md:flex-1 bg-black md:bg-surface-container-highest border-b md:border-b-0 md:border-r border-white/5 flex items-center justify-center p-2 md:p-6 relative">
-              {(() => {
-                if (!reviewTask.media_url) return (
-                  <div className="text-on-surface-variant flex flex-col items-center gap-3">
-                    <span className="material-symbols-outlined text-6xl text-white/10">image_not_supported</span>
-                    <p className="text-sm">No media available</p>
-                  </div>
-                );
-                
-                const urls = reviewTask.media_url.split(",");
-                const currentUrl = urls[carouselIndex];
-                const isMulti = urls.length > 1;
-
-                return (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {currentUrl.toLowerCase().endsWith(".mp4") ? (
-                      <video src={currentUrl} controls className="w-full h-full md:h-auto md:max-h-[85vh] object-contain rounded-md md:rounded-xl shadow-lg border border-white/10" />
-                    ) : (
-                      <img src={currentUrl} alt="Preview" className="w-full h-full md:h-auto md:max-h-[85vh] object-contain rounded-md md:rounded-xl shadow-lg border border-white/10" />
-                    )}
-                    
-                    {isMulti && (
-                      <>
-                        <button 
-                          onClick={() => setCarouselIndex(prev => prev > 0 ? prev - 1 : urls.length - 1)}
-                          className="absolute left-1 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
-                        >
-                          <span className="material-symbols-outlined md:text-[24px] text-[18px]">chevron_left</span>
-                        </button>
-                        <button 
-                          onClick={() => setCarouselIndex(prev => prev < urls.length - 1 ? prev + 1 : 0)}
-                          className="absolute right-1 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/60 rounded-full text-white flex items-center justify-center hover:bg-black/90 transition-all border border-white/20 shadow-xl z-20 backdrop-blur-md"
-                        >
-                          <span className="material-symbols-outlined md:text-[24px] text-[18px]">chevron_right</span>
-                        </button>
-                        
-                        <div className="absolute bottom-2 md:bottom-4 left-0 right-0 flex justify-center gap-1.5 md:gap-2 z-20">
-                           {urls.map((_: any, idx: number) => (
-                             <div key={idx} className={`h-1.5 md:h-2 rounded-full transition-all ${idx === carouselIndex ? 'w-4 md:w-6 bg-sp-primary' : 'w-1.5 md:w-2 bg-white/50'}`} />
-                           ))}
-                        </div>
-                        <div className="absolute top-2 left-2 md:top-4 md:left-4 z-20 bg-black/70 backdrop-blur-md px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 md:gap-2 shadow-lg">
-                           <span className="material-symbols-outlined text-[12px] md:text-[14px] text-sp-primary">view_carousel</span>
-                           <span className="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">{carouselIndex + 1} / {urls.length}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Right — Form */}
-            <div className="w-full md:w-1/2 md:flex-1 p-5 md:p-8 overflow-y-visible md:overflow-y-auto bg-[#161616] pb-24 md:pb-8">
-              {/* Modal Header */}
-              <div className="mb-6">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-widest mb-2 ${
-                  activePlatform === "instagram"
-                    ? "bg-purple-500/20 text-purple-300"
-                    : "bg-blue-500/20 text-blue-300"
-                }`}>
-                  <span className="material-symbols-outlined text-[14px]">
-                    {activePlatform === "instagram" ? "photo_camera" : "language"}
-                  </span>
-                  {activePlatform === "instagram" ? "Instagram Post" : "Website Social Feed"}
-                </span>
-                <h2 className="text-2xl font-[900] text-white tracking-tight">{reviewTask.task_name}</h2>
-                <p className="text-sm font-medium text-sp-tertiary mt-1">Client: {reviewTask.clients?.business_name}</p>
-              </div>
-
-              {/* ── INSTAGRAM FIELDS ── */}
-              {activePlatform === "instagram" && (
-                <>
-                  {/* Post Type Selector */}
-                  <div className="mb-6 flex gap-2 p-1 bg-surface-container-high border border-white/10 rounded-lg">
-                    {reviewTask.media_url?.includes(",") ? (
-                       <button 
-                         onClick={() => setPostType("CAROUSEL")} 
-                         className={`flex-1 py-2 text-xs uppercase tracking-wider font-bold rounded flex items-center justify-center gap-2 transition-all bg-sp-primary text-black shadow-md`}
-                       >
-                         <span className="material-symbols-outlined text-[18px]">view_carousel</span>
-                         Carousel ({reviewTask.media_url.split(",").length} Items)
-                       </button>
-                    ) : (
-                      <>
-                        <button 
-                          onClick={() => setPostType("FEED")} 
-                          className={`flex-1 py-1.5 text-xs uppercase tracking-wider font-bold rounded flex items-center justify-center gap-1.5 transition-all ${postType === "FEED" ? "bg-sp-primary text-black shadow-md" : "text-gray-400 hover:text-white"}`}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">grid_on</span>
-                          Feed / Reel
-                        </button>
-                        <button 
-                          onClick={() => setPostType("STORY")} 
-                          className={`flex-1 py-1.5 text-xs uppercase tracking-wider font-bold rounded flex items-center justify-center gap-1.5 transition-all ${postType === "STORY" ? "bg-[#9b51e0] text-white shadow-md" : "text-gray-400 hover:text-white"}`}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">amp_stories</span>
-                          Story (24hr)
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {(postType === "FEED" || postType === "CAROUSEL") && (
-                    <>
-                      {/* AI Generate Button */}
-                      <button
-                        onClick={generateAIContent}
-                        disabled={isGenerating}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-[#9b51e0] to-[#6a11cb] hover:from-[#a76ced] hover:to-[#7824d6] text-white font-bold text-sm shadow-xl transition-all disabled:opacity-50 mb-6"
-                      >
-                        {isGenerating ? (
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                        )}
-                        {isGenerating ? "Generating..." : "✨ AI Generate Caption"}
-                      </button>
-
-                      <div className="flex-1 mb-4">
-                        <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Post Caption</label>
-                        <textarea
-                          value={caption}
-                          onChange={(e) => setCaption(e.target.value)}
-                          placeholder="Write an engaging caption..."
-                          rows={6}
-                          className="w-full bg-surface-container-high border border-white/10 rounded-xl p-4 text-sm text-white placeholder-white/20 focus:outline-none focus:border-sp-primary/50 resize-none"
-                        />
-                      </div>
-                      <div className="mb-6">
-                        <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Hashtags</label>
-                        <input
-                          type="text"
-                          value={hashtags}
-                          onChange={(e) => setHashtags(e.target.value)}
-                          placeholder="#Automation #AIWorkflows #ScalePods"
-                          className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-sp-tertiary focus:outline-none focus:border-sp-primary/50"
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
-              {/* ── WEBSITE FIELDS ── */}
-              {activePlatform === "website" && (
-                <div className="space-y-4">
-                  {/* Title */}
-                  <div>
-                    <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">Title *</label>
-                    <input
-                      type="text"
-                      value={webTitle}
-                      onChange={(e) => { setWebTitle(e.target.value); setWebSlug(slugify(e.target.value)); }}
-                      className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-sp-primary/50"
-                      placeholder="e.g. 5 Ways to Automate Your Sales Funnel"
-                    />
-                  </div>
-                  {/* Slug */}
-                  <div>
-                    <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">URL Slug</label>
-                    <div className="flex items-center bg-surface-container-high border border-white/10 rounded-lg overflow-hidden">
-                      <span className="text-xs text-gray-500 px-3 border-r border-white/10 whitespace-nowrap">/social-feed/</span>
-                      <input
-                        type="text"
-                        value={webSlug}
-                        onChange={(e) => setWebSlug(e.target.value)}
-                        className="flex-1 bg-transparent p-3 text-sm text-sp-tertiary focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  {/* Excerpt */}
-                  <div>
-                    <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">
-                      Excerpt <span className="text-gray-500 font-normal normal-case">({webExcerpt.length}/200 chars)</span>
-                    </label>
-                    <textarea
-                      value={webExcerpt}
-                      onChange={(e) => setWebExcerpt(e.target.value.slice(0, 200))}
-                      rows={3}
-                      placeholder="A short teaser shown on the Social Feed card..."
-                      className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white resize-none focus:outline-none focus:border-sp-primary/50"
-                    />
-                  </div>
-                  {/* Category + Tags */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">Category</label>
-                      <select
-                        value={webCategory}
-                        onChange={(e) => setWebCategory(e.target.value)}
-                        className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none"
-                      >
-                        <option value="insights">💡 Insights</option>
-                        <option value="case-study">📊 Case Study</option>
-                        <option value="product-update">🚀 Product Update</option>
-                        <option value="social">📸 Social</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">Tags (comma-separated)</label>
-                      <input
-                        type="text"
-                        value={webTags}
-                        onChange={(e) => setWebTags(e.target.value)}
-                        placeholder="AI, automation, n8n"
-                        className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  {/* Body */}
-                  <div>
-                    <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">
-                      Body Content <span className="text-gray-500 font-normal normal-case">(optional long-form)</span>
-                    </label>
-                    <textarea
-                      value={webBody}
-                      onChange={(e) => setWebBody(e.target.value)}
-                      rows={4}
-                      placeholder="Full article text, markdown supported..."
-                      className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white resize-none focus:outline-none focus:border-sp-primary/50"
-                    />
-                  </div>
-                  {/* CTA */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">CTA Label</label>
-                      <input
-                        type="text"
-                        value={webCtaLabel}
-                        onChange={(e) => setWebCtaLabel(e.target.value)}
-                        placeholder="Book a Call"
-                        className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs uppercase font-bold text-on-surface-variant tracking-widest mb-1.5 block">CTA URL</label>
-                      <input
-                        type="text"
-                        value={webCtaUrl}
-                        onChange={(e) => setWebCtaUrl(e.target.value)}
-                        placeholder="https://scalepods.co/contact"
-                        className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              {isPublishing === reviewTask.id ? (
-                <div className="mt-6 flex w-full flex-col gap-4 [--radius:1rem]">
-                  <Item variant="outline" className="bg-surface-container-high border-white/10">
-                    <ItemMedia variant="icon" className="bg-[#9b51e0]/20 text-[#a76ced] border-white/5 h-10 w-10">
-                      <Spinner />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle className="text-white">Publishing to {activePlatform}...</ItemTitle>
-                      <ItemDescription className="text-gray-400">
-                        {publishMessage}
-                      </ItemDescription>
-                    </ItemContent>
-                    <ItemFooter className="mt-2">
-                      <Progress value={publishProgress} className="h-2 bg-black/40" />
-                    </ItemFooter>
-                  </Item>
-                </div>
-              ) : (
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <button onClick={handleCloseReview} className="py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors text-sm">
-                    Cancel
-                  </button>
+      <main className="flex-grow px-4 md:px-8 max-w-4xl mx-auto w-full">
+        <AnimatePresence mode="wait">
+          {currentView === "feed" ? (
+            <motion.div
+              key="feed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Filter Pills */}
+              <div className="flex space-x-3 overflow-x-auto pb-6 hide-scrollbar relative w-full mb-8 pt-4">
+                {PLATFORM_TABS.map((tab) => (
                   <button
-                    onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish}
-                    className={`py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transition-colors text-sm ${
-                      activePlatform === "instagram"
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(167,114,237,0.3)]"
-                        : "bg-sp-secondary text-black hover:bg-[#20bda9] shadow-[0_0_20px_rgba(45,212,191,0.2)]"
+                    key={tab.id}
+                    onClick={() => setActivePlatform(tab.id)}
+                    className={`px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold tracking-tight transition-all flex items-center gap-2 ${
+                      activePlatform === tab.id
+                        ? "bg-primary-container text-on-primary-container shadow-[0_4px_20px_rgba(192,193,255,0.15)]"
+                        : "bg-surface-container-highest text-on-surface hover:bg-surface-variant"
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">
-                      {activePlatform === "instagram" ? "photo_camera" : "language"}
-                    </span>
-                    {activePlatform === "instagram" ? "Post to Instagram" : "Publish to Website"}
+                    <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                    {tab.label}
+                    {counts[tab.id as keyof typeof counts] > 0 && (
+                      <span className="ml-1 opacity-60 text-xs text-on-primary-container">({counts[tab.id as keyof typeof counts]})</span>
+                    )}
                   </button>
-                </div>
-              )}
+                ))}
+              </div>
+
+              {/* Grid */}
+              <div className="flex flex-col gap-8">
+                {filteredDeliverables.length === 0 ? (
+                  <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center">
+                    <span className="material-symbols-outlined text-6xl text-gray-700 mb-4">inbox</span>
+                    <h3 className="text-lg font-bold">No tasks ready</h3>
+                  </div>
+                ) : (
+                  filteredDeliverables.map((item, idx) => (
+                    <motion.article
+                      key={item.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="bg-surface-container-low rounded-lg p-4 flex flex-col md:flex-row gap-6 shadow-[0_10px_40px_rgba(229,226,225,0.03)] relative overflow-hidden group border border-outline-variant/15"
+                    >
+                      <div className="w-full md:w-1/2 aspect-square rounded-md overflow-hidden relative">
+                        <img 
+                          src={item.media_url?.split(",")[0]} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                          alt="Preview" 
+                        />
+                        <div className="absolute top-4 right-4 bg-secondary text-on-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg z-10">
+                          {item.clients?.business_name || "CLIENT"}
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/2 flex flex-col justify-between py-2">
+                        <div>
+                          <h2 className="text-lg font-bold tracking-tight text-on-surface mb-2">{item.task_name}</h2>
+                          <p className="text-sm text-on-surface-variant leading-relaxed line-clamp-3 mb-4">
+                            {item.topic || "Review this content artifact for your brand consistency and engagement."}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-outline">
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-base">calendar_today</span>
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-base">bolt</span>
+                              Ready
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleOpenReview(item)}
+                          className="mt-6 w-full bg-gradient-to-br from-primary-container to-sp-primary text-black font-black text-sm py-4 rounded-full shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined">send</span>
+                          Review & Publish
+                        </button>
+                      </div>
+                    </motion.article>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="pt-4"
+            >
+              <div className="mb-12">
+                <h2 className="text-6xl font-black leading-tight tracking-tight text-on-surface mb-2">History</h2>
+                <p className="text-sm font-medium text-on-surface-variant max-w-xl leading-relaxed">
+                  Your recently published artifacts. Review or curate your digital gallery.
+                </p>
+              </div>
+
+              <div className="flex overflow-x-auto gap-4 pb-4 mb-8 hide-scrollbar">
+                {HISTORY_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setHistoryPlatform(tab.id)}
+                    className={`px-6 py-2 rounded-full text-sm font-bold shrink-0 transition-all ${
+                      historyPlatform === tab.id
+                        ? "bg-primary-container text-on-primary-container shadow-lg"
+                        : "bg-surface-container-highest text-on-surface hover:bg-surface-variant"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredHistory.map((item, idx) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="bg-surface-container-low rounded-lg p-4 group relative overflow-hidden transition-all duration-300 hover:shadow-2xl border border-white/5"
+                  >
+                    <div className="absolute top-6 right-6 z-10 flex gap-2">
+                      <div className="bg-surface-dim/80 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-bold text-secondary flex items-center gap-1 shadow-lg">
+                        <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                        Live
+                      </div>
+                    </div>
+                    <div className="rounded-md overflow-hidden aspect-square mb-6 relative group-hover:scale-[1.02] transition-transform duration-500 bg-surface-container-highest">
+                      {item.media_url ? (
+                        <img src={item.media_url.split(",")[0]} className="w-full h-full object-cover" alt="History" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-8 text-center italic text-sm text-on-surface-variant">
+                          "Published content artifact"
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                       <h3 className="text-lg font-bold text-on-surface tracking-tight truncate">{item.task_name}</h3>
+                       <p className="text-[10px] text-outline mb-4">
+                         Published {new Date(item.updated_at || item.created_at).toLocaleDateString()}
+                       </p>
+                       <div className="flex gap-3 mt-auto pt-4 border-t border-white/5">
+                        <a
+                          href={(() => {
+                            try {
+                              const meta = JSON.parse(item.rework_comments || "{}");
+                              return meta.ig_post_url || meta.website_url || "#";
+                            } catch(e) { return "#"; }
+                          })()}
+                          target="_blank"
+                          className="flex-1 bg-surface-container-highest hover:bg-surface-variant text-sp-primary text-xs font-bold py-3 rounded-full transition-all flex justify-center items-center gap-2 border border-outline-variant/20"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                          View
+                        </a>
+                        <button 
+                          onClick={async () => {
+                            if (!confirm("Remove from Agency OS history?")) return;
+                            await supabase.from("content_deliverables").delete().eq("id", item.id);
+                            setPublishedItems(prev => prev.filter(p => p.id !== item.id));
+                          }}
+                          className="w-12 h-12 bg-surface-container-highest hover:bg-error-container/20 text-outline hover:text-error rounded-full flex justify-center items-center transition-all border border-outline-variant/20"
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                       </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* ── BottomNavBar ── */}
+      <nav className="fixed bottom-0 left-0 w-full z-[101] flex justify-around items-center px-6 pb-10 pt-4 bg-[#131313]/60 backdrop-blur-[32px] rounded-t-[32px] shadow-[0_-10px_60px_rgba(0,0,0,0.5)]">
+        <button 
+          onClick={() => setCurrentView("feed")}
+          className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-90 ${
+            currentView === "feed" ? "text-sp-primary" : "text-on-surface/40 hover:text-on-surface"
+          }`}
+        >
+          <span className={`material-symbols-outlined text-2xl ${currentView === "feed" ? "fill-1" : ""}`}>grid_view</span>
+          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">Feed</span>
+        </button>
+
+        <Link href="/" className="flex flex-col items-center justify-center bg-gradient-to-br from-sp-primary to-primary text-black rounded-full px-6 py-2 shadow-2xl active:scale-95 transition-transform">
+          <span className="material-symbols-outlined text-2xl">add_circle</span>
+          <span className="text-[10px] uppercase font-black tracking-widest mt-1">Publish</span>
+        </Link>
+
+        <button 
+          onClick={() => setCurrentView("history")}
+          className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-90 ${
+            currentView === "history" ? "text-sp-primary" : "text-on-surface/40 hover:text-on-surface"
+          }`}
+        >
+          <span className={`material-symbols-outlined text-2xl ${currentView === "history" ? "fill-1" : ""}`}>history</span>
+          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">History</span>
+        </button>
+
+        <button className="flex flex-col items-center justify-center text-on-surface/40 hover:text-on-surface active:scale-90 transition-all">
+          <span className="material-symbols-outlined text-2xl">settings</span>
+          <span className="text-[10px] uppercase font-bold tracking-widest mt-1">Settings</span>
+        </button>
+      </nav>
+
+      {/* ── Review Modal ── */}
+      <AnimatePresence>
+        {reviewTask && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md overflow-y-auto no-scrollbar"
+          >
+            <div className="max-w-xl mx-auto min-h-screen pb-24">
+              <header className="sticky top-0 w-full z-50 flex justify-between items-center px-8 py-6">
+                <button onClick={handleCloseReview} className="text-sp-primary p-2 bg-surface-container-highest/40 backdrop-blur-xl rounded-full">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+                <h2 className="font-bold text-sp-primary uppercase tracking-tighter">Review & Publish</h2>
+                <div className="w-10" />
+              </header>
+
+              <main className="px-6 flex flex-col gap-8">
+                <section className="bg-surface-container-low rounded-lg p-6 shadow-2xl relative glass-edge">
+                   <div className="absolute top-10 right-10 z-20 bg-secondary text-on-secondary px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest">
+                      Ready
+                   </div>
+                   
+                   <div className="aspect-square w-full relative overflow-hidden rounded-md bg-surface-container-lowest">
+                      {reviewTask.media_url?.split(",")[carouselIndex].endsWith(".mp4") ? (
+                        <video 
+                          src={reviewTask.media_url.split(",")[carouselIndex]} 
+                          className="w-full h-full object-cover" 
+                          controls autoPlay muted loop 
+                        />
+                      ) : (
+                        <img 
+                          src={reviewTask.media_url?.split(",")[carouselIndex]} 
+                          className="w-full h-full object-cover" 
+                          alt="Review" 
+                        />
+                      )}
+                      
+                      {reviewTask.media_url?.includes(",") && (
+                        <>
+                          <button 
+                            onClick={() => setCarouselIndex(p => Math.max(0, p - 1))}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-surface/40 backdrop-blur-xl p-3 rounded-full text-on-surface"
+                          >
+                            <span className="material-symbols-outlined">chevron_left</span>
+                          </button>
+                          <button 
+                            onClick={() => setCarouselIndex(p => Math.min(reviewTask.media_url.split(",").length - 1, p + 1))}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-surface/40 backdrop-blur-xl p-3 rounded-full text-on-surface"
+                          >
+                            <span className="material-symbols-outlined">chevron_right</span>
+                          </button>
+                        </>
+                      )}
+                   </div>
+
+                   <div className="flex justify-center gap-3 pt-4">
+                      {reviewTask.media_url?.split(",").map((_: any, idx: number) => (
+                        <div key={idx} className={`w-2 h-2 rounded-full transition-all ${idx === carouselIndex ? 'bg-sp-primary shadow-[0_0_8px_#c0c1ff]' : 'bg-surface-container-highest'}`} />
+                      ))}
+                   </div>
+                </section>
+
+                <section className="flex flex-col gap-6">
+                   <button 
+                    onClick={generateAIContent}
+                    disabled={isGenerating}
+                    className="w-full relative group overflow-hidden rounded-full p-[1px] shadow-2xl transition-all active:scale-[0.98]"
+                   >
+                     <div className="absolute inset-0 bg-gradient-to-r from-primary-container to-sp-primary opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                     <div className="relative bg-gradient-to-br from-[#c0c1ff] to-[#e1dfff] rounded-full px-6 py-4 flex items-center justify-center gap-3">
+                        {isGenerating ? (
+                          <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        ) : (
+                          <span className="material-symbols-outlined text-black fill-1">auto_awesome</span>
+                        )}
+                        <span className="font-headline font-black text-black">Generate AI Caption</span>
+                     </div>
+                   </button>
+
+                   <div className="flex flex-col gap-2">
+                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-black ml-4">Caption</label>
+                     <textarea 
+                        value={caption}
+                        onChange={(e) => setCaption(e.target.value)}
+                        className="w-full bg-surface-container-lowest text-on-surface p-6 rounded-md min-h-[160px] resize-none focus:outline-none placeholder:text-outline-variant font-body text-sm border-none shadow-xl"
+                        placeholder="Engage your audience..."
+                      />
+                   </div>
+
+                   <div className="flex flex-col gap-2">
+                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-black ml-4">Hashtags</label>
+                     <div className="relative">
+                        <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-outline-variant">tag</span>
+                        <input 
+                          value={hashtags}
+                          onChange={(e) => setHashtags(e.target.value)}
+                          className="w-full bg-surface-container-lowest text-on-surface py-4 pl-14 pr-6 rounded-full focus:outline-none text-sm border-none shadow-xl"
+                          placeholder="automation, design..."
+                        />
+                     </div>
+                   </div>
+
+                   {/* Publishing Loader */}
+                   {isPublishing === reviewTask.id && (
+                     <div className="p-4 bg-primary-container/10 rounded-2xl border border-primary-container/20 animate-in">
+                        <p className="text-xs font-bold text-sp-primary mb-2 flex items-center gap-2">
+                           <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                           {publishMessage}
+                        </p>
+                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="h-full bg-sp-primary"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${publishProgress}%` }}
+                          />
+                        </div>
+                     </div>
+                   )}
+
+                   <div className="flex gap-4 mt-4 pb-12">
+                      <button className="flex-1 rounded-full border border-outline-variant/20 bg-transparent text-sp-primary font-bold text-sm py-4 active:scale-95">
+                        Schedule
+                      </button>
+                      <button 
+                        onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish}
+                        disabled={!!isPublishing}
+                        className="flex-[2] rounded-full bg-gradient-to-br from-primary-container to-sp-primary text-black font-black text-sm py-4 shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined fill-1">send</span>
+                        {isPublishing ? "Publishing..." : "Publish Now"}
+                      </button>
+                   </div>
+                </section>
+              </main>
             </div>
-          </div>
-        </div>
-      )}
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
