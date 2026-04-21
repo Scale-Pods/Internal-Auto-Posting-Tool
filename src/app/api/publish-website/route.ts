@@ -70,7 +70,11 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("[Website Publish] Supabase insert error:", error);
       return NextResponse.json(
-        { error: "Failed to publish to website", details: error.message },
+        { 
+          error: "Failed to publish to website", 
+          details: error.message,
+          code: error.code
+        },
         { status: 500 }
       );
     }

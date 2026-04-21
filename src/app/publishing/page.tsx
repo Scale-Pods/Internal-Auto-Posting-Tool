@@ -245,7 +245,12 @@ export default function PublishingPage() {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to publish");
+      if (!res.ok) {
+        throw { 
+          message: data.error || "Failed to publish", 
+          details: data.details 
+        };
+      }
 
       setPublishProgress(100);
       setPublishMessage("Published!");
@@ -260,7 +265,8 @@ export default function PublishingPage() {
         window.open(`${websiteUrl}/blog/${data.slug}`, "_blank");
       }
     } catch (err: any) {
-      alert("❌ " + err.message);
+      const errorMsg = err.details ? `❌ ${err.message}\nDetails: ${err.details}` : `❌ ${err.message || err}`;
+      alert(errorMsg);
     } finally {
       setIsPublishing(null);
     }
