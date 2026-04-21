@@ -98,11 +98,22 @@ export async function POST(req: NextRequest) {
           method: "POST"
         });
         const revalidateData = await revalidateRes.json();
-        console.log("[Website Publish] Revalidation response:", revalidateData);
+        
+        if (!revalidateRes.ok || !revalidateData.revalidated) {
+          throw new Error(revalidateData.message || "Revalidation handshake failed");
+        }
+        
+        console.log("[Website Publish] Revalidation successful:", revalidateData);
       }
     } catch (revalidateErr: any) {
       console.error("[Website Publish] Revalidation failed:", revalidateErr.message);
-      // We don't fail the whole request if revalidation fails, but we log it
+      // We don't fail the whole database insert, but we return the revalidation warning
+      return NextResponse.json({
+        success: true,
+        slug: data.slug,
+        revalidation_warning: `Post saved, but cache refresh lagged: ${revalidateErr.message}`,
+        url: `https://scalepods-replication.vercel.app/blog/${data.slug}`,
+      });
     }
 
     console.log("[Website Publish] Success:", data.slug);
