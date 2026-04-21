@@ -107,7 +107,7 @@ export default function PublishingPage() {
       setWebCategory("insights");
       setWebTags("");
       setWebBody("");
-      setWebSections([{ heading: "The Shift from Manual to Machine", body: "..." }]);
+      setWebSections([]);
       setWebCtaLabel("Learn More");
       setWebCtaUrl("https://scalepods.co/contact");
     }
