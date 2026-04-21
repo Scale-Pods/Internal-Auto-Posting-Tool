@@ -256,7 +256,14 @@ export default function PublishingPage() {
       setPublishMessage("Published!");
       
       setDeliverables(prev => prev.filter(d => d.id !== taskId));
-      setPublishedItems(prev => [{ ...reviewTask, status: "Published" }, ...prev]);
+      const metadata = { slug: data.slug, website_post_id: data.id };
+      setPublishedItems(prev => [{ ...reviewTask, status: "Published", rework_comments: JSON.stringify(metadata) }, ...prev]);
+      
+      // Update the record in Supabase with the slug metadata
+      await supabase.from("content_deliverables").update({ 
+        rework_comments: JSON.stringify(metadata) 
+      }).eq("id", taskId);
+
       handleCloseReview();
       
       // Open the live blog post
@@ -500,6 +507,7 @@ export default function PublishingPage() {
                 <tr>
                   <th className="px-6 py-4">Content</th>
                   <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Posted On</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -513,14 +521,57 @@ export default function PublishingPage() {
                       <span className="font-bold text-white">{row.task_name}</span>
                     </td>
                     <td className="px-6 py-4">
-                       <span className="text-sp-secondary font-bold text-xs">PUBLISHED</span>
+                       <span className="text-sp-secondary font-bold text-xs uppercase">{row.platform_target || "POST"}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-white/50 text-[11px] font-medium uppercase font-mono">
+                       {new Date(row.created_at).toLocaleDateString()} · {new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                       {row.platform_target === "website" && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const metadata = row.rework_comments ? JSON.parse(row.rework_comments) : null;
+                                if (!metadata || !metadata.slug) return alert("❌ No slug metadata found");
+                                const res = await fetch("/api/revalidate-website", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ slug: metadata.slug })
+                                });
+                                if (res.ok) alert("✅ Cache Refreshed!");
+                                else alert("❌ Refresh Failed");
+                              } catch {
+                                alert("❌ Link refresh failed");
+                              }
+                            }}
+                            className="p-2 text-white/40 hover:text-white rounded-lg"
+                            title="Refresh Website Cache"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">refresh</span>
+                          </button>
+                       )}
                        <button onClick={async () => {
-                          if (!confirm("Delete?")) return;
+                          if (!confirm(`Are you sure? This will delete the post from the Dashboard AND the LIVE ${row.platform_target === "website" ? "Website" : "Record"}.`)) return;
+                          
+                          // If it's a website post, delete from website_content first
+                          if (row.platform_target === "website") {
+                            try {
+                              const metadata = row.rework_comments ? JSON.parse(row.rework_comments) : null;
+                              if (metadata && metadata.slug) {
+                                await fetch("/api/unpublish-website", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ slug: metadata.slug })
+                                });
+                              }
+                            } catch (e) {
+                              console.error("Failed to unpublish from website", e);
+                            }
+                          }
+
                           await supabase.from("content_deliverables").delete().eq("id", row.id);
                           setPublishedItems(prev => prev.filter(p => p.id !== row.id));
-                       }} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg">
+                       }} className="p-2 text-red-500/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg" title="Delete Everywhere">
                           <span className="material-symbols-outlined text-[18px]">delete</span>
                        </button>
                     </td>
