@@ -83,6 +83,24 @@ export async function POST(req: NextRequest) {
         .eq("id", deliverable_id);
     }
 
+    // ── NEW: Trigger Revalidation ──
+    try {
+      const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL;
+      const revalidateSecret = process.env.REVALIDATION_SECRET;
+      
+      if (websiteUrl && revalidateSecret) {
+        console.log(`[Website Publish] Triggering revalidation for ${data.slug}...`);
+        const revalidateRes = await fetch(`${websiteUrl}/api/revalidate?secret=${revalidateSecret}&path=/blog/${data.slug}`, {
+          method: "POST"
+        });
+        const revalidateData = await revalidateRes.json();
+        console.log("[Website Publish] Revalidation response:", revalidateData);
+      }
+    } catch (revalidateErr: any) {
+      console.error("[Website Publish] Revalidation failed:", revalidateErr.message);
+      // We don't fail the whole request if revalidation fails, but we log it
+    }
+
     console.log("[Website Publish] Success:", data.slug);
 
     return NextResponse.json({

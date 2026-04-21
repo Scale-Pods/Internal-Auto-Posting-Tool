@@ -51,6 +51,7 @@ export default function PublishingPage() {
   const [webCategory, setWebCategory] = useState("insights");
   const [webTags, setWebTags] = useState("");
   const [webBody, setWebBody] = useState("");
+  const [webSections, setWebSections] = useState<{heading: string, body: string}[]>([]);
   const [webCtaLabel, setWebCtaLabel] = useState("Learn More");
   const [webCtaUrl, setWebCtaUrl] = useState("https://scalepods.co/contact");
 
@@ -106,6 +107,7 @@ export default function PublishingPage() {
       setWebCategory("insights");
       setWebTags("");
       setWebBody("");
+      setWebSections([{ heading: "The Shift from Manual to Machine", body: "..." }]);
       setWebCtaLabel("Learn More");
       setWebCtaUrl("https://scalepods.co/contact");
     }
@@ -127,7 +129,7 @@ export default function PublishingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic: reviewTask.topic || reviewTask.task_name,
-          platform: activePlatform === "website" ? "website blog post" : reviewTask.platform,
+          platform: activePlatform === "website" ? "A premium blog post. IMPORTANT: Return ONLY a raw JSON object with this exact structure: { \"title\": \"...\", \"excerpt\": \"...\", \"slug\": \"...\", \"sections\": [ { \"heading\": \"...\", \"body\": \"...\" }, ... ] }. Use clear headings and detailed body text for each section." : reviewTask.platform,
           client_name: reviewTask.clients?.business_name,
         }),
       });
@@ -138,7 +140,23 @@ export default function PublishingPage() {
         if (data.caption) setCaption(data.caption);
         if (data.hashtags) setHashtags(data.hashtags);
       } else if (activePlatform === "website") {
-        if (data.caption) setWebExcerpt(data.caption.slice(0, 200));
+        if (data.caption) {
+          try {
+            // Content might be wrapped in markdown code blocks
+            const jsonStr = data.caption.replace(/```json|```/g, "").trim();
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.sections) setWebSections(parsed.sections);
+            if (parsed.excerpt) setWebExcerpt(parsed.excerpt);
+            if (parsed.title) {
+              setWebTitle(parsed.title);
+              setWebSlug(parsed.slug || parsed.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+            }
+          } catch {
+            // Fallback: treat as plain text if JSON parsing fails
+            setWebSections([{ heading: "Article Content", body: data.caption }]);
+            setWebExcerpt(data.caption.slice(0, 160) + "...");
+          }
+        }
       }
     } catch (err: any) {
       alert("AI Issue: " + err.message);
@@ -206,25 +224,41 @@ export default function PublishingPage() {
     if (!reviewTask) return;
     const taskId = reviewTask.id;
     setIsPublishing(taskId);
+    setPublishProgress(20);
+    setPublishMessage("Syncing with website...");
+
     try {
       const res = await fetch("/api/publish-website", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: webTitle, excerpt: webExcerpt, body: webBody,
-          hero_image: reviewTask.media_url, category: webCategory,
-          tags: webTags.split(",").map(t => t.trim()), cta_label: webCtaLabel,
-          cta_url: webCtaUrl, deliverable_id: taskId
+          title: webTitle,
+          excerpt: webExcerpt,
+          body: JSON.stringify(webSections),
+          hero_image: reviewTask.media_url?.split(",")[0],
+          category: webCategory,
+          tags: webTags.split(",").map(t => t.trim()),
+          cta_label: webCtaLabel,
+          cta_url: webCtaUrl,
+          deliverable_id: taskId
         }),
       });
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || "Failed to publish");
 
-      await supabase.from("content_deliverables").update({ status: "Published" }).eq("id", taskId);
+      setPublishProgress(100);
+      setPublishMessage("Published!");
+      
       setDeliverables(prev => prev.filter(d => d.id !== taskId));
       setPublishedItems(prev => [{ ...reviewTask, status: "Published" }, ...prev]);
       handleCloseReview();
-      alert("🌐 Live on Scalepods!");
+      
+      // Open the live blog post
+      if (data.slug) {
+        const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://scalepods-replication.vercel.app";
+        window.open(`${websiteUrl}/blog/${data.slug}`, "_blank");
+      }
     } catch (err: any) {
       alert("❌ " + err.message);
     } finally {
@@ -515,9 +549,17 @@ export default function PublishingPage() {
                   <div className="aspect-square w-full rounded-md overflow-hidden bg-black">
                      <img src={reviewTask.media_url?.split(",")[carouselIndex]} className="w-full h-full object-contain" alt="" />
                   </div>
-                  <button onClick={generateAIContent} className="w-full bg-sp-primary text-black py-4 rounded-full font-black">Generate AI Caption</button>
-                  <textarea value={caption} onChange={(e)=>setCaption(e.target.value)} className="w-full bg-surface-container-high p-4 rounded-xl min-h-[150px] focus:outline-none" />
-                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} className="w-full bg-sp-primary text-black py-4 rounded-full font-black">Publish Now</button>
+                  <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-1 block">
+                    {activePlatform === "website" ? "Blog Content (JSON or Markdown)" : "Caption"}
+                  </label>
+                  <textarea 
+                    value={activePlatform === "website" ? webBody : caption} 
+                    onChange={(e) => activePlatform === "website" ? setWebBody(e.target.value) : setCaption(e.target.value)} 
+                    className="w-full bg-surface-container-high p-4 rounded-xl min-h-[150px] focus:outline-none text-white text-sm" 
+                  />
+                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} className="w-full bg-sp-primary text-black py-4 rounded-full font-black">
+                    {isPublishing ? "Publishing..." : "Publish Now"}
+                  </button>
                 </div>
             </motion.div>
 
@@ -540,14 +582,77 @@ export default function PublishingPage() {
                   
                   <button onClick={generateAIContent} disabled={isGenerating} className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm mb-6 flex items-center justify-center gap-2">
                     {isGenerating ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <span className="material-symbols-outlined text-sm">auto_awesome</span>}
-                    AI Generate Caption
+                    {activePlatform === "website" ? "AI Generate Full Article" : "AI Generate Caption"}
                   </button>
 
-                  <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Caption</label>
-                  <textarea value={caption} onChange={(e)=>setCaption(e.target.value)} rows={8} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-sp-primary/50 resize-none mb-6" />
+                  {activePlatform === "website" ? (
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Article Title</label>
+                        <input value={webTitle} onChange={(e)=>setWebTitle(e.target.value)} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sp-primary/50" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Slug</label>
+                        <input value={webSlug} onChange={(e)=>setWebSlug(e.target.value)} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sp-primary/50" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Excerpt</label>
+                        <textarea value={webExcerpt} onChange={(e)=>setWebExcerpt(e.target.value)} rows={2} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sp-primary/50 resize-none" />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest block">Article Sections</label>
+                          <button 
+                            onClick={() => setWebSections([...webSections, { heading: "", body: "" }])}
+                            className="text-[10px] bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded"
+                          >
+                            + Add Section
+                          </button>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                          {webSections.map((sec, i) => (
+                            <div key={i} className="bg-white/5 p-4 rounded-xl border border-white/5 relative group">
+                              <button 
+                                onClick={() => setWebSections(webSections.filter((_, idx) => idx !== i))}
+                                className="absolute top-2 right-2 text-white/30 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <span className="material-symbols-outlined text-sm">delete</span>
+                              </button>
+                              <input 
+                                placeholder="Section Heading"
+                                value={sec.heading} 
+                                onChange={(e) => {
+                                  const newSecs = [...webSections];
+                                  newSecs[i].heading = e.target.value;
+                                  setWebSections(newSecs);
+                                }}
+                                className="w-full bg-transparent border-b border-white/10 mb-2 py-1 text-sm text-white focus:outline-none focus:border-sp-primary"
+                              />
+                              <textarea 
+                                placeholder="Section Body"
+                                value={sec.body} 
+                                onChange={(e) => {
+                                  const newSecs = [...webSections];
+                                  newSecs[i].body = e.target.value;
+                                  setWebSections(newSecs);
+                                }}
+                                rows={4}
+                                className="w-full bg-transparent py-1 text-sm text-white/70 focus:outline-none resize-none"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2 block">Caption</label>
+                      <textarea value={caption} onChange={(e)=>setCaption(e.target.value)} rows={8} className="w-full bg-surface-container-high border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-sp-primary/50 resize-none mb-6" />
+                    </>
+                  )}
                   
-                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} disabled={!!isPublishing} className="w-full bg-sp-primary text-black py-4 rounded-xl font-black flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined">send</span>
+                  <button onClick={activePlatform === "instagram" ? handleInstagramPublish : handleWebsitePublish} disabled={!!isPublishing} className="mt-6 w-full bg-sp-primary text-black py-4 rounded-xl font-black flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined">{isPublishing ? "sync" : "send"}</span>
                     {isPublishing ? "Processing..." : "Publish Now"}
                   </button>
                </div>

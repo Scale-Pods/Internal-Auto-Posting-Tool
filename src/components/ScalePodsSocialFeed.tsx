@@ -111,7 +111,7 @@ export default function ScalePodsSocialFeed(props: any) {
 
 // Ensure properties are exposed in Framer
 ScalePodsSocialFeed.defaultProps = {
-  supabaseUrl: "https://uqxxcyatyydeigmtydyt.supabase.co",
+  supabaseUrl: "https://wglcrzfgejpdtxtezvrw.supabase.co",
   supabaseAnonKey: "YOUR_ANON_KEY", // Will be filled in Framer
 }
 
