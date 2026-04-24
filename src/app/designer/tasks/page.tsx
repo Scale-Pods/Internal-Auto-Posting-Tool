@@ -221,7 +221,7 @@ export default function DesignerTaskQueuePage() {
 
           {/* Pagination */}
           <div className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
-            <p className="text-sm text-slate-500 font-medium">Showing <span className="text-slate-800 font-bold">1-1</span> of <span class="text-slate-800 font-bold">12</span> tasks</p>
+            <p className="text-sm text-slate-500 font-medium">Showing <span className="text-slate-800 font-bold">1-1</span> of <span className="text-slate-800 font-bold">12</span> tasks</p>
             <div className="flex items-center gap-2">
               <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors">
                 <span className="material-symbols-outlined">chevron_left</span>
