@@ -333,18 +333,21 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6 text-center font-sans">
-      <div className="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full">
+      <div className="bg-white p-10 rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full">
         <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-4xl">warning</span>
+          <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-3">Configuration Needed</h2>
-        <p className="text-slate-600 mb-8 leading-relaxed">{message}</p>
+        <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Configuration Needed</h2>
+        <p className="text-slate-600 mb-8 leading-relaxed font-medium">{message}</p>
         <div className="space-y-3">
-          <Link href="/onboarding" className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-lg shadow-slate-200">
-            Try Again
-          </Link>
-          <Link href="/dashboard" className="block w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-2xl font-bold">
-            Back to Dashboard
+          <button 
+            onClick={() => window.location.reload()}
+            className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all"
+          >
+            Check Again
+          </button>
+          <Link href="/onboarding" className="block w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">
+            Restart Onboarding
           </Link>
         </div>
       </div>
