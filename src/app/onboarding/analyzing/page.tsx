@@ -47,7 +47,7 @@ export default function AnalyzingPage() {
         router.push(`/onboarding/report?id=${clientId}`);
       } catch (err) {
         console.error("Error triggering AI workflow:", err);
-        // Fallback redirect for testing purposes
+        // Fallback: still go to report page so polling can pick up when ready
         setTimeout(() => router.push(`/onboarding/report?id=${clientId}`), 5000);
       }
     };
