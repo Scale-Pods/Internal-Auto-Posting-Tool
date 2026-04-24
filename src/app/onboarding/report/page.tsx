@@ -4,12 +4,19 @@ export const dynamic = "force-dynamic";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy singleton — only created in the browser, never at build time
+let _supabase: SupabaseClient | null = null;
+function getSupabase() {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return _supabase;
+}
 
 interface StrategyJson {
   executive_summary?: string;
@@ -44,6 +51,7 @@ export default function StrategyReportPage() {
     const clientId = params.get("id");
     if (!clientId) { setError("No client ID in URL."); setLoading(false); return; }
 
+    const supabase = getSupabase();
     let pollTimer: ReturnType<typeof setTimeout>;
 
     const pollForStrategy = async (attempt = 0) => {
