@@ -35,20 +35,18 @@ export default function AnalyzingPage() {
           return;
         }
 
-        const response = await fetch(webhookUrl, {
+        // Trigger workflow without blocking
+        fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: clientId })
-        });
+        }).catch(err => console.error("Webhook trigger failed:", err));
 
-        if (!response.ok) throw new Error("Workflow failed");
-        
-        // When n8n finishes processing and responds
+        // Redirect immediately to report page
         router.push(`/onboarding/report?id=${clientId}`);
       } catch (err) {
-        console.error("Error triggering AI workflow:", err);
-        // Fallback: still go to report page so polling can pick up when ready
-        setTimeout(() => router.push(`/onboarding/report?id=${clientId}`), 5000);
+        console.error("Setup error:", err);
+        router.push(`/onboarding/report?id=${clientId}`);
       }
     };
 
