@@ -393,14 +393,27 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 max-w-md w-full text-center">
-        <span className="material-symbols-outlined text-5xl text-red-400 mb-4 block">error</span>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h2>
-        <p className="text-slate-500 text-sm mb-6">{message}</p>
-        <Link href="/dashboard" className="inline-block px-6 py-2.5 bg-slate-900 text-white rounded-lg font-semibold text-sm hover:bg-slate-700 transition-colors">
-          Back to Dashboard
-        </Link>
+    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center px-4 font-sans">
+      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-10 max-w-md w-full text-center">
+        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="material-symbols-outlined text-4xl">error</span>
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Analysis Error</h2>
+        <p className="text-slate-600 text-base mb-8 leading-relaxed">{message}</p>
+        <div className="flex flex-col gap-3">
+          <Link 
+            href="/onboarding" 
+            className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+          >
+            Try Onboarding Again
+          </Link>
+          <Link 
+            href="/dashboard" 
+            className="w-full py-4 bg-white text-slate-600 border border-slate-200 rounded-2xl font-semibold text-sm hover:bg-slate-50 transition-colors"
+          >
+            Go to Dashboard
+          </Link>
+        </div>
       </div>
     </div>
   );
