@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#3b0900",
+                      "surface-container": "#ffe9e4",
+                      "on-tertiary-container": "#2f291d",
+                      "inverse-on-surface": "#ffede8",
+                      "surface-container-high": "#ffe2da",
+                      "tertiary-container": "#999080",
+                      "on-secondary-container": "#5f6270",
+                      "on-primary-fixed-variant": "#862200",
+                      "on-primary-container": "#541200",
+                      "tertiary": "#655d4f",
+                      "secondary-fixed-dim": "#c4c5d6",
+                      "surface-dim": "#f1d4cc",
+                      "on-tertiary-fixed": "#201b10",
+                      "primary-container": "#ff5722",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#ffb5a0",
+                      "outline": "#907067",
+                      "on-surface": "#271813",
+                      "surface-container-low": "#fff1ed",
+                      "surface-container-highest": "#fadcd4",
+                      "secondary": "#5b5e6c",
+                      "error-container": "#ffdad6",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed": "#181b27",
+                      "background": "#fff8f6",
+                      "surface-variant": "#fadcd4",
+                      "surface-tint": "#b02f00",
+                      "on-background": "#271813",
+                      "primary-fixed": "#ffdbd1",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#ede1cf",
+                      "on-surface-variant": "#5b4039",
+                      "surface-bright": "#fff8f6",
+                      "on-secondary-fixed-variant": "#434654",
+                      "inverse-primary": "#ffb5a0",
+                      "on-primary": "#ffffff",
+                      "inverse-surface": "#3e2c27",
+                      "tertiary-fixed-dim": "#d0c5b3",
+                      "secondary-fixed": "#e0e1f2",
+                      "on-tertiary-fixed-variant": "#4d4638",
+                      "surface": "#fff8f6",
+                      "secondary-container": "#dddff0",
+                      "on-tertiary": "#ffffff",
+                      "primary": "#b02f00",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#e4beb4",
+                      "on-secondary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "padding_button_v": "12px",
+                      "padding_input_v": "12px",
+                      "sidebar_width": "240px",
+                      "container_max_width": "1440px",
+                      "base_unit": "4px",
+                      "padding_card": "24px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "metric-lg": ["Plus Jakarta Sans"],
+                      "h2": ["Plus Jakarta Sans"],
+                      "label-caps": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-base": ["Inter"],
+                      "h1": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                      "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background font-['Plus_Jakarta_Sans'] text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col z-50">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xl font-black tracking-tight text-slate-900 dark:text-white">AutoMark</span>
+<span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Marketing Velocity</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-l-4 border-orange-600" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-sm font-medium">Tasks</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">folder_special</span>
+<span class="text-sm font-medium">Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="text-sm font-medium">Automation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+</nav>
+<div class="px-4 py-6 border-t border-slate-100 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[240px] min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 py-4 z-40">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-slate-900">Task Detail</h1>
+<div class="h-6 w-px bg-slate-200 mx-2"></div>
+<nav class="flex gap-6">
+<a class="text-orange-600 border-b-2 border-orange-600 pb-1 font-semibold text-sm" href="#">Overview</a>
+<a class="text-slate-500 hover:text-slate-900 font-semibold text-sm transition-all" href="#">Assets</a>
+<a class="text-slate-500 hover:text-slate-900 font-semibold text-sm transition-all" href="#">Feedback</a>
+<a class="text-slate-500 hover:text-slate-900 font-semibold text-sm transition-all" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 text-slate-700 font-semibold text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">Share</button>
+<button class="px-4 py-2 bg-orange-600 text-white font-semibold text-sm rounded-lg hover:bg-orange-700 transition-all shadow-sm">Approve Design</button>
+<div class="flex items-center gap-2 ml-4">
+<span class="material-symbols-outlined text-slate-400 p-2 hover:bg-slate-100 rounded-full cursor-pointer">notifications</span>
+<img class="w-8 h-8 rounded-full border border-slate-200 object-cover" data-alt="professional portrait of a creative director in a bright modern office studio with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChEzulcp8oF-JfQdjCQlO0qgidYzCRVeY6J77QNxUyjKwXepnQHKBTL4--b4n03owqPLiw6sZsAtfo4-I5RShqgezRR8WQyL_I_oML4NuL4qRtAn-DUvrmIKym0Ok_Y2dRtONdYIBBudAnQWbjZxbBPN7dxz1nKfejCIGtqsfOvrO0m83jav9IH8kONhYkmN28Q9vPypFnS3Vsja47WN2Q23GVM67O5ufT5SDa6Fh9MG6qEMMf7OrG3teusHwwfZbHsNU385sN82LX"/>
+</div>
+</div>
+</header>
+<!-- Three Column Split Layout -->
+<div class="flex flex-1 p-8 gap-8 max-w-[1440px]">
+<!-- Column 1: Task Info (30%) -->
+<div class="w-[30%] flex flex-col gap-6">
+<!-- Task Info Card -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex justify-between items-start mb-6">
+<h3 class="text-label-caps font-label-caps text-slate-400 uppercase tracking-widest">Task Information</h3>
+<span class="px-2 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold rounded uppercase">In Progress</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between">
+<span class="text-sm text-slate-500">Platform</span>
+<span class="text-sm font-semibold text-slate-900 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">camera</span> Instagram
+                            </span>
+</div>
+<div class="flex justify-between">
+<span class="text-sm text-slate-500">Type</span>
+<span class="text-sm font-semibold text-slate-900">Carousel</span>
+</div>
+<div class="flex justify-between">
+<span class="text-sm text-slate-500">Client</span>
+<span class="text-sm font-semibold text-slate-900">Acme Corp</span>
+</div>
+<div class="flex justify-between">
+<span class="text-sm text-slate-500">Due Date</span>
+<span class="text-sm font-semibold text-error">Tomorrow</span>
+</div>
+</div>
+</div>
+<!-- Content Copy -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 bg-slate-50/50">
+<span class="text-sm font-bold text-slate-700">Content Copy</span>
+<span class="material-symbols-outlined text-slate-400 text-sm">expand_more</span>
+</button>
+<div class="p-6 space-y-4">
+<div class="bg-slate-50 rounded-lg p-4 relative group">
+<button class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white border border-slate-200 rounded shadow-sm">
+<span class="material-symbols-outlined text-xs">content_copy</span>
+</button>
+<p class="text-sm text-slate-600 italic">"5 ways to automate your marketing workflows today. Stop wasting time on manual entry and start scaling your velocity with AI-driven insights..."</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 text-slate-500 text-[11px] font-semibold rounded">#MarketingAutomation</span>
+<span class="px-2 py-1 bg-slate-100 text-slate-500 text-[11px] font-semibold rounded">#AI</span>
+<span class="px-2 py-1 bg-slate-100 text-slate-500 text-[11px] font-semibold rounded">#SaaSGrowth</span>
+</div>
+</div>
+</div>
+<!-- Strategy & Specs -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 bg-slate-50/50">
+<span class="text-sm font-bold text-slate-700">Design Specifications</span>
+<span class="material-symbols-outlined text-slate-400 text-sm">expand_more</span>
+</button>
+<div class="p-6 space-y-4">
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div>
+<p class="text-slate-400 text-xs mb-1 uppercase font-bold">Dimensions</p>
+<p class="font-semibold text-slate-800">1080 x 1080px</p>
+</div>
+<div>
+<p class="text-slate-400 text-xs mb-1 uppercase font-bold">Format</p>
+<p class="font-semibold text-slate-800">PNG / sRGB</p>
+</div>
+<div>
+<p class="text-slate-400 text-xs mb-1 uppercase font-bold">Resolution</p>
+<p class="font-semibold text-slate-800">72 DPI</p>
+</div>
+<div>
+<p class="text-slate-400 text-xs mb-1 uppercase font-bold">Length</p>
+<p class="font-semibold text-slate-800">5 Slides</p>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-100">
+<p class="text-slate-400 text-xs mb-3 uppercase font-bold">Color Palette</p>
+<div class="flex gap-2">
+<div class="w-8 h-8 rounded bg-[#FF5722] ring-2 ring-white ring-offset-1 shadow-sm"></div>
+<div class="w-8 h-8 rounded bg-[#1A1D29] ring-2 ring-white ring-offset-1 shadow-sm"></div>
+<div class="w-8 h-8 rounded bg-[#F8F9FA] ring-2 ring-white ring-offset-1 shadow-sm"></div>
+<div class="w-8 h-8 rounded bg-[#E9ECEF] ring-2 ring-white ring-offset-1 shadow-sm"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reference Media -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-sm font-bold text-slate-700">Reference Media</h3>
+<button class="text-orange-600 text-xs font-bold hover:underline">Download All</button>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<img class="aspect-square object-cover rounded-lg border border-slate-100" data-alt="abstract purple and blue gradient texture with geometric shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkSJIO78EzAutHt9s14DOQZcYCciHUZqAeIIU75np6R7YTKTWXibm5OJqN6nc7q8FRSRSbq0davLEzSN8QyVsl69yeqjx0EUsR9Cmj7DTVFTIepC82DLYJJp9eMXD85iTOdtwTJC4Tn18FeItuyOY2-kmWxKlWuJOGPObUpC2gkvdcPmyTCt-8H5huuhL4ep4fslrVRD-7Aj0hYuo5HN799M3KS7b1Hcf2qwGqwGEG5qzqMkvzqd9lL58DO17xE9OHf_UN6pkr8tRM"/>
+<img class="aspect-square object-cover rounded-lg border border-slate-100" data-alt="minimalist design showing a 3d rendered sphere floating in a neutral grey room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDafjtVPRYvE5UG0jxXavEh6F94KrRWs__N0XmTVPgZWf_Z0ihQ5S1zln28vhEeXiQcOCaHaGqAKX1LiR5BFsgrRCO0fDpkCbssBSVubnBnxBCjUjOQL_Vh6TUMCqGilrgMmbtpN8Jp2BUiMhMoj7G_pZrvHoxAxYPux3c7g5LiLALMVIhsGKGKaXG0wL2YjETyIfpCr8vnhx-12GcHn4nm_ToRf4rCbBVpBieYkekUxyz3NLeZucOjDTHmq8AZalRgB1kTmUbBUYps"/>
+<div class="aspect-square bg-slate-50 rounded-lg flex items-center justify-center border border-dashed border-slate-200">
+<span class="text-[10px] text-slate-400 font-bold">+4</span>
+</div>
+</div>
+<a class="mt-4 flex items-center gap-2 text-sm text-slate-500 hover:text-orange-600 transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+<span class="underline">Acme_Brand_Guidelines_2024.pdf</span>
+</a>
+</div>
+</div>
+<!-- Column 2: Design Workspace (50%) -->
+<div class="flex-1 flex flex-col gap-6">
+<!-- Tabbed Upload Section -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="flex border-b border-slate-100">
+<button class="flex-1 py-4 text-sm font-bold text-orange-600 border-b-2 border-orange-600">Local Upload</button>
+<button class="flex-1 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">Canva Import</button>
+<button class="flex-1 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">Figma Import</button>
+</div>
+<div class="p-8">
+<div class="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50/30 hover:bg-orange-50/30 hover:border-orange-200 transition-all cursor-pointer group">
+<div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-orange-600 text-3xl">upload_file</span>
+</div>
+<p class="text-sm font-bold text-slate-700">Drag &amp; drop your slides here</p>
+<p class="text-xs text-slate-400 mt-1">Supports PNG, JPG up to 10MB each</p>
+<button class="mt-6 px-6 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 transition-colors">Browse Files</button>
+</div>
+<!-- Upload Progress -->
+<div class="mt-6 space-y-3">
+<div class="flex items-center gap-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+<div class="w-10 h-10 bg-slate-200 rounded overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="vibrant orange and blue 3d abstract art for social media graphic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNtQD0heiJixfoicXAJXCdVdb2rR0ODDR44HSmdaXprDuImOlQin2QKaFQY9i7p55ytUNqeIBZwEdoH-QBk9K-feXbVxiGdTnzeV4pZiaImRNEIxQB9-6VikwU7sV6JcWiPE62mCx2Gth_xKMv4t4FnRqrir33eF0Sj6yTUA1Ou9WGpTM_iMghG93u6ODt-Ieg-e-TGPykdnWfgjKOd360lEfDb8a-SkxA_fdZT6vWQ-kofGVz1YxHCUI18TQSdEP4TX4cM--BuI0F"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="text-xs font-bold text-slate-700">slide_01_hero.png</span>
+<span class="text-xs text-slate-400">100%</span>
+</div>
+<div class="w-full h-1.5 bg-slate-200 rounded-full">
+<div class="w-full h-full bg-orange-600 rounded-full"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Design Preview Gallery -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-sm font-bold text-slate-700">Design Preview Gallery</h3>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200">
+<span class="material-symbols-outlined text-slate-600 text-sm">grid_view</span>
+</button>
+<button class="p-2 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200">
+<span class="material-symbols-outlined text-slate-600 text-sm">view_carousel</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<!-- Slide Cards -->
+<div class="relative group">
+<div class="aspect-square bg-slate-100 rounded-lg overflow-hidden border-2 border-orange-500 shadow-md">
+<img class="w-full h-full object-cover" data-alt="slide 1 design: hero section with bold typography and orange background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEDO_yQgVJuahXiYHIGrkwPCcBJLUf_9eHEm0awQrcSWJxNSff_z6dZr_-VuQFXtEGAdv9r2OHqAjK_NlxOP29u_qQ-1ohr-MgK29weloPXousas3VOR2tcL1QTYtVULTN_RjJ9j60tmqpo_xsm8bphXCKe-48_a1z5VstarB_1rlEEE_7ZyXbMR5tp0tPh3_LMVJY5xYsqBmc4vnQl4U2znk-AlyxEPK5kDsBhNP3c7BoihbtX0n-BkfxezF2uGs_bkIWqnPGgrL8"/>
+</div>
+<span class="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">1</span>
+<div class="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 bg-white/90 rounded shadow hover:bg-white transition-colors"><span class="material-symbols-outlined text-slate-600 text-[14px]">drag_indicator</span></button>
+<button class="p-1 bg-error/90 rounded shadow hover:bg-error transition-colors"><span class="material-symbols-outlined text-white text-[14px]">delete</span></button>
+</div>
+</div>
+<div class="relative group">
+<div class="aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+<img class="w-full h-full object-cover" data-alt="slide 2 design: info graphic with icons and bullet points on white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIxbjeh98hc-LEaVT-bRJGaA6PAHJyONnGSh7VwmLwAylxVNXj_OpVf8HUmGo8cNQEJ0bMSJOvbpNYZBEVYNzGJxf7repHi9BDmqolQU30_UCBgTlkb9eQKR7K3vJA7OJgbX6_2O5QegjxfvUoC-6CX3CluVmmWrwtwUqdxqO_SVJ33dSeJHBx_2m85K44zj0hrjSIEbD5PaDSS0EvQf2S2aGapv1PP4cxA_dEUgPpMeM_FcbwwUWx_61FEzSbrvJeCkL5dtzTcqha"/>
+</div>
+<span class="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">2</span>
+</div>
+<div class="relative group">
+<div class="aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+<img class="w-full h-full object-cover" data-alt="slide 3 design: colorful abstract background with data charts" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoUd0lqOmeZ43gPDM6vRtF0XZX0HUN0bFV-S68uB453GsVH9ucx4oJE3hGb1uy_D4l3dtIjOobbw_Vp5y5dnpxnUjJVB8e_kRFWji88K1oUmsJNVi3HqAJX6kNk-xWNG_c7bIcwhsVWRdGeGkZJAQCwY5DZt58x1R_BQ5WMp-kuYw3ADvvbCq0bzxUzLk_nX9wzGCyUFDSmY4rinhj0AEYK9IMMqOI3VtN4j6EZImeJ9ZBUcZ_GBKR0eolrK-g8poWmgjMye-Fze16"/>
+</div>
+<span class="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">3</span>
+</div>
+<div class="aspect-square bg-slate-50 rounded-lg border border-dashed border-slate-200 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-slate-300">add_circle</span>
+<span class="text-[10px] text-slate-400 mt-1 font-bold">Slide 4</span>
+</div>
+<div class="aspect-square bg-slate-50 rounded-lg border border-dashed border-slate-200 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-slate-300">add_circle</span>
+<span class="text-[10px] text-slate-400 mt-1 font-bold">Slide 5</span>
+</div>
+</div>
+</div>
+<!-- Design Notes -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="text-sm font-bold text-slate-700 mb-4">Design Notes</h3>
+<div class="border border-slate-200 rounded-lg overflow-hidden">
+<div class="flex gap-2 p-2 bg-slate-50 border-b border-slate-200">
+<button class="p-1.5 hover:bg-slate-200 rounded transition-colors"><span class="material-symbols-outlined text-sm text-slate-600">format_bold</span></button>
+<button class="p-1.5 hover:bg-slate-200 rounded transition-colors"><span class="material-symbols-outlined text-sm text-slate-600">format_italic</span></button>
+<button class="p-1.5 hover:bg-slate-200 rounded transition-colors"><span class="material-symbols-outlined text-sm text-slate-600">format_list_bulleted</span></button>
+<div class="h-4 w-px bg-slate-300 my-auto mx-1"></div>
+<button class="p-1.5 hover:bg-slate-200 rounded transition-colors"><span class="material-symbols-outlined text-sm text-slate-600">link</span></button>
+</div>
+<textarea class="w-full p-4 text-sm text-slate-600 border-none focus:ring-0 min-h-[120px] placeholder-slate-300" placeholder="Type instructions or notes for the reviewer..."></textarea>
+</div>
+</div>
+</div>
+<!-- Column 3: Stats & Actions (20%) -->
+<div class="w-[20%] flex flex-col gap-6">
+<!-- Task Status & Progress -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-sm font-bold text-slate-700">Approval Progress</h3>
+<span class="text-sm font-bold text-orange-600">50%</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full mb-6">
+<div class="w-1/2 h-full bg-orange-600 rounded-full"></div>
+</div>
+<div class="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+<span class="material-symbols-outlined text-slate-400">schedule</span>
+<div>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Time Remaining</p>
+<p class="text-sm font-bold text-slate-700 mt-1">24:12:05</p>
+</div>
+</div>
+</div>
+<!-- Client Feedback -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="text-sm font-bold text-slate-700 mb-4">Client Feedback</h3>
+<div class="relative bg-orange-50/50 p-4 rounded-lg border-l-4 border-orange-500">
+<span class="material-symbols-outlined absolute -top-2 -left-2 text-orange-200 text-3xl">format_quote</span>
+<p class="text-xs text-slate-600 italic leading-relaxed">"The color in v2 is better, but the typography in the first slide feels a bit crowded. Can we try a more open layout for the headline?"</p>
+<p class="text-[10px] text-slate-400 font-bold mt-2">— Sarah Mitchell, Acme Corp</p>
+</div>
+</div>
+<!-- Version History -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="text-sm font-bold text-slate-700 mb-4">Version History</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-orange-600 ring-4 ring-orange-50"></div>
+<span class="text-xs font-bold text-slate-900">Version 3 (Current)</span>
+</div>
+<span class="text-[10px] text-slate-400">Today</span>
+</div>
+<div class="flex items-center justify-between opacity-60">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-300"></div>
+<span class="text-xs font-medium text-slate-600">Version 2</span>
+</div>
+<button class="text-[10px] text-orange-600 font-bold hover:underline">Compare</button>
+</div>
+<div class="flex items-center justify-between opacity-60">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-300"></div>
+<span class="text-xs font-medium text-slate-600">Version 1</span>
+</div>
+<button class="text-[10px] text-orange-600 font-bold hover:underline">Compare</button>
+</div>
+</div>
+</div>
+<!-- Sticky Actions -->
+<div class="sticky top-24 space-y-3">
+<button class="w-full py-3 bg-white border border-slate-200 text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                        Save Draft
+                    </button>
+<button class="w-full py-3 bg-orange-600 text-white font-bold text-sm rounded-xl hover:bg-orange-700 transition-all shadow-md active:scale-95">
+                        Submit for Client Approval
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

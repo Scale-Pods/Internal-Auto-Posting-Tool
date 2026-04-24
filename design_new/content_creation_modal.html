@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Content Studio | MarketingOS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ede1cf",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "surface-container": "#ffe9e4",
+                        "inverse-on-surface": "#ffede8",
+                        "outline": "#907067",
+                        "outline-variant": "#e4beb4",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#541200",
+                        "surface-variant": "#fadcd4",
+                        "on-background": "#271813",
+                        "surface-container-high": "#ffe2da",
+                        "surface-container-low": "#fff1ed",
+                        "on-primary-fixed": "#3b0900",
+                        "surface-container-highest": "#fadcd4",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#862200",
+                        "secondary-fixed-dim": "#c4c5d6",
+                        "secondary": "#5b5e6c",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#5f6270",
+                        "surface": "#fff8f6",
+                        "inverse-primary": "#ffb5a0",
+                        "surface-dim": "#f1d4cc",
+                        "secondary-fixed": "#e0e1f2",
+                        "primary": "#b02f00",
+                        "background": "#fff8f6",
+                        "on-tertiary-fixed-variant": "#4d4638",
+                        "surface-tint": "#b02f00",
+                        "secondary-container": "#dddff0",
+                        "tertiary-container": "#999080",
+                        "surface-bright": "#fff8f6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#434654",
+                        "tertiary": "#655d4f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#271813",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#201b10",
+                        "tertiary-fixed-dim": "#d0c5b3",
+                        "on-surface-variant": "#5b4039",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#ffdbd1",
+                        "on-tertiary-container": "#2f291d",
+                        "primary-container": "#ff5722",
+                        "on-secondary-fixed": "#181b27",
+                        "inverse-surface": "#3e2c27"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "padding_input_v": "12px",
+                        "gutter": "24px",
+                        "container_max_width": "1440px",
+                        "padding_card": "24px",
+                        "base_unit": "4px",
+                        "sidebar_width": "240px",
+                        "padding_button_v": "12px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Plus Jakarta Sans"],
+                        "metric-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h1": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e4beb4; border-radius: 10px; }
+        .glass-bg { backdrop-filter: blur(8px); background-color: rgba(26, 29, 41, 0.2); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden">
+<!-- Dashboard Background (Blurred Content) -->
+<div class="fixed inset-0 z-0 flex blur-sm pointer-events-none opacity-40">
+<!-- SideNavBar Anchor -->
+<aside class="fixed left-0 top-0 h-screen w-60 border-r border-gray-100 bg-white flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm">rocket_launch</span>
+</div>
+<span class="text-lg font-bold text-gray-900 font-h2">MarketingOS</span>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 bg-[#FFF3E0] text-[#FF5722] border-l-4 border-[#FF5722] font-medium text-sm">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined">edit_document</span> Content Library
+                </div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined">auto_mode</span> Automations
+                </div>
+</nav>
+</aside>
+<!-- Main Content Area Placeholder -->
+<main class="ml-60 flex-1 p-8">
+<div class="grid grid-cols-3 gap-6 mb-8">
+<div class="h-32 bg-white rounded-xl shadow-sm border border-gray-100"></div>
+<div class="h-32 bg-white rounded-xl shadow-sm border border-gray-100"></div>
+<div class="h-32 bg-white rounded-xl shadow-sm border border-gray-100"></div>
+</div>
+<div class="h-[600px] bg-white rounded-xl shadow-sm border border-gray-100"></div>
+</main>
+</div>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 z-50 glass-bg flex items-center justify-center p-6">
+<!-- Creation Modal -->
+<div class="bg-white w-full max-w-[1000px] h-[921px] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+<!-- Modal Header -->
+<header class="flex items-center justify-between px-8 py-5 border-b border-outline-variant bg-white z-10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-primary-container/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</div>
+<div>
+<h1 class="font-h2 text-[20px] text-on-surface">Create New Content</h1>
+<p class="text-label-caps text-secondary uppercase">Campaign: Summer Launch 2024</p>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-secondary">close</span>
+</button>
+</header>
+<!-- Modal Content (Split View) -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Column: Editor Form -->
+<div class="w-1/2 overflow-y-auto custom-scrollbar p-8 bg-surface-container-lowest">
+<div class="space-y-8">
+<!-- Content Type & AI Assistant -->
+<div class="flex items-center justify-between bg-primary-container/5 p-4 rounded-xl border border-primary-container/10">
+<div class="flex-1 pr-4">
+<label class="text-label-caps text-secondary block mb-1">CONTENT TYPE</label>
+<div class="relative">
+<select class="w-full bg-transparent font-medium text-on-surface border-none focus:ring-0 appearance-none py-0">
+<option>Social Media Post</option>
+<option>Blog Article</option>
+<option>Email Newsletter</option>
+<option>Product Description</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-secondary">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant">
+<span class="material-symbols-outlined text-primary-container">auto_awesome</span>
+<div class="flex items-center">
+<div class="w-10 h-5 bg-primary-container rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Target Platform -->
+<section>
+<label class="text-label-caps text-secondary block mb-3">TARGET PLATFORM</label>
+<div class="grid grid-cols-3 gap-3">
+<button class="p-3 rounded-xl border-2 border-primary-container bg-white flex flex-col items-center gap-2 transition-all">
+<img alt="" class="w-6 h-6" data-alt="minimalist instagram icon in brand orange" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzt-CYkIHKMLT0iQva9dp84UmGqI0FH51G0EJcv9rd7l_OJ3d8cazuVyFsyRwNFQcDZcOHugJa-fYZxwqvhf9zo4_337qpQ3TagjxXS5DsK_64qtJ0gmczZHP7ICMbxIbiB4Zef49cVgsFCV0SCBrIJs_0lz_xrGSA8ys61H9wtkD0dh9QzYdmLn7IaT5jq4CVP5vvu49xAU2FkE-rco8dsHHyKYxvWdJe1lWHdl3Y-ugyoV0vn6qMVkqBVvhvXm9546QOA0yLwqEd"/>
+<span class="text-body-sm font-semibold">Instagram</span>
+<span class="text-[10px] text-secondary">2,200 chars</span>
+</button>
+<button class="p-3 rounded-xl border border-outline-variant bg-white flex flex-col items-center gap-2 hover:border-primary-container/50 transition-all">
+<img alt="" class="w-6 h-6" data-alt="minimalist linkedin icon in professional navy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB72WRFPAbxJ7m5m3FOVdxri9qFnkqx9ERYTR8iDI--3z7TWZVwjpaOydRrAOabnUkury-j33sovXoLENJA3ypptJGOCwyJi4ySsV-7zBHn1hiy7mn9UWTzRev-MUyzFVjGaSCWysu9zuqjB9eeV1gsII5wdfxy7FNjcjL6xV83BHbMEsIzJfzRxU3-RyQKMkAvGFYS457UmyskonUmh3PRdP1zijZvKxwAhjoVjnAjEM3wT8LyrIS8g01zBBd50Dcx0t6fOovlvMtu"/>
+<span class="text-body-sm font-semibold">LinkedIn</span>
+<span class="text-[10px] text-secondary">3,000 chars</span>
+</button>
+<button class="p-3 rounded-xl border border-outline-variant bg-white flex flex-col items-center gap-2 hover:border-primary-container/50 transition-all">
+<img alt="" class="w-6 h-6" data-alt="minimalist globe icon representing website" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhYNdTLkTHAndoWZ9Fg9wGeQVZUhmXkjcb5C0MuI61-d9RKPsXBH23I9ii16X2ixXPX61MBYXpS1r1bv9LYoSXCSfuMruEayxeBC11hu3zIqnJQgUwWlUgEp11MxSz9c7n-pQoSHvBwwO0IhoyvoWmTv8mapSOEb_hS_LAu86lHiL5WSL9TV4TDgt-zSVVd_bOk2gtTf24qw3FblYL6HFTLBmo9-MkSaryPDdmvqe_nI9Sq8m5zOXLZ5MO4ryKd3Dxqr-2p_DnMBO0"/>
+<span class="text-body-sm font-semibold">Website</span>
+<span class="text-[10px] text-secondary">Unlimited</span>
+</button>
+</div>
+</section>
+<!-- Context/Reference -->
+<section>
+<label class="text-label-caps text-secondary block mb-3">CONTEXT &amp; REFERENCES</label>
+<textarea class="w-full bg-white border border-outline-variant rounded-xl p-4 text-body-base focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all" placeholder="Paste links, keywords, or creative direction..." rows="3"></textarea>
+<button class="mt-3 w-full bg-primary-container text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary-container/20 hover:bg-primary transition-all">
+<span class="material-symbols-outlined text-[20px]">auto_fix_high</span>
+                                Generate Draft with AI
+                            </button>
+</section>
+<!-- Caption Editor -->
+<section>
+<div class="flex justify-between items-end mb-3">
+<label class="text-label-caps text-secondary">CAPTION CONTENT</label>
+<span class="text-[11px] font-medium text-secondary bg-gray-100 px-2 py-0.5 rounded">450 / 2200</span>
+</div>
+<div class="border border-outline-variant rounded-xl overflow-hidden bg-white shadow-sm focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
+<div class="flex items-center gap-1 p-2 bg-surface-container-low border-b border-outline-variant">
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">format_bold</span></button>
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">format_italic</span></button>
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">list</span></button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">sentiment_satisfied</span></button>
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">attach_file</span></button>
+</div>
+<textarea class="w-full p-4 text-body-base border-none focus:ring-0" rows="5">✨ Exciting news! Our Summer 2024 Collection is finally here. Inspired by the golden hours of the Amalfi coast, every piece is designed to keep you cool and stylish. 🍋
+
+Shop the first drop now! 
+
+#Summer2024 #AmalfiCoast #NewArrivals</textarea>
+</div>
+</section>
+<!-- Hashtags & CTA -->
+<div class="grid grid-cols-2 gap-6">
+<section>
+<label class="text-label-caps text-secondary block mb-3">HASHTAGS</label>
+<div class="flex flex-wrap gap-2 mb-2">
+<span class="bg-[#FFF3E0] text-primary-container px-2 py-1 rounded-lg text-[12px] font-semibold border border-primary-container/20 flex items-center gap-1">#Summer <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span></span>
+<span class="bg-[#FFF3E0] text-primary-container px-2 py-1 rounded-lg text-[12px] font-semibold border border-primary-container/20 flex items-center gap-1">#Style <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span></span>
+</div>
+<input class="w-full bg-white border border-outline-variant rounded-xl px-4 py-2 text-body-sm focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container" placeholder="Add hashtag..." type="text"/>
+</section>
+<section>
+<label class="text-label-caps text-secondary block mb-3">CALL TO ACTION</label>
+<select class="w-full bg-white border border-outline-variant rounded-xl px-4 py-2 text-body-sm focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container appearance-none">
+<option>Link in Bio</option>
+<option>Visit Website</option>
+<option>Shop Now</option>
+<option>Register Today</option>
+</select>
+</section>
+</div>
+<!-- Schedule -->
+<section class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-3">
+<input checked="" class="w-5 h-5 rounded text-primary-container focus:ring-primary-container border-outline-variant" type="checkbox"/>
+<span class="font-semibold text-on-surface">Schedule for later</span>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-4">
+<div class="relative">
+<input class="w-full bg-white border border-outline-variant rounded-xl px-4 py-2 text-body-sm focus:ring-2 focus:ring-primary-container/20" type="date" value="2024-06-21"/>
+</div>
+<div class="relative">
+<input class="w-full bg-white border border-outline-variant rounded-xl px-4 py-2 text-body-sm focus:ring-2 focus:ring-primary-container/20" type="time" value="10:00"/>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Right Column: Live Preview -->
+<div class="w-1/2 bg-gray-50 border-l border-outline-variant flex flex-col">
+<div class="p-6 border-b border-outline-variant bg-white flex items-center justify-center gap-6">
+<button class="text-primary-container font-bold text-sm border-b-2 border-primary-container pb-2">Instagram</button>
+<button class="text-secondary font-medium text-sm hover:text-primary-container pb-2">LinkedIn</button>
+<button class="text-secondary font-medium text-sm hover:text-primary-container pb-2">Website</button>
+</div>
+<div class="flex-1 p-8 flex flex-col items-center justify-center overflow-y-auto">
+<!-- Instagram Mockup -->
+<div class="w-72 aspect-[9/19] bg-white rounded-[3rem] border-[8px] border-gray-900 shadow-2xl relative overflow-hidden flex flex-col">
+<!-- Top Notch -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-b-xl z-20"></div>
+<div class="flex-1 flex flex-col bg-white">
+<!-- Profile Header -->
+<div class="p-3 flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-[2px]">
+<img class="w-full h-full rounded-full border-2 border-white object-cover" data-alt="professional portrait of a creative marketing manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7iRb5ZdnZ_bgV_sp355pD7yPif51wm085F6vqXUCGs2lvzhWB0zzG4I7jLk5nmiSnxpmNBq5D3rCmpxCTc24pNcqch2xF8_3yl6HlT6Cl6vA3pR8kj6K30tft9JLmRqmh3Kuv8-is3ehbCQ2XZwptScAd9ExuY_sz8ZSpknJ6Q9f5-gksQCEOJE1hySEToWeVGt1TyLRmw9X-myDXkBjt2NAXCX6wt_fN-I2qjAicrLg84Od_Tg0wFJu57AlwqjaSYDpNRIHZ7Ld5"/>
+</div>
+<div class="flex-1">
+<p class="text-[10px] font-bold">marketing_os</p>
+<p class="text-[8px] text-gray-500">Amalfi Coast, Italy</p>
+</div>
+<span class="material-symbols-outlined text-[14px]">more_horiz</span>
+</div>
+<!-- Content Image -->
+<div class="aspect-square bg-gray-200 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="breathtaking coastal view of Positano Italy at sunrise with soft golden light and blue waters" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo4GeJvlPopP_E28iNnag0XMDqSDjACiIkKDGr2c9rV9G8PObqzGiO9SPcc1qALMiYmZtZSPIBWhk2-9D4Lfbj5f0ymhd1hE16tQitAlP2hf9znixE9pI9_8JDoxdhl_qZdATR_nFxnau4zvV_i5J-LMjfs2aAfbQMs_ZBH09yiv93JfuP0Fo1OskoY3VLJKbgzLR4qpoS3yr5gp37tOZHUenguuRarOFrKoX0n_Oru8RA6BveFJ7Nqi62RqWfYozCywXeZ-GaK2Pu"/>
+<div class="absolute bottom-2 right-2 bg-black/40 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">1/3</div>
+</div>
+<!-- Engagement -->
+<div class="p-3">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+<span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+<span class="material-symbols-outlined text-[20px]">send</span>
+<div class="flex-1"></div>
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</div>
+<p class="text-[10px] font-bold mb-1">1,204 likes</p>
+<p class="text-[10px] leading-tight line-clamp-3">
+<span class="font-bold">marketing_os</span> ✨ Exciting news! Our Summer 2024 Collection is finally here. Inspired by the golden hours...
+                                        <span class="text-gray-500">more</span>
+</p>
+<p class="text-[9px] text-gray-400 mt-1 uppercase tracking-tight">2 minutes ago</p>
+</div>
+</div>
+<!-- Bottom Nav -->
+<div class="h-10 border-t border-gray-100 flex items-center justify-around">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="material-symbols-outlined text-[20px]">search</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 600;">add_box</span>
+<span class="material-symbols-outlined text-[20px]">movie</span>
+<div class="w-5 h-5 rounded-full bg-gray-200"></div>
+</div>
+</div>
+<!-- Preview Tools -->
+<div class="mt-8 w-full max-w-sm">
+<div class="bg-white rounded-xl p-4 shadow-sm border border-outline-variant">
+<div class="flex items-center justify-between mb-4">
+<span class="text-label-caps text-secondary">PREVIEW SETTINGS</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">settings_suggest</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-secondary">Image Compression</span>
+<span class="font-semibold text-green-600">Optimal</span>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-secondary">Safe Zone Check</span>
+<span class="font-semibold text-primary-container">Passed</span>
+</div>
+<div class="w-full bg-error-container/20 text-error p-3 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<p class="text-[11px] font-medium leading-normal">Instagram caption truncated after 3 lines. Move CTA higher for better conversion.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<footer class="px-8 py-5 border-t border-outline-variant bg-white flex items-center justify-between z-10">
+<button class="px-6 py-2.5 rounded-xl border border-outline-variant text-secondary font-semibold hover:bg-gray-50 transition-all">
+                    Save as Draft
+                </button>
+<div class="flex items-center gap-3">
+<button class="px-6 py-2.5 rounded-xl text-secondary font-semibold hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+<button class="bg-primary-container text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary-container/20 hover:bg-primary transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">how_to_reg</span>
+                        Submit for Approval
+                    </button>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Marketing Strategy - FlowPilot AI Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-pill {
+            background-color: #FF5722;
+            color: white;
+        }
+        .inactive-pill {
+            background-color: #E9ECEF;
+            color: #5b5e6c;
+        }
+        .disabled-pill {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+<!-- Insert Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#e4beb4",
+                      "error-container": "#ffdad6",
+                      "inverse-surface": "#3e2c27",
+                      "error": "#ba1a1a",
+                      "on-secondary-container": "#5f6270",
+                      "primary": "#b02f00",
+                      "primary-fixed": "#ffdbd1",
+                      "surface-container-high": "#ffe2da",
+                      "primary-container": "#ff5722",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#201b10",
+                      "primary-fixed-dim": "#ffb5a0",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#fadcd4",
+                      "surface-bright": "#fff8f6",
+                      "on-background": "#271813",
+                      "inverse-primary": "#ffb5a0",
+                      "tertiary-fixed-dim": "#d0c5b3",
+                      "secondary-fixed-dim": "#c4c5d6",
+                      "surface-container-low": "#fff1ed",
+                      "background": "#fff8f6",
+                      "on-secondary-fixed-variant": "#434654",
+                      "surface": "#fff8f6",
+                      "secondary": "#5b5e6c",
+                      "on-primary": "#ffffff",
+                      "tertiary": "#655d4f",
+                      "on-secondary-fixed": "#181b27",
+                      "on-primary-fixed": "#3b0900",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#5b4039",
+                      "on-primary-fixed-variant": "#862200",
+                      "tertiary-container": "#999080",
+                      "secondary-container": "#dddff0",
+                      "on-surface": "#271813",
+                      "inverse-on-surface": "#ffede8",
+                      "surface-container": "#ffe9e4",
+                      "surface-tint": "#b02f00",
+                      "outline": "#907067",
+                      "on-tertiary-fixed-variant": "#4d4638",
+                      "surface-dim": "#f1d4cc",
+                      "on-tertiary-container": "#2f291d",
+                      "secondary-fixed": "#e0e1f2",
+                      "on-primary-container": "#541200",
+                      "tertiary-fixed": "#ede1cf",
+                      "surface-variant": "#fadcd4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "padding_button_v": "12px",
+                      "sidebar_width": "240px",
+                      "padding_card": "24px",
+                      "container_max_width": "1440px",
+                      "base_unit": "4px",
+                      "padding_input_v": "12px"
+              },
+              "fontFamily": {
+                      "label-caps": ["Inter"],
+                      "h2": ["Plus Jakarta Sans"],
+                      "h1": ["Plus Jakarta Sans"],
+                      "body-base": ["Inter"],
+                      "metric-lg": ["Plus Jakarta Sans"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-[#FFF8F6] min-h-screen flex flex-col items-center">
+<!-- Top AppBar Component -->
+<header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800 w-full fixed top-0 z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-[#1A1D29] dark:text-white font-['Plus_Jakarta_Sans']">AutomationFlow</span>
+<!-- Step Progress -->
+<nav class="hidden md:flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="font-['Plus_Jakarta_Sans'] text-sm font-medium text-slate-500">Workspace</span>
+</div>
+<div class="w-8 h-px bg-slate-200"></div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-[#FF5722] flex items-center justify-center">
+<span class="text-white text-xs font-bold">2</span>
+</div>
+<span class="font-['Plus_Jakarta_Sans'] text-sm font-medium text-[#FF5722] border-b-2 border-[#FF5722] pb-1">Marketing Strategy</span>
+</div>
+<div class="w-8 h-px bg-slate-200"></div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+<span class="text-slate-500 text-xs font-bold">3</span>
+</div>
+<span class="font-['Plus_Jakarta_Sans'] text-sm font-medium text-slate-500">Execution</span>
+</div>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="font-['Plus_Jakarta_Sans'] text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#FF5722] transition-colors">Save &amp; Exit</button>
+<span class="material-symbols-outlined text-slate-500" data-icon="help_outline">help_outline</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="mt-28 mb-32 w-full max-w-[600px] px-4">
+<!-- Form Card -->
+<div class="bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden border border-slate-100">
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-[#FFF3E0]">
+<div class="h-full bg-[#FF5722] w-1/2"></div>
+</div>
+<div class="p-8 space-y-8">
+<!-- Header -->
+<div class="space-y-1">
+<h1 class="font-h2 text-h2 text-on-surface">Marketing Strategy</h1>
+<p class="font-body-base text-body-sm text-secondary">Define your objectives and target audience to optimize the AI workflow.</p>
+</div>
+<!-- 1. Target Audience -->
+<section class="space-y-3">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface flex items-center gap-1">
+                            Target Audience
+                            <span class="material-symbols-outlined text-sm text-slate-400 cursor-help" title="Describe who you want to reach">info</span>
+</label>
+<span class="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">0 / 300</span>
+</div>
+<textarea class="w-full h-[100px] bg-[#E9ECEF] border-none rounded-lg p-3 font-body-base text-body-sm focus:ring-2 focus:ring-[#FF5722]/10 focus:border-[#FF5722] transition-all placeholder:text-slate-400" placeholder="Describe your ideal customer..."></textarea>
+</section>
+<!-- 2. Primary Goal -->
+<section class="space-y-4">
+<label class="font-label-caps text-label-caps text-on-surface">Primary Goal</label>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+<!-- Sales (Selected) -->
+<div class="relative group cursor-pointer border-2 border-[#FF5722] bg-[#FFF3E0] rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[#FF5722]" data-icon="attach_money">attach_money</span>
+<span class="font-label-caps text-[10px] text-on-surface">Sales</span>
+</div>
+<!-- Brand Awareness -->
+<div class="relative group cursor-pointer border border-slate-200 hover:border-[#FF5722]/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary" data-icon="campaign">campaign</span>
+<span class="font-label-caps text-[10px] text-on-surface">Awareness</span>
+</div>
+<!-- Lead Gen -->
+<div class="relative group cursor-pointer border border-slate-200 hover:border-[#FF5722]/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary" data-icon="magnet">nest_cam_magnet_mount</span>
+<span class="font-label-caps text-[10px] text-on-surface">Lead Gen</span>
+</div>
+<!-- Education -->
+<div class="relative group cursor-pointer border border-slate-200 hover:border-[#FF5722]/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary" data-icon="menu_book">menu_book</span>
+<span class="font-label-caps text-[10px] text-on-surface">Education</span>
+</div>
+<!-- Community -->
+<div class="relative group cursor-pointer border border-slate-200 hover:border-[#FF5722]/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary" data-icon="groups">groups</span>
+<span class="font-label-caps text-[10px] text-on-surface">Community</span>
+</div>
+<!-- Other -->
+<div class="relative group cursor-pointer border border-slate-200 hover:border-[#FF5722]/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-[10px] text-on-surface">Other</span>
+</div>
+</div>
+</section>
+<!-- 3. Brand Tone -->
+<section class="space-y-3">
+<label class="font-label-caps text-label-caps text-on-surface">Brand Tone (Max 3)</label>
+<div class="flex flex-wrap gap-2">
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] active-pill cursor-pointer shadow-sm">Premium</div>
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] inactive-pill cursor-pointer hover:bg-slate-200">Casual</div>
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] active-pill cursor-pointer shadow-sm">Bold</div>
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] inactive-pill cursor-pointer hover:bg-slate-200">Innovative</div>
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] inactive-pill cursor-pointer hover:bg-slate-200">Professional</div>
+<div class="px-4 py-2 rounded-full font-label-caps text-[11px] inactive-pill cursor-pointer hover:bg-slate-200">Aggressive</div>
+</div>
+<p class="text-[11px] font-medium text-[#FF5722] tracking-wide">2 / 3 SELECTED</p>
+</section>
+<!-- 4. Target Platforms -->
+<section class="space-y-4">
+<label class="font-label-caps text-label-caps text-on-surface">Target Platforms</label>
+<div class="flex flex-col sm:flex-row gap-3">
+<!-- Instagram (Selected) -->
+<div class="flex-1 relative p-4 border-2 border-[#FF5722] rounded-lg flex items-center gap-3 bg-[#FFF3E0] cursor-pointer">
+<span class="material-symbols-outlined text-[#FF5722]" data-icon="photo_camera">photo_camera</span>
+<span class="font-body-base text-body-sm font-semibold text-on-surface">Instagram</span>
+<div class="absolute top-2 right-2 w-4 h-4 bg-[#FF5722] rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px] text-white" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<!-- LinkedIn -->
+<div class="flex-1 relative p-4 border border-slate-200 hover:border-[#FF5722]/50 rounded-lg flex items-center gap-3 bg-white cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-slate-400" data-icon="work">work</span>
+<span class="font-body-base text-body-sm font-semibold text-on-surface">LinkedIn</span>
+</div>
+<!-- Website -->
+<div class="flex-1 relative p-4 border border-slate-200 hover:border-[#FF5722]/50 rounded-lg flex items-center gap-3 bg-white cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-slate-400" data-icon="language">language</span>
+<span class="font-body-base text-body-sm font-semibold text-on-surface">Website</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar Component -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="max-w-7xl mx-auto w-full flex justify-between items-center">
+<button class="text-[#1A1D29] dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg px-8 py-3 flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:translate-y-0.5 duration-150">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
+                Back
+            </button>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-slate-500 border border-transparent hover:border-slate-200 rounded-lg px-6 py-3 font-['Plus_Jakarta_Sans'] text-xs font-semibold uppercase tracking-wider transition-all">
+                    Save Draft
+                </button>
+<button class="bg-[#FF5722] text-white rounded-lg px-8 py-3 flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:translate-y-0.5 duration-150">
+                    Continue to Step 3
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</nav>
+</body></html>

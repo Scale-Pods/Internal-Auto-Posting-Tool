@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FlowPilot AI | Content Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#541200",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#b02f00",
+                        "secondary-fixed-dim": "#c4c5d6",
+                        "secondary-fixed": "#e0e1f2",
+                        "tertiary": "#655d4f",
+                        "on-surface": "#271813",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#862200",
+                        "on-background": "#271813",
+                        "tertiary-container": "#999080",
+                        "secondary": "#5b5e6c",
+                        "on-secondary-fixed": "#181b27",
+                        "on-secondary": "#ffffff",
+                        "outline": "#907067",
+                        "inverse-surface": "#3e2c27",
+                        "surface-container-high": "#ffe2da",
+                        "surface-container": "#ffe9e4",
+                        "surface": "#fff8f6",
+                        "surface-bright": "#fff8f6",
+                        "surface-variant": "#fadcd4",
+                        "inverse-primary": "#ffb5a0",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#f1d4cc",
+                        "on-secondary-container": "#5f6270",
+                        "tertiary-fixed": "#ede1cf",
+                        "on-surface-variant": "#5b4039",
+                        "on-primary-fixed": "#3b0900",
+                        "on-tertiary-fixed-variant": "#4d4638",
+                        "primary-fixed": "#ffdbd1",
+                        "background": "#fff8f6",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "tertiary-fixed-dim": "#d0c5b3",
+                        "on-tertiary-container": "#2f291d",
+                        "on-secondary-fixed-variant": "#434654",
+                        "outline-variant": "#e4beb4",
+                        "surface-container-highest": "#fadcd4",
+                        "secondary-container": "#dddff0",
+                        "primary-container": "#ff5722",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#b02f00",
+                        "surface-container-low": "#fff1ed",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#ffede8",
+                        "on-tertiary-fixed": "#201b10"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "padding_card": "24px",
+                        "container_max_width": "1440px",
+                        "base_unit": "4px",
+                        "gutter": "24px",
+                        "padding_button_v": "12px",
+                        "padding_input_v": "12px",
+                        "sidebar_width": "240px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "metric-lg": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(5, minmax(140px, 1fr));
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-base text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-60 border-r border-slate-200 bg-white dark:bg-gray-900 z-50">
+<div class="flex flex-col h-full py-6">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_fix</span>
+</div>
+<div>
+<h2 class="font-bold text-slate-900 dark:text-white text-sm">Marketing Pro</h2>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest">Enterprise Plan</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-slate-500 dark:text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-plus-jakarta-sans text-[14px]">Dashboard</span>
+</a>
+<a class="bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 border-l-4 border-orange-500 font-semibold flex items-center gap-3 px-6 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-plus-jakarta-sans text-[14px]">Calendar</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">auto_fix</span>
+<span class="font-plus-jakarta-sans text-[14px]">Automations</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-plus-jakarta-sans text-[14px]">Audiences</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span class="font-plus-jakarta-sans text-[14px]">Library</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-plus-jakarta-sans text-[14px]">Reports</span>
+</a>
+</nav>
+<div class="px-6 mt-auto space-y-4">
+<button class="w-full py-2 px-4 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-all">
+                    Upgrade Plan
+                </button>
+<div class="pt-4 border-t border-slate-100">
+<a class="text-slate-500 flex items-center gap-3 py-2 hover:text-slate-900 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-[14px]">Help Center</span>
+</a>
+<a class="text-slate-500 flex items-center gap-3 py-2 hover:text-slate-900 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-[14px]">Log Out</span>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-slate-200 ml-60 h-16 flex items-center justify-between px-8 shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-lg font-black tracking-tight text-slate-900 dark:text-white">MarketFlow</span>
+<nav class="flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 font-medium text-sm" href="#">Analytics</a>
+<a class="text-orange-600 dark:text-orange-400 border-b-2 border-orange-500 pb-1 font-medium text-sm" href="#">Campaigns</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 font-medium text-sm" href="#">Assets</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-px bg-slate-200 mx-2"></div>
+<button class="bg-primary-container text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-md active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add_task</span>
+                Schedule Post
+            </button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-slate-200" data-alt="professional headshot of a creative marketing director in a stylish modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATeojA6ZxnxqjL-V3WQeylvUqy-n1T5zGQXNhO2BRuxcL2Kd5Zy2CRj9Hw-Hv3-iRo_tVaaO_FDyDKkGksqFg-hlRqCf7pOKCF00vwhGCfYOtKIK5SnUkUZIAMkX4Dr138MBeffFLwiHr85iheW8zzS8CarG2cnVcp1snxZvquEVuK3YxPDFIUuRV0xGTdNVNfnu2eJTuqRsK7BSxn6WrvG-RWKYvoih7TocrXrzeXG3OlW6yYv0xqz2i2JTGCl_4vWDhkTMSOkxX6"/>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pl-60 pt-16 min-h-screen">
+<div class="p-8 max-w-[1440px] mx-auto">
+<!-- Calendar Header Tools -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div>
+<h1 class="font-h1 text-h2 text-on-surface mb-1">April 2026</h1>
+<p class="text-body-sm text-on-surface-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                        14 Scheduled posts this month
+                    </p>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-white border border-slate-200 p-1 rounded-xl flex shadow-sm">
+<button class="px-4 py-1.5 text-sm font-medium bg-slate-100 text-slate-900 rounded-lg">Month</button>
+<button class="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">Week</button>
+<button class="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">Day</button>
+<button class="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">List</button>
+</div>
+<button class="bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filters
+                    </button>
+</div>
+</div>
+<!-- Calendar Grid -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+<!-- Day Names -->
+<div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/50">
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Mon</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Tue</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Wed</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Thu</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Fri</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Sat</div>
+<div class="py-3 px-4 text-center text-label-caps text-slate-400">Sun</div>
+</div>
+<!-- Days -->
+<div class="calendar-grid">
+<!-- Week 1 Empty Slots -->
+<div class="border-r border-b border-slate-100 bg-slate-50/30 p-2"></div>
+<div class="border-r border-b border-slate-100 bg-slate-50/30 p-2"></div>
+<!-- April 1 -->
+<div class="border-r border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-400">1</span>
+</div>
+<!-- April 2 -->
+<div class="border-r border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-400">2</span>
+<!-- Post Card -->
+<div class="mt-2 bg-white rounded-lg border border-slate-100 shadow-sm p-2 hover-lift cursor-grab active:cursor-grabbing">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Posted</span>
+<span class="material-symbols-outlined text-slate-300 text-[16px]">share</span>
+</div>
+<p class="text-[10px] font-medium text-slate-700 line-clamp-1">AI Trends 2026 Intro</p>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex -space-x-1">
+<span class="material-symbols-outlined text-blue-600 text-[14px]">alternate_email</span>
+<span class="material-symbols-outlined text-pink-600 text-[14px]">image</span>
+</div>
+<span class="text-[9px] text-slate-400">09:00 AM</span>
+</div>
+</div>
+</div>
+<!-- April 3 -->
+<div class="border-r border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-400">3</span>
+</div>
+<!-- April 4 -->
+<div class="border-r border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-400">4</span>
+</div>
+<!-- April 5 -->
+<div class="border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-400">5</span>
+</div>
+<!-- April 6 (Scheduled Post Example) -->
+<div class="border-r border-b border-slate-100 p-3 group hover:bg-surface transition-colors">
+<span class="text-sm font-bold text-slate-900">6</span>
+<div class="mt-2 bg-white rounded-lg border-l-4 border-l-primary-container border-y border-r border-slate-100 shadow-sm p-2 hover-lift cursor-grab">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-orange-50 text-primary-container text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Scheduled</span>
+</div>
+<img class="w-full h-12 object-cover rounded mb-2" data-alt="clean infographic with vibrant orange and deep navy colors showing data growth metrics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAas_mNN1XS35TJs7EAqOzCJjsKFHDPO8xFCVjATkS3He1D3J8deYp4REhGw_0UJyRELPHthYk426miS6g3oQB9Xw7NwHBy1mNCsjxTqcY6eDXw0rR1D8Afx3E_G4EASOPz-x--y8U62w9NtKk5POINMuLMUFtqzx71ZgyEjU2jg0LO6jZLg8miSxSp88UEx9_haXYiyWA7VPaN8lR6s1a5rH2YyuNmCFbKifiL_rfGa7dVdFQnfnpH_15qE53oorLy0KgdKY3brdh1"/>
+<p class="text-[10px] font-medium text-slate-700 line-clamp-1">Automation 101 Guide</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="material-symbols-outlined text-pink-600 text-[14px]">image</span>
+<span class="text-[9px] text-slate-400">02:30 PM</span>
+</div>
+</div>
+</div>
+<!-- Fill the rest for visual depth -->
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">7</span></div>
+<div class="border-r border-b border-slate-100 p-3 bg-surface-container-low"><span class="text-sm font-bold text-slate-900">8</span>
+<div class="mt-2 bg-white rounded-lg border border-red-100 shadow-sm p-2 hover-lift">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-red-50 text-red-600 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Failed</span>
+</div>
+<p class="text-[10px] font-medium text-slate-700 line-clamp-1">Webinar Recap Video</p>
+<span class="text-[9px] text-red-400 mt-1 block">API Error: Invalid Token</span>
+</div>
+</div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">9</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">10</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">11</span></div>
+<div class="border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-400">12</span></div>
+<!-- Week 3 -->
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">13</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">14</span></div>
+<div class="border-r border-b border-slate-100 p-3 ring-2 ring-primary-container ring-inset rounded-lg z-10"><span class="text-sm font-bold text-primary-container">15</span>
+<div class="mt-2 bg-white rounded-lg border-l-4 border-l-primary-container border-y border-r border-slate-100 shadow-sm p-2 hover-lift">
+<p class="text-[10px] font-medium text-slate-700">5 Ways to Automate...</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="material-symbols-outlined text-blue-800 text-[14px]">ads_click</span>
+<span class="text-[9px] text-slate-400">11:15 AM</span>
+</div>
+</div>
+</div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">16</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">17</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">18</span></div>
+<div class="border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-400">19</span></div>
+<!-- Filling more days -->
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">20</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">21</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">22</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">23</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">24</span></div>
+<div class="border-r border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-900">25</span></div>
+<div class="border-b border-slate-100 p-3"><span class="text-sm font-bold text-slate-400">26</span></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Schedule Post Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[8px]"></div>
+<!-- Modal Content -->
+<div class="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+<div class="flex items-center justify-between p-6 border-b border-slate-100">
+<h3 class="font-h2 text-xl text-slate-900">Schedule New Post</h3>
+<button class="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Stepper -->
+<div class="flex items-center px-8 py-4 bg-slate-50 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-container text-white text-[10px] flex items-center justify-center font-bold">1</div>
+<span class="text-sm font-semibold text-slate-900">Content</span>
+</div>
+<div class="h-px w-8 bg-slate-300 mx-4"></div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 text-[10px] flex items-center justify-center font-bold">2</div>
+<span class="text-sm font-medium text-slate-500">Scheduling</span>
+</div>
+<div class="h-px w-8 bg-slate-300 mx-4"></div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 text-[10px] flex items-center justify-center font-bold">3</div>
+<span class="text-sm font-medium text-slate-500">Platforms</span>
+</div>
+</div>
+<!-- Modal Body -->
+<div class="p-8 max-h-[614px] overflow-y-auto">
+<div class="space-y-6">
+<!-- Step 1 Content -->
+<div class="space-y-4">
+<label class="block text-sm font-semibold text-slate-700">Select Approved Content</label>
+<div class="grid grid-cols-1 gap-3">
+<button class="flex items-start gap-4 p-4 rounded-xl border-2 border-primary-container bg-orange-50 text-left transition-all">
+<img class="w-16 h-16 rounded-lg object-cover" data-alt="futuristic digital glow of data flowing through a fiber optic network in space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuhhJdaZh50QT8GtwrGwJ5SLlGd1oVUe851Gw2jjnVjOUgQyFbVWW52yFYDmaoumIQGW7a-HMUD8swgVFmmfReCV0hMW2oKQ9xlDzeipFz9sAy9T-hmDPIE6GkxMdHpISspelCJYGohtL2KSZiKcJ0-nE5bMdJuerDbvpprIMjJgzRpmf9kBwgvjBc00H3ef8-R1vB5m4NendkDel7fMTo8nlHuZbBdoPPPKnECDwiZxBEu4fLVozUZCO57typwAiBdcT5esYEqb5v"/>
+<div>
+<h4 class="font-bold text-slate-900">5 ways to automate your content flow</h4>
+<p class="text-sm text-slate-600 mt-1">Generated by FlowPilot AI • Approved by Sarah</p>
+<div class="flex gap-2 mt-2">
+<span class="px-2 py-0.5 bg-white border border-orange-200 rounded-md text-[10px] font-bold text-orange-600 uppercase">Article</span>
+</div>
+</div>
+<span class="material-symbols-outlined ml-auto text-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<button class="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition-all">
+<img class="w-16 h-16 rounded-lg object-cover grayscale opacity-60" data-alt="minimal dashboard charts with orange accents and clean geometric shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuBEMesA9CMzaPrr-BVHh4-l2K88vd6Fs6u99xNnoq3u4ANVol7qcUPscwhrBXqbtrPp86RzAUbI4rWT7UfaQkP5F9xTKRyhK2hJzriQBVW64QL2Br27SsFJipbYCLa-p_U_6AtZyI-ykLGxVojZ_fa7dYaikC8Rpb1TeKBj4GyCC5MbsDVVQT2XT3o0jk3D-45KAw3Z0VgCq47AE3LpS0ckSRLYtKvesfI0yWYyaeP7cvsfkoFCV5_Z-prqT3xhbwoRnzB2OWuHHD"/>
+<div>
+<h4 class="font-bold text-slate-700">Weekly ROI Performance Report</h4>
+<p class="text-sm text-slate-500 mt-1">Ready for review • Drafted 2h ago</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Step 2 Preview: Recommended Times -->
+<div class="p-4 bg-surface rounded-xl border border-orange-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container">lightbulb</span>
+<div>
+<p class="text-sm font-bold text-slate-900">AI Recommended Posting Time</p>
+<p class="text-xs text-slate-600">Based on your Instagram audience activity</p>
+</div>
+</div>
+<span class="text-sm font-black text-primary-container">Tomorrow, 10:45 AM</span>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+<button class="text-sm font-bold text-slate-500 hover:text-slate-700 px-4 py-2">Save as Draft</button>
+<div class="flex items-center gap-3">
+<button class="text-sm font-bold text-slate-700 px-6 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+<button class="text-sm font-bold text-white px-8 py-2.5 rounded-lg bg-primary-container shadow-lg shadow-orange-200 hover:bg-primary transition-all">Next Step</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Drag & Drop Rescheduling Visual (Floating element for context) -->
+<div class="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-bounce">
+<div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div>
+<p class="text-sm font-bold">New: Drag &amp; Drop</p>
+<p class="text-[11px] text-slate-400">Rearrange your calendar by dragging cards</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</body></html>

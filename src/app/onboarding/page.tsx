@@ -1,313 +1,417 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-
-const PLATFORMS = [
-  { id: "Instagram",  icon: "auto_awesome",  label: "Instagram" },
-  { id: "WhatsApp",   icon: "chat",           label: "WhatsApp" },
-  { id: "Website",    icon: "language",       label: "Website" },
-  { id: "Facebook",   icon: "groups",         label: "Facebook" },
-  { id: "LinkedIn",   icon: "work",           label: "LinkedIn" },
-  { id: "YouTube",    icon: "play_circle",    label: "YouTube" },
-  { id: "Twitter",    icon: "alternate_email",label: "Twitter" },
-  { id: "TikTok",     icon: "music_video",    label: "TikTok" },
-];
-
-const GOALS = ["Sales", "Brand Awareness", "Lead Generation", "Customer Education", "Community Growth"];
-const TONES = ["Premium", "Casual", "Bold", "Innovative", "Professional", "Aggressive"];
 
 export default function OnboardingPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess]           = useState(false);
-  const [error, setError]               = useState<string | null>(null);
-  const [businessName, setBusinessName] = useState("");
-  const [industry, setIndustry]         = useState("");
-  const [description, setDescription]   = useState("");
-  const [targetAudience, setTargetAudience] = useState("");
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [goal, setGoal]   = useState("");
-  const [tone, setTone]   = useState("");
+  const [step, setStep] = useState(1);
 
-  function togglePlatform(id: string) {
-    setSelectedPlatforms((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
-  }
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const { error: dbError } = await supabase.from("clients").insert([{
-        business_name:        businessName,
-        industry_type:        industry,
-        business_description: description,
-        target_audience:      targetAudience,
-        platforms:            selectedPlatforms.join(", "),
-        primary_goal:         goal,
-        brand_tone:           tone,
-      }]);
-      if (dbError) throw new Error(dbError.message);
-      setSuccess(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Submission failed");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function resetForm() {
-    setSuccess(false); setBusinessName(""); setIndustry(""); setDescription("");
-    setTargetAudience(""); setSelectedPlatforms([]); setGoal(""); setTone("");
-  }
-
-  /* ─── Success State ─────────────────────────────────── */
-  if (success) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-surface">
-        <div className="text-center space-y-6 max-w-md px-8">
-          <div className="w-20 h-20 rounded-full bg-sp-secondary/20 flex items-center justify-center mx-auto animate-in zoom-in-95">
-            <span className="material-symbols-outlined text-sp-secondary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-          </div>
-          <h2 className="text-3xl font-[900] text-white">Client Onboarded!</h2>
-          <p className="text-on-surface-variant">
-            <span className="text-sp-primary font-bold">{businessName}</span> has been added to your automation pipeline and is ready for AI strategy generation.
-          </p>
-          <div className="flex gap-3 justify-center pt-2">
-            <button onClick={resetForm} className="px-5 py-2.5 rounded-xl bg-surface-container-high text-on-surface font-bold border border-white/5 hover:bg-surface-bright transition-all text-sm">
-              + Add Another
-            </button>
-            <Link href="/clients" className="px-5 py-2.5 rounded-xl bg-sp-primary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(192,193,255,0.3)] transition-all text-sm flex items-center gap-2">
-              View Clients <span className="material-symbols-outlined text-base">arrow_forward</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ─── Main Onboarding Layout ─────────────────────────── */
   return (
-    <div className="min-h-screen lg:h-screen overflow-x-hidden flex flex-col bg-surface text-left">
-      {/* ── Page Header ─────────────────────────────── */}
-      <div className="flex-shrink-0 px-4 md:px-8 pt-6 pb-4 border-b border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sp-primary/10 border border-sp-primary/20 text-sp-primary text-[9px] font-bold uppercase tracking-widest">
-            Onboarding Phase 01
-          </div>
-          <div>
-            <h1 className="text-xl font-[900] text-white tracking-tight">
-              Configure Your <span className="text-sp-primary">Marketing AI</span>
-            </h1>
-            <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Provide business details to calibrate AI agents for optimal conversion.</p>
-          </div>
-        </div>
-        {/* AI Potential badge */}
-        <div className="hidden lg:flex items-center gap-3 bg-surface-container-low border border-sp-secondary/20 rounded-2xl px-5 py-3">
-          <div className="w-9 h-9 rounded-xl bg-sp-secondary/10 flex items-center justify-center border border-sp-secondary/20">
-            <span className="material-symbols-outlined text-sp-secondary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
-          </div>
-          <div>
-            <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">AI Automation Potential</p>
-            <p className="text-sm font-[900] text-white">Up to <span className="text-sp-secondary">85%</span> of funnel automated in 30 days</p>
-          </div>
-          <div className="ml-4 h-8 w-24 bg-surface-container-high rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-sp-primary to-sp-secondary rounded-full w-[85%] flex items-center justify-end pr-2">
-              <span className="text-[9px] font-bold text-on-primary">85%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Form Body (2-panel) ──────────────────────── */}
-      <div className="flex-1 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-5 gap-0 min-h-0">
-        
-        {/* LEFT: Main Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-3 overflow-y-auto custom-scrollbar p-6 md:p-8 flex flex-col gap-5">
-
-          {/* Row 1: Business Name + Industry */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Business Name *</label>
-              <input
-                type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} required
-                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 focus:border-sp-primary focus:ring-1 focus:ring-sp-primary outline-none transition-all"
-                placeholder="e.g. Nova AI Systems"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Industry *</label>
-              <input
-                type="text" value={industry} onChange={(e) => setIndustry(e.target.value)} required
-                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 focus:border-sp-primary focus:ring-1 focus:ring-sp-primary outline-none transition-all"
-                placeholder="e.g. B2B SaaS"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Description */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Business Description *</label>
-            <textarea
-              value={description} onChange={(e) => setDescription(e.target.value)} required rows={3}
-              className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 focus:border-sp-primary focus:ring-1 focus:ring-sp-primary outline-none transition-all resize-none"
-              placeholder="What makes your brand unique? What problem do you solve?"
-            />
-          </div>
-
-          {/* Row 3: Target Audience */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Target Audience *</label>
-            <input
-              type="text" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} required
-              className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 focus:border-sp-primary focus:ring-1 focus:ring-sp-primary outline-none transition-all"
-              placeholder="e.g. E-commerce founders scaling past $1M ARR"
-            />
-          </div>
-
-          {/* Row 4: Goal + Tone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Primary Goal *</label>
-              <select value={goal} onChange={(e) => setGoal(e.target.value)} required
-                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm focus:border-sp-primary outline-none transition-all appearance-none cursor-pointer">
-                <option value="">Select a goal...</option>
-                {GOALS.map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Brand Tone *</label>
-              <select value={tone} onChange={(e) => setTone(e.target.value)} required
-                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-white text-sm focus:border-sp-primary outline-none transition-all appearance-none cursor-pointer">
-                <option value="">Select a tone...</option>
-                {TONES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Row 5: Platforms */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Target Platforms</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {PLATFORMS.map((p) => {
-                const active = selectedPlatforms.includes(p.id);
-                return (
-                  <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
-                    className={`flex flex-col items-center justify-center py-2 md:py-3 px-2 rounded-xl border transition-all hover:scale-105 text-center ${
-                      active
-                        ? "border-sp-primary bg-sp-primary/10 shadow-[0_0_12px_rgba(192,193,255,0.15)]"
-                        : "bg-surface-container-low border-outline-variant/20 hover:border-sp-primary/30 hover:bg-surface-container"
-                    }`}>
-                    <span className={`material-symbols-outlined text-base md:text-lg mb-1 ${active ? "text-sp-primary" : "text-gray-500"}`}
-                      style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                      {p.icon}
+    <div className="bg-surface min-h-screen flex flex-col items-center font-body-base text-on-surface antialiased">
+      {/* Top AppBar Component */}
+      <header className="bg-white shadow-sm border-b border-slate-200 w-full fixed top-0 z-50">
+        <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-8">
+            <span className="text-xl font-bold text-slate-900 font-h2">
+              FlowPilot AI
+            </span>
+            {/* Step Progress */}
+            <nav className="hidden md:flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    step > 1 ? "bg-green-500 text-white" : "bg-primary-container text-white"
+                  }`}
+                >
+                  {step > 1 ? (
+                    <span className="material-symbols-outlined text-sm">
+                      check
                     </span>
-                    <span className={`text-[9px] md:text-[10px] font-bold ${active ? "text-white" : "text-gray-400"}`}>{p.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+                  ) : (
+                    <span className="text-xs font-bold">1</span>
+                  )}
+                </div>
+                <span
+                  className={`font-label-caps text-sm font-medium ${
+                    step === 1 ? "text-primary-container border-b-2 border-primary-container pb-1" : "text-slate-500"
+                  }`}
+                >
+                  Business Info
+                </span>
+              </div>
+              <div className="w-8 h-px bg-slate-200"></div>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    step > 2
+                      ? "bg-green-500 text-white"
+                      : step === 2
+                      ? "bg-primary-container text-white"
+                      : "bg-slate-200 text-slate-500"
+                  }`}
+                >
+                  {step > 2 ? (
+                    <span className="material-symbols-outlined text-sm">
+                      check
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold">2</span>
+                  )}
+                </div>
+                <span
+                  className={`font-label-caps text-sm font-medium ${
+                    step === 2 ? "text-primary-container border-b-2 border-primary-container pb-1" : "text-slate-500"
+                  }`}
+                >
+                  Marketing Strategy
+                </span>
+              </div>
+              <div className="w-8 h-px bg-slate-200"></div>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    step === 3 ? "bg-primary-container text-white" : "bg-slate-200 text-slate-500"
+                  }`}
+                >
+                  <span className="text-xs font-bold">3</span>
+                </div>
+                <span
+                  className={`font-label-caps text-sm font-medium ${
+                    step === 3 ? "text-primary-container border-b-2 border-primary-container pb-1" : "text-slate-500"
+                  }`}
+                >
+                  Competitors
+                </span>
+              </div>
+            </nav>
           </div>
-
-          {/* Error */}
-          {error && (
-            <div className="text-sm text-sp-error bg-error/5 border border-sp-error/20 rounded-xl px-4 py-3 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">error</span>{error}
-            </div>
-          )}
-
-          {/* Submit */}
-          <div className="pt-2 flex justify-end">
-            <button type="submit" disabled={isSubmitting}
-              className="bg-sp-primary text-on-primary px-7 py-3 rounded-xl font-[900] text-sm uppercase tracking-widest flex items-center gap-2.5 transform hover:scale-[1.02] transition-all custom-glow disabled:opacity-70">
-              {isSubmitting ? (
-                <><div className="w-4 h-4 rounded-full border-2 border-on-primary border-t-transparent animate-spin" /> Saving...</>
-              ) : (
-                <>Save Client Profile <span className="material-symbols-outlined text-base">arrow_forward</span></>
-              )}
+          <div className="flex items-center gap-4">
+            <button className="font-label-caps text-sm font-medium text-slate-500 hover:text-primary-container transition-colors">
+              Save & Exit
             </button>
-          </div>
-        </form>
-
-        {/* RIGHT: Info Panel */}
-        <div className="lg:col-span-2 border-l border-white/5 bg-surface-container-lowest overflow-y-auto custom-scrollbar p-6 md:p-8 flex flex-col gap-5">
-          
-          {/* Step tracker */}
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">Setup Checklist</p>
-            <div className="space-y-2">
-              {[
-                { label: "Business Identity",  done: !!(businessName && industry) },
-                { label: "Brand Description",  done: !!description },
-                { label: "Audience Targeting", done: !!targetAudience },
-                { label: "Goal & Tone",        done: !!(goal && tone) },
-                { label: "Platform Selection", done: selectedPlatforms.length > 0 },
-              ].map((step, i) => (
-                <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${step.done ? "bg-sp-secondary/10 border border-sp-secondary/20" : "bg-surface-container border border-white/5"}`}>
-                  <span className={`material-symbols-outlined text-base ${step.done ? "text-sp-secondary" : "text-gray-600"}`}
-                    style={step.done ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                    {step.done ? "check_circle" : "radio_button_unchecked"}
-                  </span>
-                  <span className={`text-sm font-medium ${step.done ? "text-white" : "text-gray-500"}`}>{step.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Completion meter */}
-          <div className="bg-surface-container border border-white/5 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Profile Completeness</p>
-              <span className="text-sp-primary font-[900] text-sm">
-                {Math.round(
-                  ([businessName, industry, description, targetAudience, goal, tone].filter(Boolean).length / 6) * 100
-                )}%
-              </span>
-            </div>
-            <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-sp-primary to-sp-tertiary rounded-full transition-all duration-500"
-                style={{ width: `${Math.round(([businessName, industry, description, targetAudience, goal, tone].filter(Boolean).length / 6) * 100)}%` }}
-              />
-            </div>
-          </div>
-
-          {/* What happens next */}
-          <div className="bg-surface-container border border-white/5 rounded-2xl p-5">
-            <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">What Happens Next?</p>
-            <div className="space-y-3">
-              {[
-                { icon: "smart_toy",      color: "text-sp-primary",    label: "AI generates a full strategy" },
-                { icon: "pending_actions",color: "text-sp-secondary",  label: "You review & approve the plan" },
-                { icon: "palette",        color: "text-sp-tertiary",   label: "Designer creates the visual assets" },
-                { icon: "rocket_launch",  color: "text-sp-primary",    label: "Content is auto-published" },
-              ].map((step, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0`}>
-                    <span className={`material-symbols-outlined text-sm ${step.color}`}>{step.icon}</span>
-                  </div>
-                  <span className="text-sm text-on-surface-variant">{step.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Inspiration card */}
-          <div className="bg-gradient-to-br from-primary-container/20 to-sp-tertiary/10 rounded-2xl p-5 border border-sp-primary/20 relative overflow-hidden group cursor-pointer hover:border-sp-primary/40 transition-all">
-            <div className="relative z-10">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-sp-primary mb-2 block">Pro Tip</span>
-              <h4 className="text-white font-bold text-sm mb-1">Be Specific!</h4>
-              <p className="text-xs text-on-surface-variant leading-relaxed">The more detail you add to your business description & audience, the better the AI strategy output will be.</p>
-            </div>
-            <div className="absolute -right-3 -bottom-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-7xl text-sp-primary">lightbulb</span>
-            </div>
+            <span className="material-symbols-outlined text-slate-500 cursor-help">
+              help_outline
+            </span>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="mt-28 mb-32 w-full max-w-[600px] px-4">
+        {/* Form Card */}
+        <div className="bg-white rounded-lg shadow-soft overflow-hidden border border-outline-variant/30">
+          {/* Progress Bar */}
+          <div className="w-full h-1 bg-surface-container">
+            <div
+              className="h-full bg-primary-container transition-all duration-300"
+              style={{ width: `${(step / 3) * 100}%` }}
+            ></div>
+          </div>
+
+          <div className="p-8 space-y-8">
+            {step === 1 && (
+              <>
+                <div className="space-y-1">
+                  <h1 className="font-h2 text-h2 text-on-surface">
+                    Business Profile
+                  </h1>
+                  <p className="font-body-base text-body-sm text-secondary">
+                    Tell us about your business so our AI agent can analyze your industry.
+                  </p>
+                </div>
+                <section className="space-y-4">
+                  <div>
+                    <label className="block font-label-caps text-on-surface mb-2">
+                      Business Name
+                    </label>
+                    <input
+                      className="w-full px-4 py-3 bg-white border border-outline-variant rounded-lg font-body-base focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all"
+                      placeholder="e.g. Acme Corp"
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-label-caps text-on-surface mb-2">
+                      Industry
+                    </label>
+                    <select className="w-full px-4 py-3 bg-white border border-outline-variant rounded-lg font-body-base focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all">
+                      <option value="" disabled selected>
+                        Select Industry
+                      </option>
+                      <option value="saas">SaaS / Software</option>
+                      <option value="ecommerce">E-commerce</option>
+                      <option value="agency">Agency / Services</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block font-label-caps text-on-surface">
+                        Business Description
+                      </label>
+                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">
+                        0 / 500
+                      </span>
+                    </div>
+                    <textarea
+                      className="w-full h-[120px] bg-white border border-outline-variant rounded-lg p-3 font-body-base text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all placeholder:text-slate-400"
+                      placeholder="What does your business do? What are your main products or services?"
+                    ></textarea>
+                  </div>
+                </section>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <div className="space-y-1">
+                  <h1 className="font-h2 text-h2 text-on-surface">
+                    Marketing Strategy
+                  </h1>
+                  <p className="font-body-base text-body-sm text-secondary">
+                    Define your objectives and target audience to optimize the AI
+                    workflow.
+                  </p>
+                </div>
+
+                {/* 1. Target Audience */}
+                <section className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="font-label-caps text-on-surface flex items-center gap-1">
+                      Target Audience
+                      <span
+                        className="material-symbols-outlined text-sm text-slate-400 cursor-help"
+                        title="Describe who you want to reach"
+                      >
+                        info
+                      </span>
+                    </label>
+                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">
+                      0 / 300
+                    </span>
+                  </div>
+                  <textarea
+                    className="w-full h-[100px] bg-white border border-outline-variant rounded-lg p-3 font-body-base text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all placeholder:text-slate-400"
+                    placeholder="Describe your ideal customer..."
+                  ></textarea>
+                </section>
+
+                {/* 2. Primary Goal */}
+                <section className="space-y-4">
+                  <label className="font-label-caps text-on-surface">
+                    Primary Goal
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="sales" className="hidden" defaultChecked />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        attach_money
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Sales
+                      </span>
+                    </label>
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="awareness" className="hidden" />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        campaign
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Awareness
+                      </span>
+                    </label>
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="lead_gen" className="hidden" />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        nest_cam_magnet_mount
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Lead Gen
+                      </span>
+                    </label>
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="education" className="hidden" />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        menu_book
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Education
+                      </span>
+                    </label>
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="community" className="hidden" />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        groups
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Community
+                      </span>
+                    </label>
+                    <label className="relative group cursor-pointer border-2 border-outline-variant hover:border-primary-container/50 bg-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0]">
+                      <input type="radio" name="goal" value="other" className="hidden" />
+                      <span className="material-symbols-outlined text-on-surface group-has-[:checked]:text-primary-container">
+                        auto_awesome
+                      </span>
+                      <span className="font-label-caps text-[10px] text-on-surface">
+                        Other
+                      </span>
+                    </label>
+                  </div>
+                </section>
+
+                {/* 3. Brand Tone */}
+                <section className="space-y-3">
+                  <label className="font-label-caps text-on-surface">
+                    Brand Tone (Max 3)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Premium", "Casual", "Bold", "Innovative", "Professional", "Aggressive"].map((tone, idx) => (
+                      <label key={tone} className="cursor-pointer">
+                        <input type="checkbox" className="hidden peer" defaultChecked={idx === 0 || idx === 2} />
+                        <div className="px-4 py-2 rounded-full font-label-caps text-[11px] bg-surface-container text-on-surface-variant peer-checked:bg-primary-container peer-checked:text-white transition-colors shadow-sm hover:bg-surface-variant">
+                          {tone}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-[11px] font-medium text-primary-container tracking-wide">
+                    2 / 3 SELECTED
+                  </p>
+                </section>
+
+                {/* 4. Target Platforms */}
+                <section className="space-y-4">
+                  <label className="font-label-caps text-on-surface">
+                    Target Platforms
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <label className="flex-1 relative p-4 border-2 border-outline-variant rounded-lg flex items-center gap-3 bg-white cursor-pointer transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0] hover:border-primary-container/50">
+                      <input type="checkbox" className="hidden peer" defaultChecked />
+                      <span className="material-symbols-outlined text-slate-400 peer-checked:text-primary-container">
+                        photo_camera
+                      </span>
+                      <span className="font-body-base text-body-sm font-semibold text-on-surface">
+                        Instagram
+                      </span>
+                    </label>
+                    <label className="flex-1 relative p-4 border-2 border-outline-variant rounded-lg flex items-center gap-3 bg-white cursor-pointer transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0] hover:border-primary-container/50">
+                      <input type="checkbox" className="hidden peer" />
+                      <span className="material-symbols-outlined text-slate-400 peer-checked:text-primary-container">
+                        work
+                      </span>
+                      <span className="font-body-base text-body-sm font-semibold text-on-surface">
+                        LinkedIn
+                      </span>
+                    </label>
+                    <label className="flex-1 relative p-4 border-2 border-outline-variant rounded-lg flex items-center gap-3 bg-white cursor-pointer transition-colors has-[:checked]:border-primary-container has-[:checked]:bg-[#FFF3E0] hover:border-primary-container/50">
+                      <input type="checkbox" className="hidden peer" defaultChecked />
+                      <span className="material-symbols-outlined text-slate-400 peer-checked:text-primary-container">
+                        language
+                      </span>
+                      <span className="font-body-base text-body-sm font-semibold text-on-surface">
+                        Website
+                      </span>
+                    </label>
+                  </div>
+                </section>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <div className="space-y-1">
+                  <h1 className="font-h2 text-h2 text-on-surface">
+                    Competitor Analysis
+                  </h1>
+                  <p className="font-body-base text-body-sm text-secondary">
+                    List your top competitors so our AI can analyze their strategies.
+                  </p>
+                </div>
+                <section className="space-y-4">
+                  <div>
+                    <label className="block font-label-caps text-on-surface mb-2">
+                      Competitor 1
+                    </label>
+                    <input
+                      className="w-full px-4 py-3 bg-white border border-outline-variant rounded-lg font-body-base focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all"
+                      placeholder="e.g. competitor.com or @competitor"
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-label-caps text-on-surface mb-2">
+                      Competitor 2 (Optional)
+                    </label>
+                    <input
+                      className="w-full px-4 py-3 bg-white border border-outline-variant rounded-lg font-body-base focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all"
+                      placeholder="e.g. competitor.com or @competitor"
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-label-caps text-on-surface mb-2">
+                      Competitor 3 (Optional)
+                    </label>
+                    <input
+                      className="w-full px-4 py-3 bg-white border border-outline-variant rounded-lg font-body-base focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all"
+                      placeholder="e.g. competitor.com or @competitor"
+                      type="text"
+                    />
+                  </div>
+                </section>
+              </>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Bottom Action Bar Component */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
+          <button
+            onClick={prevStep}
+            disabled={step === 1}
+            className={`text-slate-700 border border-slate-300 rounded-lg px-8 py-3 flex items-center gap-2 font-label-caps text-xs font-semibold uppercase tracking-wider transition-opacity duration-150 ${
+              step === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50 active:translate-y-0.5"
+            }`}
+          >
+            <span className="material-symbols-outlined text-sm">
+              arrow_back
+            </span>
+            Back
+          </button>
+          <div className="flex items-center gap-4">
+            <button className="hidden md:block text-slate-500 hover:text-slate-800 border border-transparent hover:border-slate-200 rounded-lg px-6 py-3 font-label-caps text-xs font-semibold uppercase tracking-wider transition-all">
+              Save Draft
+            </button>
+            {step < 3 ? (
+              <button
+                onClick={nextStep}
+                className="bg-primary-container text-white rounded-lg px-8 py-3 flex items-center gap-2 font-label-caps text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:translate-y-0.5 duration-150"
+              >
+                Continue to Step {step + 1}
+                <span className="material-symbols-outlined text-sm">
+                  arrow_forward
+                </span>
+              </button>
+            ) : (
+              <Link
+                href="/dashboard"
+                className="bg-primary-container text-white rounded-lg px-8 py-3 flex items-center gap-2 font-label-caps text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:translate-y-0.5 duration-150"
+              >
+                Finish & Generate Strategy
+                <span className="material-symbols-outlined text-sm">
+                  check_circle
+                </span>
+              </Link>
+            )}
+          </div>
+        </div>
+      </nav>
     </div>
   );
 }

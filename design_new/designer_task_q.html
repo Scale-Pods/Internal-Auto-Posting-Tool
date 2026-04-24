@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FlowPilot AI - Design Tasks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "on-primary-container": "#541200",
+                        "secondary": "#5b5e6c",
+                        "surface-bright": "#fff8f6",
+                        "on-surface": "#271813",
+                        "outline-variant": "#e4beb4",
+                        "on-surface-variant": "#5b4039",
+                        "tertiary": "#655d4f",
+                        "tertiary-fixed": "#ede1cf",
+                        "on-tertiary-fixed": "#201b10",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#c4c5d6",
+                        "on-primary-fixed": "#3b0900",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#b02f00",
+                        "inverse-on-surface": "#ffede8",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#ffe9e4",
+                        "outline": "#907067",
+                        "on-secondary-container": "#5f6270",
+                        "primary-container": "#ff5722",
+                        "inverse-surface": "#3e2c27",
+                        "secondary-container": "#dddff0",
+                        "background": "#fff8f6",
+                        "tertiary-container": "#999080",
+                        "surface": "#fff8f6",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#434654",
+                        "surface-container-low": "#fff1ed",
+                        "inverse-primary": "#ffb5a0",
+                        "tertiary-fixed-dim": "#d0c5b3",
+                        "on-background": "#271813",
+                        "on-tertiary-fixed-variant": "#4d4638",
+                        "surface-container-highest": "#fadcd4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-tint": "#b02f00",
+                        "on-secondary-fixed": "#181b27",
+                        "on-primary-fixed-variant": "#862200",
+                        "surface-dim": "#f1d4cc",
+                        "secondary-fixed": "#e0e1f2",
+                        "surface-container-high": "#ffe2da",
+                        "on-tertiary-container": "#2f291d",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#fadcd4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "padding_button_v": "12px",
+                        "base_unit": "4px",
+                        "container_max_width": "1440px",
+                        "gutter": "24px",
+                        "padding_card": "24px",
+                        "sidebar_width": "240px",
+                        "padding_input_v": "12px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "metric-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-base antialiased">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-slate-200 flex flex-col py-6 px-4 z-50">
+<div class="flex items-center gap-3 px-2 mb-10">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-xl font-black text-[#1A1D29] tracking-tight font-h1 leading-none">FlowPilot AI</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">Marketing Automation</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#FFF3E0] text-[#FF5722] border-l-4 border-[#FF5722] font-semibold text-[14px]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span> Tasks
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">library_books</span> Library
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">auto_awesome</span> Automation
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">insights</span> Analytics
+            </a>
+</nav>
+<div class="mt-auto space-y-1 pt-6 border-t border-slate-100">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all font-medium text-[14px]" href="#">
+<span class="material-symbols-outlined">contact_support</span> Support
+            </a>
+<div class="mt-4 p-4 bg-slate-50 rounded-xl">
+<p class="text-[12px] font-bold text-slate-800 mb-2">Campaign Limit</p>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[75%]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 font-medium">15/20 Active Campaigns</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[240px] min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 h-16 flex items-center justify-between">
+<div class="flex flex-col">
+<nav class="flex items-center gap-2 text-[12px] font-medium text-slate-400">
+<span>Dashboard</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-slate-600">Tasks</span>
+</nav>
+<h2 class="font-h2 text-lg text-[#1A1D29]">Design Tasks</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center bg-slate-100 p-1 rounded-lg">
+<button class="px-3 py-1.5 rounded-md bg-white shadow-sm text-primary-container flex items-center gap-2 text-sm font-semibold">
+<span class="material-symbols-outlined text-sm">format_list_bulleted</span> List
+                    </button>
+<button class="px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-sm">grid_view</span> Board
+                    </button>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-slate-400 hover:text-slate-600">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary-container border-2 border-white rounded-full"></span>
+</button>
+<button class="bg-primary-container hover:bg-[#E64A19] text-white px-5 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-orange-200">
+<span class="material-symbols-outlined text-[20px]">add</span> New Task
+                    </button>
+</div>
+</div>
+</header>
+<!-- Filter Bar -->
+<section class="bg-white border-b border-slate-200 px-8 py-4 space-y-4">
+<div class="flex flex-wrap items-center gap-4">
+<div class="relative group">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:border-primary-container/30">
+                        Status <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+<div class="relative">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:border-primary-container/30">
+                        Client <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+<div class="relative">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:border-primary-container/30">
+                        Due Date <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</button>
+</div>
+<div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Priority:</span>
+<button class="px-3 py-1 rounded-full bg-red-50 text-red-600 text-[11px] font-bold uppercase tracking-wider border border-red-100">High</button>
+<button class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold uppercase tracking-wider border border-amber-100">Medium</button>
+<button class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold uppercase tracking-wider border border-blue-100">Low</button>
+</div>
+<div class="ml-auto relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-50 border-none rounded-lg text-sm w-[280px] focus:ring-2 focus:ring-primary-container/20" placeholder="Search tasks..." type="text"/>
+</div>
+</div>
+<!-- Active Filters -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-slate-500">Active Filters:</span>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-primary-container text-xs font-semibold rounded-md border border-orange-100">
+                        Status: In Progress <button class="material-symbols-outlined text-[14px]">close</button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-primary-container text-xs font-semibold rounded-md border border-orange-100">
+                        Priority: High <button class="material-symbols-outlined text-[14px]">close</button>
+</span>
+<button class="text-xs font-bold text-[#FF5722] hover:underline ml-2">Clear All</button>
+</div>
+</div>
+</section>
+<!-- Task List Content -->
+<section class="p-8 flex-1 max-w-container_max_width mx-auto w-full">
+<!-- Bulk Action Bar (Contextual) -->
+<div class="mb-6 flex items-center justify-between bg-[#1A1D29] text-white px-6 py-3 rounded-xl shadow-xl">
+<div class="flex items-center gap-4">
+<span class="flex items-center justify-center w-6 h-6 bg-primary-container rounded-full text-[12px] font-bold">2</span>
+<span class="text-sm font-medium">Tasks selected</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">drive_file_move</span> Move
+                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">edit</span> Change Priority
+                    </button>
+<div class="w-px h-4 bg-white/20 mx-2"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">delete</span> Delete
+                    </button>
+</div>
+</div>
+<!-- Task List Stack -->
+<div class="space-y-4">
+<!-- Task Card 1 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 hover-lift overflow-hidden group">
+<div class="flex p-6">
+<div class="pt-1 pr-4">
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary-container focus:ring-primary-container" type="checkbox"/>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">image</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-800 text-[16px]">Q4 Product Launch - Instagram Carousel</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider rounded border border-red-100">High</span>
+</div>
+<div class="flex items-center gap-3 mt-1">
+<span class="flex items-center gap-1 text-[12px] text-slate-400 font-medium">
+<span class="material-symbols-outlined text-[14px]">person</span> Lumina Tech
+                                            </span>
+<span class="w-1 h-1 bg-slate-200 rounded-full"></span>
+<span class="flex items-center gap-1 text-[12px] text-red-500 font-bold">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Due Today, 5:00 PM
+                                            </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100">
+<span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> In Progress
+                                        </span>
+</div>
+<button class="p-1 text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="bg-slate-50/50 rounded-lg p-4 border border-slate-100 mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-pink-500 text-[18px]">photo_camera</span>
+<span class="text-xs font-bold text-slate-600 uppercase">Content Preview</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                                    "Ready to revolutionize your workspace? The new Lumina X1 is here to redefine productivity with AI-driven task management..."
+                                </p>
+<a class="text-xs font-bold text-[#FF5722] mt-2 inline-block hover:underline" href="#">View Full Caption</a>
+</div>
+<details class="group/ref">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined transition-transform group-open/ref:rotate-180 text-[18px]">expand_more</span>
+                                    Strategy Reference
+                                </summary>
+<div class="mt-4 grid grid-cols-2 gap-4 pb-2">
+<div class="p-3 bg-orange-50/50 rounded-lg border border-orange-100">
+<p class="text-[10px] font-bold text-orange-800 uppercase mb-1">Target Audience</p>
+<p class="text-xs text-slate-600">Tech-savvy millennials, remote professionals</p>
+</div>
+<div class="p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+<p class="text-[10px] font-bold text-blue-800 uppercase mb-1">Brand Tone</p>
+<p class="text-xs text-slate-600">Sophisticated, energetic, minimalist</p>
+</div>
+</div>
+</details>
+</div>
+</div>
+<div class="bg-slate-50/30 px-6 py-3 flex items-center justify-between border-t border-slate-100">
+<div class="flex -space-x-2">
+<img alt="Team member" class="w-7 h-7 rounded-full border-2 border-white" data-alt="Portrait of a young professional woman smiling, soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIfiZ1sZV6ihKdjRkF3XOyRNH2aqy1UwG0-lQ2jCyR2G1q2ERuyYWXSMsUS2OlQI16Nfm93Q9l2NtXlZmPOBL1QFWIqhqkE0iZQzWDVejq4aT2oF8mFlAcvBZF-Y8Czvlf9w5Eg1zgmxZxZCzWkMLCB4tRNA6_B-JxPbWfDXDMgx9_7XXosiPKjVlF7seGVhcrzGhu2hB-pQPjUFdq5bgM20g15NSOZ1PcCoNfOjpe_SXvk6OZpYSXY4uhLCh3DE9p9XmFlUP0qgdD"/>
+<img alt="Team member" class="w-7 h-7 rounded-full border-2 border-white" data-alt="Portrait of a creative designer with glasses, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeluRzTSLQUdUYHX0r9_5y9pH40o3cg442UuhOXA1F5fO7lwFtSGxLcwcySYlxhf6EtcpVt-DATjnIkfb162jQOqEXVYmXD93qm4oOfgse-5-3tejwte4rmmPZX1BHBhBJIU8GF2pD2PnP-wfdJR0J_kt1kMgIOGLpiDVnIZUqHgrRGDiaPFBnh9ecyAvmvkay5uBhCCxDsQF3jhTf8cWndXu027f1MAOvnzSXxai7HCsT6Y_Nft5Cz7EZjQTjPPaR4wn67FJRDx5O"/>
+<div class="w-7 h-7 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-500">+3</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-1.5 text-slate-600 text-sm font-semibold hover:bg-slate-100 rounded-lg transition-colors">View Details</button>
+<button class="px-4 py-1.5 bg-primary-container text-white text-sm font-bold rounded-lg hover:bg-[#E64A19] transition-colors shadow-md shadow-orange-100">Continue Design</button>
+</div>
+</div>
+</div>
+<!-- Task Card 2 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 hover-lift overflow-hidden group">
+<div class="flex p-6">
+<div class="pt-1 pr-4">
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary-container focus:ring-primary-container" type="checkbox"/>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-800 text-[16px]">LinkedIn Thought Leadership Banner</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-100">Medium</span>
+</div>
+<div class="flex items-center gap-3 mt-1">
+<span class="flex items-center gap-1 text-[12px] text-slate-400 font-medium">
+<span class="material-symbols-outlined text-[14px]">person</span> GreenLoop Solutions
+                                            </span>
+<span class="w-1 h-1 bg-slate-200 rounded-full"></span>
+<span class="flex items-center gap-1 text-[12px] text-slate-500 font-medium">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Due Oct 14, 10:00 AM
+                                            </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">
+<span class="w-2 h-2 bg-slate-400 rounded-full"></span> New
+                                        </span>
+</div>
+<button class="p-1 text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="bg-slate-50/50 rounded-lg p-4 border border-slate-100 mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-blue-600 text-[18px]">share</span>
+<span class="text-xs font-bold text-slate-600 uppercase">Content Preview</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                                    "Sustainability isn't just a trend; it's the future of enterprise growth. Proud to announce our new ESG framework..."
+                                </p>
+<a class="text-xs font-bold text-[#FF5722] mt-2 inline-block hover:underline" href="#">View Full Caption</a>
+</div>
+<details class="group/ref">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined transition-transform group-open/ref:rotate-180 text-[18px]">expand_more</span>
+                                    Strategy Reference
+                                </summary>
+<div class="mt-4 grid grid-cols-2 gap-4 pb-2">
+<div class="p-3 bg-orange-50/50 rounded-lg border border-orange-100">
+<p class="text-[10px] font-bold text-orange-800 uppercase mb-1">Target Audience</p>
+<p class="text-xs text-slate-600">C-Suite Executives, Sustainability Officers</p>
+</div>
+<div class="p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+<p class="text-[10px] font-bold text-blue-800 uppercase mb-1">Brand Tone</p>
+<p class="text-xs text-slate-600">Authoritative, Professional, Trustworthy</p>
+</div>
+</div>
+</details>
+</div>
+</div>
+<div class="bg-slate-50/30 px-6 py-3 flex items-center justify-between border-t border-slate-100">
+<div class="flex -space-x-2">
+<img alt="Team member" class="w-7 h-7 rounded-full border-2 border-white" data-alt="Close-up of a diverse professional man with a friendly expression, outdoor soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_B6koYUlOl4C5ngJd3BAmzSgjOXRRovIhdzc-sOyGfpQu71QyfqbKv9stV-c9OJM-krsoyxDmu6yoJ21vlMyDW92ybssEPqQR3DHlHmTmo_sh6wR_MSP24YfseuWlMzFnrlS_b6RI45GVlrqtjBtlBw0WyV4YkVjiTnWrBd2usqDAgia0o65_JA1xSakTd3Dszcfh87JtmHVtVjsZFO55y5S688p2xMSSPFw8Cjm6mOUPhWrEgBXVrSKhWwYSHwxNgJqpakmuuS3P"/>
+<div class="w-7 h-7 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-500">+1</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-1.5 text-slate-600 text-sm font-semibold hover:bg-slate-100 rounded-lg transition-colors">View Details</button>
+<button class="px-4 py-1.5 bg-primary-container text-white text-sm font-bold rounded-lg hover:bg-[#E64A19] transition-colors shadow-md shadow-orange-100">Start Design</button>
+</div>
+</div>
+</div>
+<!-- Task Card 3 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 hover-lift overflow-hidden group">
+<div class="flex p-6">
+<div class="pt-1 pr-4">
+<input class="w-5 h-5 rounded border-slate-300 text-primary-container focus:ring-primary-container" type="checkbox"/>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">web</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-800 text-[16px]">E-commerce Landing Page Revisions</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded border border-blue-100">Low</span>
+</div>
+<div class="flex items-center gap-3 mt-1">
+<span class="flex items-center gap-1 text-[12px] text-slate-400 font-medium">
+<span class="material-symbols-outlined text-[14px]">person</span> Urban Threads
+                                            </span>
+<span class="w-1 h-1 bg-slate-200 rounded-full"></span>
+<span class="flex items-center gap-1 text-[12px] text-slate-500 font-medium">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Due Oct 18, 12:00 PM
+                                            </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-bold border border-purple-100">
+<span class="w-2 h-2 bg-purple-500 rounded-full"></span> Revision
+                                        </span>
+</div>
+<button class="p-1 text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="bg-slate-50/50 rounded-lg p-4 border border-slate-100 mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-purple-500 text-[18px]">history_edu</span>
+<span class="text-xs font-bold text-slate-600 uppercase">Content Preview</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                                    "Update the hero section typography to better reflect the Fall collection's rustic aesthetic. Ensure the CTA button is more prominent..."
+                                </p>
+<a class="text-xs font-bold text-[#FF5722] mt-2 inline-block hover:underline" href="#">View Full Caption</a>
+</div>
+</div>
+</div>
+<div class="bg-slate-50/30 px-6 py-3 flex items-center justify-between border-t border-slate-100">
+<div class="flex -space-x-2">
+<img alt="Team member" class="w-7 h-7 rounded-full border-2 border-white" data-alt="Portrait of a confident professional woman with a bright smile, clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIP5dJecNpAGkA3QqjPDvv0NB5yTBWhQgQrDkTJQ2QhIEIK7ycQ-CF1EAgZxHpmss4sf_f22L6CR1AhGDJ7fJx2BujFklEz-xZt04P45uoAJBjlJTo4IDNc8nIJIR3Gx5PucpCnYy8f7Vvew0YhYHDR1Cg8nTra9juuuTTmIjDzkRjcK2aeeRSbaAMQtBLPrcGEbBCo7WgJ4Gil8jga7p6ldnCloFGYFKdcfFX1mxge524fqZBThoLuq9GSsO3CUzwB-OocQt8PCSD"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-1.5 text-slate-600 text-sm font-semibold hover:bg-slate-100 rounded-lg transition-colors">View Details</button>
+<button class="px-4 py-1.5 bg-primary-container text-white text-sm font-bold rounded-lg hover:bg-[#E64A19] transition-colors shadow-md shadow-orange-100">Edit Design</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination & Bulk Footer -->
+<div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
+<p class="text-sm text-slate-500 font-medium">Showing <span class="text-slate-800 font-bold">1-12</span> of <span class="text-slate-800 font-bold">48</span> tasks</p>
+<div class="flex items-center gap-2">
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary-container text-white font-bold text-sm">1</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-slate-600 font-semibold text-sm hover:bg-slate-50">2</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-slate-600 font-semibold text-sm hover:bg-slate-50">3</button>
+<span class="px-2 text-slate-300">...</span>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-slate-600 font-semibold text-sm hover:bg-slate-50">8</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm text-slate-400">Rows per page:</span>
+<select class="bg-transparent border-none text-sm font-bold text-slate-800 focus:ring-0 cursor-pointer">
+<option>12</option>
+<option>24</option>
+<option>48</option>
+</select>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB (Suppressed on this sub-page as per rules, but included if needed for global context) -->
+<!-- Not rendered as this is a task-focused sub-page -->
+</body></html>

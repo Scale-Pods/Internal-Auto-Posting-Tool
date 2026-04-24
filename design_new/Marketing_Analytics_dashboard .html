@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FlowPilot AI - Marketing Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#201b10",
+                        "surface-variant": "#fadcd4",
+                        "surface-container-low": "#fff1ed",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "outline-variant": "#e4beb4",
+                        "secondary-fixed-dim": "#c4c5d6",
+                        "on-primary-container": "#541200",
+                        "tertiary-fixed-dim": "#d0c5b3",
+                        "primary": "#b02f00",
+                        "secondary": "#5b5e6c",
+                        "surface-container-highest": "#fadcd4",
+                        "primary-fixed": "#ffdbd1",
+                        "outline": "#907067",
+                        "on-surface": "#271813",
+                        "inverse-primary": "#ffb5a0",
+                        "secondary-container": "#dddff0",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ede1cf",
+                        "surface": "#fff8f6",
+                        "tertiary": "#655d4f",
+                        "on-primary-fixed": "#3b0900",
+                        "on-secondary-fixed-variant": "#434654",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#ffe9e4",
+                        "on-primary-fixed-variant": "#862200",
+                        "on-background": "#271813",
+                        "inverse-surface": "#3e2c27",
+                        "on-tertiary-container": "#2f291d",
+                        "on-secondary-container": "#5f6270",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e0e1f2",
+                        "surface-container-high": "#ffe2da",
+                        "on-tertiary-fixed-variant": "#4d4638",
+                        "tertiary-container": "#999080",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#5b4039",
+                        "primary-container": "#ff5722",
+                        "on-secondary-fixed": "#181b27",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#ffede8",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fff8f6",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#b02f00",
+                        "background": "#fff8f6",
+                        "surface-dim": "#f1d4cc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "sidebar_width": "240px",
+                        "base_unit": "4px",
+                        "padding_input_v": "12px",
+                        "padding_button_v": "12px",
+                        "container_max_width": "1440px",
+                        "padding_card": "24px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "metric-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface font-body-base text-on-surface">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] border-r border-slate-100 bg-white z-50 flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<div>
+<h2 class="text-lg font-bold text-slate-900 font-h2">FlowPilot AI</h2>
+<p class="text-xs text-slate-500 font-body-sm">Marketing Velocity</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">auto_awesome</span>
+<span class="font-medium">Automations</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-primary-container border-l-4 border-primary-container transition-all duration-200 font-medium" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">groups</span>
+<span class="font-medium">Audience</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">hub</span>
+<span class="font-medium">Platforms</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<button class="w-full mb-6 bg-primary-container text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+<span class="material-symbols-outlined">add</span>
+                New Workflow
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary-container">menu_book</span>
+<span class="font-medium text-sm">Documentation</span>
+</a>
+</div>
+</aside>
+<div class="ml-[240px] min-h-screen">
+<!-- TopNavBar Component -->
+<header class="sticky top-0 z-40 w-full h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center px-8 shadow-sm">
+<div class="flex items-center gap-6">
+<h1 class="text-xl font-extrabold tracking-tight text-slate-900 font-h1">Marketing Analytics Dashboard</h1>
+<div class="h-6 w-[1px] bg-slate-200"></div>
+<div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+<span class="text-sm font-medium text-slate-600">Apr 1 - Apr 30, 2026</span>
+<span class="text-xs text-slate-400 ml-2">vs Prev Month</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 mr-4">
+<select class="bg-transparent border-none text-sm font-medium text-slate-600 focus:ring-0 cursor-pointer">
+<option>All Platforms</option>
+<option>Instagram</option>
+<option>LinkedIn</option>
+</select>
+<select class="bg-transparent border-none text-sm font-medium text-slate-600 focus:ring-0 cursor-pointer">
+<option>All Status</option>
+<option>Active</option>
+<option>Archived</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export
+                    </button>
+<button class="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional man with a friendly expression, studio lighting, clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt0-73ZkriEuZxLP9l9FmXSftF58M5OHbHZt-_ZKDq8HBbVcII1F-bxzWdhVHLIB3cmHYR_I3C8GmilIpCOxrpwrf7HpyNmNV44TI10Itp5n9FMR0UnWBsiJSZ7YhmErZIP-EtVO-ucvSxpXAC9gsF_7BQYTeVtjWSJaPFOinOYLLLpJ8PPT64ukWQ5hMKWULw2ijRN1LsQFlWKzaEj0v_j5NzNvpQ2tmJXPzb4SQbhdWsq7BXprMW3WVXZ3esLP9-xpJ5X9TDXSJ9"/>
+</button>
+</div>
+</div>
+</header>
+<main class="p-8 max-w-[1440px] mx-auto space-y-8">
+<!-- Key Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Impressions -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform duration-200">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<div class="text-green-600 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                            +18.4%
+                        </div>
+</div>
+<p class="text-slate-500 text-sm font-medium mb-1">Total Impressions</p>
+<h3 class="text-[32px] font-bold text-slate-900 font-h2 mb-4">124,830</h3>
+<div class="h-10 w-full bg-gradient-to-r from-orange-50 to-orange-100/50 rounded flex items-end">
+<div class="w-full h-full opacity-30 bg-[radial-gradient(circle_at_bottom_left,_#FF5722_0%,_transparent_70%)]"></div>
+</div>
+</div>
+<!-- Reach -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform duration-200">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div class="text-green-600 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                            +12.3%
+                        </div>
+</div>
+<p class="text-slate-500 text-sm font-medium mb-1">Total Reach</p>
+<h3 class="text-[32px] font-bold text-slate-900 font-h2 mb-4">89,420</h3>
+<div class="h-10 w-full bg-gradient-to-r from-orange-50 to-orange-100/50 rounded"></div>
+</div>
+<!-- Engagement Rate -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform duration-200">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">touch_app</span>
+</div>
+<div class="text-green-600 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                            +0.8%
+                        </div>
+</div>
+<p class="text-slate-500 text-sm font-medium mb-1">Engagement Rate</p>
+<h3 class="text-[32px] font-bold text-slate-900 font-h2 mb-4">7.2%</h3>
+<div class="h-10 w-full bg-gradient-to-r from-orange-50 to-orange-100/50 rounded"></div>
+</div>
+<!-- Follower Growth -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform duration-200">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+<div class="text-green-600 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                            +8.5%
+                        </div>
+</div>
+<p class="text-slate-500 text-sm font-medium mb-1">Follower Growth</p>
+<h3 class="text-[32px] font-bold text-slate-900 font-h2 mb-4">+1,245</h3>
+<div class="h-10 w-full bg-gradient-to-r from-orange-50 to-orange-100/50 rounded"></div>
+</div>
+</div>
+<!-- Main Dashboard Area -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Impressions Over Time Chart (Bento Left) -->
+<div class="col-span-12 lg:col-span-8 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-lg font-bold text-slate-900 font-h2">Impressions Over Time</h3>
+<p class="text-sm text-slate-500">Tracking daily reach across all platforms</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs font-bold bg-primary-container text-white rounded-full">Daily</button>
+<button class="px-3 py-1 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-full">Weekly</button>
+</div>
+</div>
+<!-- Mock Chart Visualization -->
+<div class="relative h-64 w-full flex items-end justify-between gap-2">
+<div class="absolute inset-0 grid grid-rows-4 w-full">
+<div class="border-t border-slate-50"></div>
+<div class="border-t border-slate-50"></div>
+<div class="border-t border-slate-50"></div>
+<div class="border-t border-slate-50"></div>
+</div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-1/4 group"><div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">12k</div></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-2/4"></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-1/3"></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-2/5"></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-3/5"></div>
+<div class="relative flex-1 bg-orange-100 rounded-t h-4/5"></div>
+<div class="relative flex-1 bg-orange-200 rounded-t h-2/3"></div>
+<div class="relative flex-1 bg-primary-container rounded-t h-full">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-3 py-1.5 rounded shadow-xl font-bold whitespace-nowrap">Peak: Apr 22</div>
+</div>
+<div class="relative flex-1 bg-orange-200 rounded-t h-3/4"></div>
+<div class="relative flex-1 bg-orange-100 rounded-t h-1/2"></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-2/3"></div>
+<div class="relative flex-1 bg-slate-50 rounded-t h-1/2"></div>
+</div>
+<div class="mt-4 flex justify-between text-xs text-slate-400 font-medium">
+<span>Apr 1</span>
+<span>Apr 8</span>
+<span>Apr 15</span>
+<span>Apr 22</span>
+<span>Apr 30</span>
+</div>
+</div>
+<!-- Top Performing Content (Bento Right) -->
+<div class="col-span-12 lg:col-span-4 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+<h3 class="text-lg font-bold text-slate-900 font-h2 mb-6">Top Performing Content</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 group cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors">
+<img alt="Content thumbnail" class="w-14 h-14 rounded-lg object-cover" data-alt="Digital marketing strategy concept with sleek tech interface and neon accents, modern corporate style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRjYXWDm2Pe_njMdAK6ZBEW9evbH7JPUFEHyceC0p7fZEvJZjCRuzR6JLAv6Y8ZjhshElXktFIYJbey_PMlNky0g6pRkB5Tr8Y6Jb3R2DmEjMXzLBdmnn5g6UN9Na1PUYLw2nJzkkvhXbjCKv1wh1vzXWhpHREhNturWARScwjDRrcfWN8T-h1KOY2mgZXC3I5RwW5jR9k2rxmYV0crbe3BjMkX9JQPkcXxG0LK6iv-bsI3ZHXfrTRtjFviQ-8TnCt1EWdgE380rgE"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 truncate">Q2 Growth Strategies</h4>
+<p class="text-xs text-slate-500">Instagram • 14.2k likes</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-green-600">+12%</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors">
+<img alt="Content thumbnail" class="w-14 h-14 rounded-lg object-cover" data-alt="Abstract data visualization with flowing lines and vibrant orange nodes on a dark clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9Q1sHVCUy5yEl-P7dGnmck4xEqi3kYmTZw4M8vX75MnadbjN7aR3H-u8NdTWPRSrLIuYZ9KSZtBBl9x0_thp738QL6Eut6qSFjSGv1kbfNh-kRSfqUKswKtU3xmIFKgqGyzEhFSZ8BDL1SL8RpUBGHdiMMIE9c2oXnhSnCVC1AxzVf4hxnz0nbagkWEZIgqdJyBeXojwv74sAUd5PyyFrq4SBdUHYzScXLgQTT4mv_Rk69dae_pmSjGOaKPxIy5JPgYL8_tISXIMZ"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 truncate">Data Flow Explainer</h4>
+<p class="text-xs text-slate-500">LinkedIn • 8.9k shares</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-green-600">+5%</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer p-2 hover:bg-slate-50 rounded-lg transition-colors">
+<img alt="Content thumbnail" class="w-14 h-14 rounded-lg object-cover" data-alt="Minimalist office setting with a single plant and modern tech, soft natural lighting through window" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvvz74NB5XCaZWsEyRO2xXQY2cejX0G9vxZnXDXM-jsChqLaNW7zTn-zxlcaVKMySUSNYCiSiRn_vqspU1CfaR74foJ7Ybmi6LD33v6fCAdO-QfkX79sUX78jN0CmwMrwLI9DYom4gPaoeYVUla2GtSfJGRZUgvvCTVjmUKWGk8dcKDjXgU6Kf1N0wyPgF1YNB7v2QujurokUTPfqjgrJ1lHyzofUpSGi8MaBwSKqWDvaf-Sef5fo_wMq5HWO_JDLzT5RKF6GdtN0F"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 truncate">Productivity Hacks</h4>
+<p class="text-xs text-slate-500">Website • 4.5k views</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-orange-600">-2%</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                        View All Content
+                    </button>
+</div>
+<!-- Platform Performance -->
+<div class="col-span-12 lg:col-span-4 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+<h3 class="text-lg font-bold text-slate-900 font-h2 mb-6">Platform Performance</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-pink-500"></span>
+<span class="text-sm font-bold text-slate-700">Instagram</span>
+</div>
+<span class="text-sm font-bold text-slate-900">82/100</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-pink-500 rounded-full" style="width: 82%"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Eng: 8.4%</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Growth: +1.2k</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-blue-600"></span>
+<span class="text-sm font-bold text-slate-700">LinkedIn</span>
+</div>
+<span class="text-sm font-bold text-slate-900">65/100</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-blue-600 rounded-full" style="width: 65%"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Eng: 3.1%</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Growth: +430</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-orange-500"></span>
+<span class="text-sm font-bold text-slate-700">Website</span>
+</div>
+<span class="text-sm font-bold text-slate-900">91/100</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-orange-500 rounded-full" style="width: 91%"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">CTR: 5.2%</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sessions: 42k</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Audience Demographics -->
+<div class="col-span-12 lg:col-span-8 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+<h3 class="text-lg font-bold text-slate-900 font-h2 mb-6">Audience Demographics</h3>
+<div class="grid grid-cols-3 gap-8">
+<div class="flex flex-col items-center">
+<p class="text-xs font-bold text-slate-400 uppercase mb-4">Age Range</p>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-100" cx="64" cy="64" fill="transparent" r="54" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary-container" cx="64" cy="64" fill="transparent" r="54" stroke="currentColor" stroke-dasharray="339.292" stroke-dashoffset="101.78" stroke-width="12"></circle>
+</svg>
+<div class="absolute text-center">
+<p class="text-xl font-bold text-slate-900">70%</p>
+<p class="text-[10px] text-slate-500">25-34</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-xs font-bold text-slate-400 uppercase mb-4">Gender</p>
+<div class="w-full space-y-3 mt-4">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-slate-600 w-12">Male</span>
+<div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 48%"></div>
+</div>
+<span class="text-xs font-bold text-slate-900">48%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-slate-600 w-12">Female</span>
+<div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-orange-300" style="width: 51%"></div>
+</div>
+<span class="text-xs font-bold text-slate-900">51%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col">
+<p class="text-xs font-bold text-slate-400 uppercase mb-4">Top Regions</p>
+<ul class="space-y-2">
+<li class="flex justify-between items-center text-sm">
+<span class="text-slate-600">United States</span>
+<span class="font-bold text-slate-900">42%</span>
+</li>
+<li class="flex justify-between items-center text-sm">
+<span class="text-slate-600">United Kingdom</span>
+<span class="font-bold text-slate-900">18%</span>
+</li>
+<li class="flex justify-between items-center text-sm">
+<span class="text-slate-600">Germany</span>
+<span class="font-bold text-slate-900">12%</span>
+</li>
+</ul>
+<div class="mt-4 p-2 bg-slate-50 rounded-lg border border-slate-100 text-center cursor-pointer hover:bg-slate-100 transition-colors">
+<span class="text-[10px] font-bold text-primary-container uppercase">View Map Breakdown</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Engagement Table -->
+<div class="col-span-12 lg:col-span-9 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+<h3 class="text-lg font-bold text-slate-900 font-h2">Recent Post Performance</h3>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-slate-100 text-[10px] font-bold text-slate-500 rounded uppercase">Filter: High Engagement</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead class="bg-slate-50/50">
+<tr class="text-left border-b border-slate-100">
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Post Title</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Platform</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Impressions</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Engagement</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-4 text-sm font-bold text-slate-900">Designing for SaaS Velocity</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded">LinkedIn</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 text-right">18,245</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-900 text-right">1,402</td>
+<td class="px-6 py-4 text-xs text-slate-500 font-medium">Apr 28, 2026</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 text-sm font-bold text-slate-900">Automation Workflows 101</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-pink-50 text-pink-600 text-[10px] font-bold rounded">Instagram</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 text-right">32,910</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-900 text-right">4,120</td>
+<td class="px-6 py-4 text-xs text-slate-500 font-medium">Apr 26, 2026</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 text-sm font-bold text-slate-900">Why Data-Driven?</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold rounded">Website</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 text-right">12,400</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-900 text-right">890</td>
+<td class="px-6 py-4 text-xs text-slate-500 font-medium">Apr 24, 2026</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 text-sm font-bold text-slate-900">Community AMA Highlights</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-pink-50 text-pink-600 text-[10px] font-bold rounded">Instagram</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 text-right">24,560</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-900 text-right">1,230</td>
+<td class="px-6 py-4 text-xs text-slate-500 font-medium">Apr 22, 2026</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors border-none">
+<td class="px-6 py-4 text-sm font-bold text-slate-900">Product Launch Teaser</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded">LinkedIn</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 text-right">45,120</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-900 text-right">5,890</td>
+<td class="px-6 py-4 text-xs text-slate-500 font-medium">Apr 20, 2026</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Live Activity Feed -->
+<div class="col-span-12 lg:col-span-3 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+<h3 class="text-lg font-bold text-slate-900 font-h2 mb-6">Live Activity</h3>
+<div class="relative space-y-6 before:absolute before:inset-0 before:ml-[15px] before:-z-10 before:h-full before:w-[2px] before:bg-slate-100">
+<div class="relative flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-pink-50 border-2 border-white flex items-center justify-center text-pink-500 flex-shrink-0">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900">New follower on Instagram</p>
+<p class="text-xs text-slate-500">2m ago • @creative_mind</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-blue-50 border-2 border-white flex items-center justify-center text-blue-600 flex-shrink-0">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">share</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900">Post shared on LinkedIn</p>
+<p class="text-xs text-slate-500">15m ago • TechTrends Inc</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-green-50 border-2 border-white flex items-center justify-center text-green-600 flex-shrink-0">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_graph</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900">Milestone reached!</p>
+<p class="text-xs text-slate-500">1h ago • 100k Impressions</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-slate-500 flex-shrink-0">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">mail</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900">Newsletter summary sent</p>
+<p class="text-xs text-slate-500">3h ago • To 12,450 users</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Campaigns Overview & Reports -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Campaign Card -->
+<div class="bg-slate-900 text-white rounded-xl shadow-xl overflow-hidden p-8 flex flex-col justify-between relative">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]">rocket_launch</span>
+</div>
+<div class="relative">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-3 py-1 bg-primary-container text-[10px] font-bold rounded-full uppercase">Active Campaign</span>
+<span class="text-slate-400 text-xs font-medium">Launched Apr 15</span>
+</div>
+<h3 class="text-2xl font-bold font-h2 mb-4">Product Launch 2026</h3>
+<div class="grid grid-cols-3 gap-8 mb-8">
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Current ROI</p>
+<p class="text-2xl font-bold text-green-400">4.8x</p>
+</div>
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Ad Spend</p>
+<p class="text-2xl font-bold">$12.4k</p>
+</div>
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Conversions</p>
+<p class="text-2xl font-bold">1,842</p>
+</div>
+</div>
+</div>
+<div class="relative flex gap-4">
+<button class="flex-1 bg-white text-slate-900 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors">Campaign Details</button>
+<button class="flex-1 border border-slate-700 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors">Manage Channels</button>
+</div>
+</div>
+<!-- Export & Reports -->
+<div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-8">
+<h3 class="text-lg font-bold text-slate-900 font-h2 mb-6">Export &amp; Reports</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-primary-container/20 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Monthly Performance Report</h4>
+<p class="text-xs text-slate-500">Comprehensive PDF with detailed charts</p>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-primary-container/20 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">table_view</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Raw Data (CSV)</h4>
+<p class="text-xs text-slate-500">Post-level metrics and reach data</p>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<div class="pt-4 border-t border-slate-100">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-slate-400">schedule_send</span>
+<span class="text-sm font-bold text-slate-700">Scheduled Email Reports</span>
+</div>
+<span class="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded">Weekly Active</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,170 +1,226 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { loginAsync } from "@/lib/auth";
+import React, { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Admin");
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError("");
-    setLoading(true);
-    
-    // Call the new async database-backed login
-    const user = await loginAsync(email, password);
-    
-    if (!user) {
-      setError("Invalid credentials. Please contact administration.");
-      setLoading(false);
-      return;
-    }
-    
-    router.push(user.role === "designer" ? "/designer" : "/");
-  }
 
-  function quickLogin(type: "user" | "designer") {
-    setEmail(type === "user" ? "user@123" : "design@123");
-    setPassword("123");
-    setError("");
-  }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
+      // Simulate role-based redirect
+      if (role === "Admin" || role === "Client") {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/designer/tasks";
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` }
+    });
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 soft-gradient-bg relative text-left">
-      {/* Decorative corners */}
-      <div className="fixed top-12 left-12 w-32 h-32 opacity-10 pointer-events-none">
-        <div className="absolute inset-0 border-t border-l border-green-800"></div>
-        <div className="absolute top-4 left-4 w-full h-full border-t border-l border-green-800"></div>
-      </div>
-      <div className="fixed bottom-12 right-12 w-32 h-32 opacity-10 pointer-events-none">
-        <div className="absolute inset-0 border-b border-r border-green-800"></div>
-        <div className="absolute bottom-4 right-4 w-full h-full border-b border-r border-green-800"></div>
-      </div>
+    <div className="min-h-screen flex font-body-base selection:bg-primary-container selection:text-white">
+      {/* Left Panel - Visual/Brand */}
+      <div className="hidden lg:flex flex-col justify-center w-1/2 bg-[#FFF5F0] p-12 xl:p-24 relative overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute top-10 left-12 flex items-center gap-2"
+        >
+          <span className="text-primary-container material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+          <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+        </motion.div>
 
-      <main className="w-full max-w-md">
-        {/* Brand */}
-        <div className="mb-12 text-center">
-          <h1 className="font-[900] text-4xl tracking-tighter text-gray-800 mb-2">ScalePods</h1>
-          <p className="font-[900] text-xs uppercase tracking-widest text-green-800/60">Enterprise Portal</p>
-        </div>
-
-        {/* Login Card */}
-        <div className="login-glass border border-white/40 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-green-600/10 p-6 md:p-10">
-          <div className="mb-6 md:mb-8">
-            <h2 className="font-[900] text-xl md:text-2xl text-gray-800 mb-1">Welcome back</h2>
-            <p className="text-green-800/70 text-xs md:text-sm">Access your enterprise workspace.</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="z-10 mt-10"
+        >
+          {/* Mockup Container */}
+          <div className="bg-white p-4 rounded-3xl shadow-2xl mb-12 transform -rotate-2 hover:rotate-0 transition-transform duration-500 max-w-lg">
+            <div className="bg-[#1C2331] rounded-2xl p-6 aspect-[4/3] relative overflow-hidden flex flex-col">
+               <h3 className="text-white font-h2 text-2xl mb-6">Dashboard</h3>
+               <div className="flex-1 bg-[#151B26] rounded-xl border border-white/5 p-4 flex flex-col gap-3">
+                 {/* Mock UI Rows */}
+                 <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                   <div className="w-1/3 h-2 bg-white/20 rounded-full"></div>
+                   <div className="w-1/4 h-2 bg-blue-400/50 rounded-full"></div>
+                 </div>
+                 <div className="flex justify-between items-center py-1">
+                   <div className="w-1/4 h-2 bg-white/10 rounded-full"></div>
+                   <div className="w-1/2 h-2 bg-green-400/50 rounded-full"></div>
+                 </div>
+                 <div className="flex justify-between items-center py-1">
+                   <div className="w-1/5 h-2 bg-white/10 rounded-full"></div>
+                   <div className="w-2/5 h-2 bg-teal-400/50 rounded-full"></div>
+                 </div>
+                 {/* Graph Area */}
+                 <div className="mt-auto pt-4 border-t border-white/5 flex items-end gap-1 h-16">
+                   {[30, 45, 25, 60, 40, 70, 50, 85].map((h, i) => (
+                     <div key={i} className="flex-1 bg-white/10 rounded-t-sm hover:bg-primary-container/80 transition-colors" style={{ height: `${h}%` }}></div>
+                   ))}
+                 </div>
+               </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div className="space-y-2">
-              <label className="font-[900] text-[10px] uppercase tracking-wider text-green-800/60 ml-1">Work Email</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-green-800/40 text-lg">alternate_email</span>
+          <h1 className="text-4xl md:text-5xl font-black text-[#3A1F16] font-h1 leading-tight mb-4">
+            Welcome back to<br/>FlowPilot
+          </h1>
+          <p className="text-[#6D4C41] font-medium text-lg mb-8 max-w-md">
+            Automate smarter, grow faster with AI-powered marketing
+          </p>
+          
+          <div className="space-y-4">
+            {[
+              "Real-time campaign analytics",
+              "AI-powered content generation",
+              "Automated workflow builder"
+            ].map((text, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center text-white shrink-0">
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
                 </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/40 border-0 ring-1 ring-green-600/20 focus:ring-2 focus:ring-green-600 text-gray-800 rounded-xl py-3.5 pl-11 pr-4 transition-all placeholder:text-green-800/30 text-sm"
-                  placeholder="user@123"
-                  required
-                />
+                <span className="text-[#5D4037] font-bold">{text}</span>
               </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right Panel - Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white relative">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-2 mb-12">
+            <span className="text-primary-container material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+            <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="text-3xl font-black text-slate-900 font-h2 mb-2">Sign in to your account</h2>
+            <p className="text-slate-500 mb-8 font-medium">Enter your credentials to continue</p>
+
+            {/* Google Login */}
+            <button 
+              onClick={handleGoogleLogin}
+              className="w-full py-3.5 px-4 border border-slate-200 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors font-bold text-slate-700 shadow-sm mb-6"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-px bg-slate-200 flex-1"></div>
+              <span className="text-xs font-bold text-slate-400">OR</span>
+              <div className="h-px bg-slate-200 flex-1"></div>
             </div>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-end px-1">
-                <label className="font-[900] text-[10px] uppercase tracking-wider text-green-800/60">Password</label>
-                <a className="text-[10px] font-[900] uppercase text-green-800 hover:text-gray-800 transition-colors cursor-pointer">Forgot?</a>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-green-800/40 text-lg">lock</span>
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/40 border-0 ring-1 ring-green-600/20 focus:ring-2 focus:ring-green-600 text-gray-800 rounded-xl py-3.5 pl-11 pr-4 transition-all placeholder:text-green-800/30 text-sm"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Remember */}
-            <div className="flex items-center px-1">
-              <input type="checkbox" id="remember" className="w-4 h-4 rounded border-green-600/30 text-green-600 focus:ring-green-600 bg-white/50" />
-              <label htmlFor="remember" className="ml-3 text-xs font-medium text-green-800/70">Keep me logged in for 30 days</label>
-            </div>
-
-            {/* Error */}
             {error && (
-              <div className="text-sm text-red-700 bg-red-100 border border-red-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">error</span>
+              <div className="mb-6 p-4 bg-error-container text-on-error-container rounded-xl text-sm font-bold flex items-start gap-2">
+                <span className="material-symbols-outlined text-[20px]">error</span>
                 {error}
               </div>
             )}
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 px-6 bg-gradient-to-br from-green-600 to-green-500 text-white font-[900] uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-green-600/20 hover:shadow-xl hover:scale-[1.01] active:scale-95 transition-all duration-200 disabled:opacity-70"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  Authenticating...
-                </span>
-              ) : (
-                "Sign In to Portal"
-              )}
-            </button>
-          </form>
+            {/* Email Form */}
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Email address</label>
+                <input 
+                  type="email" 
+                  required
+                  placeholder="you@company.com"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-          {/* Divider */}
-          <div className="mt-8">
-            <div className="relative flex items-center mb-8">
-              <div className="flex-grow border-t border-green-600/10"></div>
-              <span className="flex-shrink mx-4 text-[10px] font-[900] uppercase text-green-800/40 tracking-widest">quick access</span>
-              <div className="flex-grow border-t border-green-600/10"></div>
-            </div>
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-sm font-bold text-slate-700">Password</label>
+                  <Link href="#" className="text-sm font-bold text-primary-container hover:underline">Forgot password?</Link>
+                </div>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => quickLogin("designer")}
-                className="flex items-center justify-center gap-3 py-3 px-4 bg-white/40 border border-white/60 rounded-xl hover:bg-white/60 transition-all"
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Sign in as</label>
+                <div className="relative">
+                  <select 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all appearance-none text-slate-900 bg-white font-medium"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Client">Client</option>
+                    <option value="Designer">Designer</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full mt-2 bg-primary-container text-white py-3.5 rounded-xl font-bold hover:bg-primary shadow-md hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-outlined text-green-800 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>palette</span>
-                <span className="text-xs font-bold text-green-800">Designer</span>
+                {isLoading ? "Signing In..." : "Sign In"}
               </button>
-              <button
-                onClick={() => quickLogin("user")}
-                className="flex items-center justify-center gap-3 py-3 px-4 bg-white/40 border border-white/60 rounded-xl hover:bg-white/60 transition-all"
-              >
-                <span className="material-symbols-outlined text-green-800 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-                <span className="text-xs font-bold text-green-800">Client</span>
-              </button>
-            </div>
-          </div>
-        </div>
+            </form>
 
-        {/* Footer */}
-        <div className="mt-10 flex justify-center gap-8">
-          <span className="text-[10px] font-[900] uppercase text-green-800/50 tracking-widest">Privacy Policy</span>
-          <span className="text-[10px] font-[900] uppercase text-green-800/50 tracking-widest">Terms of Service</span>
-          <span className="text-[10px] font-[900] uppercase text-green-800/50 tracking-widest">Support</span>
+            <p className="mt-8 text-center text-sm font-medium text-slate-600">
+              Don't have an account? <Link href="/signup" className="text-primary-container font-bold hover:underline">Sign up</Link>
+            </p>
+          </motion.div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

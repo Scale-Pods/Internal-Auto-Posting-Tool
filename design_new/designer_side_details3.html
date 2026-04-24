@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Task Detail - FlowPilot AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#181b27",
+                        "on-background": "#271813",
+                        "surface-container": "#ffe9e4",
+                        "tertiary-container": "#999080",
+                        "secondary-fixed-dim": "#c4c5d6",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ede1cf",
+                        "outline": "#907067",
+                        "inverse-surface": "#3e2c27",
+                        "tertiary-fixed-dim": "#d0c5b3",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#ffede8",
+                        "surface": "#fff8f6",
+                        "on-primary-fixed": "#3b0900",
+                        "on-primary-container": "#541200",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#e4beb4",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#201b10",
+                        "primary-fixed": "#ffdbd1",
+                        "on-secondary-container": "#5f6270",
+                        "on-tertiary-container": "#2f291d",
+                        "surface-dim": "#f1d4cc",
+                        "secondary": "#5b5e6c",
+                        "tertiary": "#655d4f",
+                        "background": "#fff8f6",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "surface-container-highest": "#fadcd4",
+                        "surface-variant": "#fadcd4",
+                        "secondary-container": "#dddff0",
+                        "surface-container-high": "#ffe2da",
+                        "primary-container": "#ff5722",
+                        "on-primary-fixed-variant": "#862200",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#434654",
+                        "surface-container-low": "#fff1ed",
+                        "on-surface-variant": "#5b4039",
+                        "on-tertiary-fixed-variant": "#4d4638",
+                        "secondary-fixed": "#e0e1f2",
+                        "on-surface": "#271813",
+                        "inverse-primary": "#ffb5a0",
+                        "surface-bright": "#fff8f6",
+                        "on-primary": "#ffffff",
+                        "primary": "#b02f00",
+                        "surface-tint": "#b02f00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "8px",
+                        "xl": "12px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "padding_button_v": "12px",
+                        "base_unit": "4px",
+                        "padding_input_v": "12px",
+                        "padding_card": "24px",
+                        "gutter": "24px",
+                        "container_max_width": "1440px",
+                        "sidebar_width": "240px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"],
+                        "metric-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "metric-lg": ["32px", {"lineHeight": "1.1", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fff8f6; }
+        .plus-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-on-background">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-50 sticky top-0 flex justify-between items-center w-full px-6 py-3">
+<div class="flex items-center gap-6">
+<a class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-body-base">arrow_back</span>
+<span class="font-label-caps text-label-caps">Back to Tasks</span>
+</a>
+<div class="h-6 w-px bg-slate-200"></div>
+<div class="flex items-center gap-4">
+<span class="font-h2 text-body-base font-bold text-slate-900 tracking-tight">DesignOps</span>
+<span class="bg-surface-container text-on-surface-variant px-2 py-1 rounded text-xs font-bold">#D-1247</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">pending</span> In Progress
+            </span>
+<div class="text-right">
+<p class="text-xs font-bold text-slate-400">CLIENT</p>
+<p class="text-sm font-bold text-slate-900">Acme Corporation</p>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="text-right">
+<p class="text-xs font-bold text-slate-400">DEADLINE</p>
+<p class="text-sm font-bold text-primary-container">Due Tomorrow, 5:00 PM</p>
+</div>
+<button class="bg-white border border-slate-200 p-2 rounded-lg hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Close-up headshot of a professional designer in a bright studio setting, clean lighting, soft bokeh" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDod8oS4mVSl1DKVZfS9R3_p_OsaYJhVhMIlcOIs_6qApLUDLbrp9RBs4TZY0kInM6NX1y7TNMPVaXx_pjHjuFUGBUIIrYkex-3eUU5Oy5Yr7letefmHX0Sy-FOZlB_gGFwYUmYySEKJYDIBAsif2WlIh81YmJUOnKSLqq07N5D0TI3_Va8lsPAy4y8jbsDhuXtRGcHGHLjxMTQYaau22m_syGzVjSiF3ed96WOln9cL6VtFdbyg98kkZtHIVOlufrDmZmOphq61uBE"/>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- LEFT COLUMN (30%) -->
+<aside class="md:col-span-3 space-y-6 sticky top-24 h-fit overflow-y-auto no-scrollbar pb-12">
+<!-- Platform & Type Card -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-h2 text-body-base font-bold text-slate-900">Platform</h3>
+<span class="material-symbols-outlined text-primary-container">retweet</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Format</span>
+<span class="font-semibold text-slate-900">Carousel Post</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Slides</span>
+<span class="font-semibold text-slate-900">5 Slides</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Dimensions</span>
+<span class="font-semibold text-slate-900">1080 x 1080px</span>
+</div>
+</div>
+</div>
+<!-- Content Copy -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-h2 text-body-base font-bold text-slate-900">Caption</h3>
+<button class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">content_copy</span> Copy
+                    </button>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg text-sm text-slate-700 font-body-sm leading-relaxed mb-4">
+                    Unlock the power of AI-driven design automation with FlowPilot. Stop wasting hours on manual resizing and start scaling your creative output today. 🚀
+                </div>
+<div class="flex flex-wrap gap-2">
+<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[11px] font-bold">#marketing</span>
+<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[11px] font-bold">#SaaS</span>
+<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[11px] font-bold">#automation</span>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100">
+<p class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">CTA Link</p>
+<a class="text-primary-container text-sm font-semibold hover:underline" href="#">acmecorp.com/demo</a>
+</div>
+</div>
+<!-- Strategy & Brand -->
+<div class="space-y-4">
+<div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">description</span>
+<span class="text-sm font-semibold">Strategy Report 6.2</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="font-h2 text-body-base font-bold text-slate-900 mb-4">Brand Kit</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-[#FF5722]"></span>
+<span class="w-6 h-6 rounded bg-[#1A1D29]"></span>
+<span class="w-6 h-6 rounded bg-[#F8F9FA] border border-slate-200"></span>
+<span class="text-xs font-semibold text-slate-500 ml-auto">Brand Colors</span>
+</div>
+<div class="text-sm">
+<p class="text-slate-500 text-xs font-bold uppercase mb-1">Tone of Voice</p>
+<p class="font-semibold">Professional, Bold</p>
+</div>
+<div class="text-sm">
+<p class="text-slate-500 text-xs font-bold uppercase mb-1">Audience</p>
+<p class="font-semibold">B2B SaaS Founders</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Reference Grid -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="font-h2 text-body-base font-bold text-slate-900 mb-4">References</h3>
+<div class="grid grid-cols-3 gap-2">
+<img alt="Ref 1" class="rounded-lg w-full aspect-square object-cover" data-alt="Screenshot of a clean minimalist SaaS dashboard interface with blue and orange accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlmv6I3COkjAYzUVNEnRIkNePE80lLYOim1LCMpxv6QITtb8h-LpilB3A5eNH_1cjEyaaGyAIKYsD8hpnAZLkgbfV3R2qwHGR8dSGmrzXB7boUcw4Kxv_SnVRKHIlt51rG4w2SHrMyiLjcC9b83H83qYsQhso6FNulTY100vx2SbcpbwL7qd4tMhCXhu74gbtTG_bYnMdMg29Z8oIT_I6pGXm6bosHi5Hai04Q5whPW5lL484YZFYi2FoQFBcxgK29uc3D70tjk8W5"/>
+<img alt="Ref 2" class="rounded-lg w-full aspect-square object-cover" data-alt="Instagram carousel layout example with high-contrast typography and bold shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKsNwF9eALmu5BzdsURYpmcDahG1RsSDLisR1IaKDIZi0hMUdkWR2Y76NDF7A3a1O5QwBEPYpLasxi7oVGzeWyzKVfXyMUPOggZ3s6RCyCL1sLhksxqJdzqIsmbdN8Tr646Mqy9TVr4mOy5Ah-3IqkzBtwt6gxPbzI9kMBlBEiXgAjA1xjcryv_VcZiQP4SWtOXxlhnqU-1sc-i-g2YB1Sa2UMsrE30B_m9ldZNv6QLepWo4HX5hm3exWeH0ATQXLbT3mq02cIQ7bM"/>
+<div class="bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
+<span class="material-symbols-outlined text-slate-400">add</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- MIDDLE COLUMN (50%) -->
+<section class="md:col-span-6 space-y-8">
+<!-- Integration Buttons -->
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-white border-2 border-slate-100 p-6 rounded-xl flex flex-col items-center gap-3 hover-lift group">
+<div class="w-12 h-12 bg-[#00C4CC]/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#00C4CC]">cloud_download</span>
+</div>
+<span class="font-bold text-slate-900">Export from Canva</span>
+<p class="text-xs text-slate-500">Connect &amp; sync designs</p>
+</button>
+<button class="bg-white border-2 border-slate-100 p-6 rounded-xl flex flex-col items-center gap-3 hover-lift group">
+<div class="w-12 h-12 bg-[#F24E1E]/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#F24E1E]">layers</span>
+</div>
+<span class="font-bold text-slate-900">Export from Figma</span>
+<p class="text-xs text-slate-500">Fetch frames via URL</p>
+</button>
+</div>
+<!-- Workspace Upload Zone -->
+<div class="bg-surface-container-low border-2 border-dashed border-primary-fixed-dim rounded-2xl p-12 flex flex-col items-center justify-center gap-4 text-center">
+<div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-4xl">upload_file</span>
+</div>
+<div>
+<h3 class="font-h2 text-xl font-bold text-slate-900">Drop your designs here</h3>
+<p class="text-slate-500 text-sm mt-1">Supports JPG, PNG, PDF, SVG (Max 50MB)</p>
+</div>
+<button class="bg-primary-container text-white px-6 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">
+                    Select Files
+                </button>
+</div>
+<!-- Carousel Preview -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-h2 text-xl font-bold text-slate-900">Slide Preview</h3>
+<span class="text-sm font-semibold text-slate-400">5/5 Slides Uploaded</span>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Slide Item 1 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 group">
+<div class="flex flex-col items-center gap-1 text-slate-300 cursor-grab">
+<span class="material-symbols-outlined text-lg">unfold_more</span>
+</div>
+<div class="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+<img alt="Slide 1" class="w-full h-full object-cover" data-alt="Vibrant orange background with bold white headline text and abstract geometric shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBS4FFyKjSRkMbDw8o3KhbCn15oZaRNmS-ltgA7I-Yb9mUzkNkzwKAg22GKvI-CWJymXnhIIg1dI5JiGcrLpLbVDmu4OsqpWDl2ENZJPWPW9sxK4Te3JIJbzKEHuABjHSIElcQOD4u2OJcz4hNHwPJhkZh0oSVjyjBWGjYj28Luc0uvm9fjkzGCmSD-Wyz4Uzd1PYBCxPZrB3lpQwg3A_F-5iKIwbIvgxjRMJ_VlFzO1At72HjP6wxNeN0Jnzu0fyyXoWn2MnkSJB1G"/>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-primary text-white text-[10px] font-black px-1.5 py-0.5 rounded">SLIDE 1</span>
+<span class="text-xs font-bold text-slate-400">intro_visual.png</span>
+</div>
+<p class="text-sm text-slate-600 font-medium">Main title slide with brand logo</p>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">refresh</span></button>
+<button class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-error"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+</div>
+<!-- Slide Item 2 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 group">
+<div class="flex flex-col items-center gap-1 text-slate-300 cursor-grab">
+<span class="material-symbols-outlined text-lg">unfold_more</span>
+</div>
+<div class="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+<img alt="Slide 2" class="w-full h-full object-cover" data-alt="A clean data visualization chart showing upward growth on a soft cream background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCONaX3Rk4YiSczNCC21DqFjdlz6XcMPbXDTfgYbtK0qyZ8fbrK3ZGhpWsYmYQWHikJ-TEdjDFqwDzKQOYAUewlQhNW4s26KIS526dbI1sQFAmK3uOYfkp3lFOssCsFqZiIGZTseTs3xCwPR2l52PV4T9E92DVSaE1n4VIQBMwx3fkwaleu8LUgz3ZnqBd1y2KrniLj_JgYP-y7Te7JWclB3435BmUvYMRvaaDlO3cnaP0VLW-QHNE29Q8Cj0Q1bhOHJ9GKpELxl_c3"/>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-slate-900 text-white text-[10px] font-black px-1.5 py-0.5 rounded">SLIDE 2</span>
+<span class="text-xs font-bold text-slate-400">stats_chart.svg</span>
+</div>
+<p class="text-sm text-slate-600 font-medium">Growth metrics and data visualization</p>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">refresh</span></button>
+<button class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-error"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Design Notes -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="font-h2 text-body-base font-bold text-slate-900 mb-4">Design Notes</h3>
+<textarea class="w-full min-h-[120px] bg-slate-50 border-slate-200 rounded-xl p-4 text-sm font-body-sm focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container outline-none transition-all" placeholder="Enter specific instructions for the designer or client review notes..."></textarea>
+</div>
+</section>
+<!-- RIGHT COLUMN (20%) -->
+<aside class="md:col-span-3 space-y-6 sticky top-24 h-fit pb-32">
+<!-- Versions Timeline -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="font-h2 text-body-base font-bold text-slate-900 mb-6">Versions</h3>
+<div class="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+<div class="relative pl-8">
+<div class="absolute left-1.5 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-primary-fixed"></div>
+<p class="text-xs font-bold text-primary">v3 (Current)</p>
+<p class="text-[11px] text-slate-400">Today, 2:45 PM</p>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-2 top-1.5 w-2 h-2 rounded-full bg-slate-300"></div>
+<p class="text-xs font-bold text-slate-900">v2 (Revision Requested)</p>
+<p class="text-[11px] text-slate-400">Yesterday, 11:20 AM</p>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-2 top-1.5 w-2 h-2 rounded-full bg-slate-300"></div>
+<p class="text-xs font-bold text-slate-500">v1 (Initial Draft)</p>
+<p class="text-[11px] text-slate-400">Oct 24, 4:00 PM</p>
+</div>
+</div>
+</div>
+<!-- Client Feedback Card -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-primary-fixed">
+<div class="flex items-center gap-3 mb-4">
+<img alt="John Doe" class="w-10 h-10 rounded-full" data-alt="Professional headshot of a mature businessman with gray hair, warm expression, office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjbdDqdXhQN0DqyoOx1Ts2Va3616XcpF-ut7A0rs5ai8QRw_ctIHEu1l4PPulA_7fuMxyCG7xMTKYRTT5vZ0ERcMlhGTs-Mo-wr6MxIsPrv5nFGsBDjSxcyn2oMejErc3uO8_TRWKDMgudWdUqq3CpZhIBpNHuQBtMlTlNFceSOn59iH8VAd2vJha9Xug6hZBHSbbRotb0VCFiTumk6fApXnqmAY_ODe56YfC88DJtYUY23lfu5-a9m9NAEKeq81hCbixegm5nCZT5"/>
+<div>
+<p class="text-sm font-bold">John Doe</p>
+<p class="text-[10px] font-bold text-slate-400">ACME CORP</p>
+</div>
+</div>
+<div class="relative bg-white p-3 rounded-lg text-xs leading-relaxed text-slate-600 shadow-sm italic">
+                    "The orange in Slide 1 feels a bit too vibrant compared to our brand guide. Also, can we increase the font size on the chart labels in Slide 2?"
+                </div>
+<button class="w-full mt-4 bg-white border border-slate-200 text-[11px] font-bold py-2 rounded-lg hover:bg-slate-50">Reply to John</button>
+</div>
+<!-- Requirements Checklist -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+<h3 class="font-h2 text-body-base font-bold text-slate-900 mb-4">Requirements</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded border-slate-300 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover:text-slate-900 line-through decoration-slate-300">Instagram optimized</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded border-slate-300 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover:text-slate-900 line-through decoration-slate-300">5 slides minimum</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded border-slate-300 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover:text-slate-900">Brand fonts applied</span>
+</label>
+</div>
+</div>
+</aside>
+</main>
+<!-- Bottom Actions Bar (Sticky) -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-8 py-4 z-[60] shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="max-w-[1440px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">sync</span>
+<span class="text-xs font-semibold text-slate-400 italic">Auto-saved 2 minutes ago</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 border-2 border-slate-100 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-50 transition-colors">Save Draft</button>
+<button class="px-6 py-2 border-2 border-slate-100 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">visibility</span> Preview Design
+                </button>
+<button class="px-8 py-2.5 bg-primary-container text-white rounded-xl font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary-container/20">
+                    Submit for Client Approval
+                </button>
+</div>
+</div>
+</div>
+<!-- Modals (Hidden by default, structure provided) -->
+<!-- Canva Modal Background Blur -->
+<div class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+<div class="bg-white w-[500px] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+<h4 class="font-bold">Connect Canva Design</h4>
+<button class="material-symbols-outlined text-slate-400 hover:text-slate-900">close</button>
+</div>
+<div class="p-8 space-y-6">
+<div class="bg-slate-50 p-6 rounded-xl border border-slate-100 flex flex-col items-center gap-3">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary-container">link</span>
+</div>
+<p class="text-sm font-semibold text-slate-900 text-center">Login to your Canva account to sync your project library</p>
+</div>
+<button class="w-full bg-[#00C4CC] text-white py-3 rounded-xl font-bold hover:opacity-90 transition-opacity">Connect Account</button>
+</div>
+</div>
+</div>
+<!-- Figma Modal Background Blur -->
+<div class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+<div class="bg-white w-[500px] rounded-2xl shadow-2xl overflow-hidden">
+<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+<h4 class="font-bold">Fetch Figma Frames</h4>
+<button class="material-symbols-outlined text-slate-400">close</button>
+</div>
+<div class="p-8 space-y-4">
+<label class="block">
+<span class="text-xs font-bold text-slate-400 uppercase">Figma File URL</span>
+<input class="mt-1 block w-full rounded-xl border-slate-200 text-sm p-3 focus:ring-primary focus:border-primary" placeholder="https://www.figma.com/file/..." type="text"/>
+</label>
+<div class="p-4 bg-blue-50 text-blue-700 text-xs rounded-lg flex gap-3">
+<span class="material-symbols-outlined text-sm">info</span>
+<p>Make sure your file sharing permissions are set to "Anyone with the link can view".</p>
+</div>
+<button class="w-full bg-[#F24E1E] text-white py-3 rounded-xl font-bold">Fetch Frames</button>
+</div>
+</div>
+</div>
+</body></html>
