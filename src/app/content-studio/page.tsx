@@ -138,8 +138,8 @@ export default function ContentStudioPage() {
                     <div className="border border-outline-variant rounded-xl overflow-hidden bg-white shadow-sm focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
                       <div className="flex items-center gap-1 p-2 bg-surface-container-low border-b border-outline-variant">
                         <button className="p-1.5 hover:bg-white rounded transition-colors"><span className="material-symbols-outlined text-[18px]">format_bold</span></button>
-                        <button className="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">format_italic</span></button>
-                        <button className="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined text-[18px]">list</span></button>
+                        <button className="p-1.5 hover:bg-white rounded transition-colors"><span className="material-symbols-outlined text-[18px]">format_italic</span></button>
+                        <button className="p-1.5 hover:bg-white rounded transition-colors"><span className="material-symbols-outlined text-[18px]">list</span></button>
                       </div>
                       <textarea className="w-full p-4 text-sm border-none focus:ring-0 resize-none outline-none" rows={5} defaultValue="✨ Exciting news! Our new AI features are finally here. Simplify your marketing workflow today. 🚀\n\nLink in bio!" />
                     </div>
