@@ -1,0 +1,169 @@
+{
+  "name": "AI Strategy Deep Audit Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-strategy-audit",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook (Trigger)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "table": "clients",
+        "matchType": "any",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "name": "Fetch Client (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase_credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "model": "gpt-4o-search-preview",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "content": "You are a digital intelligence researcher specializing in business analysis across web and social platforms.\n\nYour mission is to comprehensively research a given business by systematically exploring their digital footprint across multiple channels and extracting structured insights.\n\nPHASE 1: PRIMARY DIGITAL ASSET DISCOVERY\nPHASE 2: DEEP CONTENT ANALYSIS\nPHASE 3: SOCIAL MEDIA INTELLIGENCE\nPHASE 4: COMPETITOR INTELLIGENCE\nPHASE 5: GAP & OPPORTUNITY IDENTIFICATION\n\nOUTPUT FORMAT REQUIREMENTS:\nReturn ONLY valid JSON matching the exact schema requested without any markdown wrapping or backticks. It must start with { and end with }."
+            },
+            {
+              "role": "user",
+              "content": "Now research: {{$json.business_name}}\nIndustry: {{$json.industry_type}}\nWebsite: {{$json.website_url}}\nCompetitors to analyze: {{$json.competitors}}\nGoals: {{$json.primary_goal}}\nTarget Audience: {{$json.target_audience}}\n\nExecute comprehensive multi-platform research and return structured JSON output."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3,
+          "responseFormat": "jsonObject"
+        }
+      },
+      "name": "GPT-4o Search Deep Audit",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai_credentials",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "clients",
+        "matchType": "any",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$node['Webhook (Trigger)'].json.body.client_id}}"
+            }
+          ]
+        },
+        "updateFields": {
+          "fields": [
+            {
+              "keyName": "strategy_output",
+              "keyValue": "={{$json.message.content}}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "strategy_approved"
+            }
+          ]
+        }
+      },
+      "name": "Update Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase_credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Strategy Generated successfully\"\n}",
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Client (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Client (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "GPT-4o Search Deep Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o Search Deep Audit": {
+      "main": [
+        [
+          {
+            "node": "Update Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Supabase": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

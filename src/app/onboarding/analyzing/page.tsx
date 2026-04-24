@@ -17,18 +17,52 @@ export default function AnalyzingPage() {
   ];
 
   useEffect(() => {
+    // We expect the URL to have ?id=CLIENT_ID
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get("id");
+
+    if (!clientId) {
+      console.error("No client ID found in URL");
+      return;
+    }
+
+    const triggerN8nWorkflow = async () => {
+      try {
+        const webhookUrl = process.env.NEXT_PUBLIC_N8N_STRATEGY_WEBHOOK;
+        if (!webhookUrl) {
+          console.warn("No webhook URL configured. Simulating delay...");
+          setTimeout(() => router.push(`/onboarding/report?id=${clientId}`), 10000);
+          return;
+        }
+
+        const response = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: clientId })
+        });
+
+        if (!response.ok) throw new Error("Workflow failed");
+        
+        // When n8n finishes processing and responds
+        router.push(`/onboarding/report?id=${clientId}`);
+      } catch (err) {
+        console.error("Error triggering AI workflow:", err);
+        // Fallback redirect for testing purposes
+        setTimeout(() => router.push(`/onboarding/report?id=${clientId}`), 5000);
+      }
+    };
+
+    triggerN8nWorkflow();
+
+    // Visual progress bar animation
     const timer = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          setTimeout(() => router.push("/onboarding/report"), 500); // Redirect when done
-          return 100;
-        }
+        if (prev >= 95) return 95; // Wait at 95% until API responds
         const newProgress = prev + 1;
         setCurrentStep(Math.floor((newProgress / 100) * steps.length));
         return newProgress;
       });
-    }, 100);
+    }, 400); // Slower progress to account for API latency
 
     return () => clearInterval(timer);
   }, [router, steps.length]);
