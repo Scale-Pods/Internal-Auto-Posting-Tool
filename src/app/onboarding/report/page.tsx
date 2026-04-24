@@ -1,19 +1,22 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// Lazy singleton — only created in the browser, never at build time
+export const dynamic = "force-dynamic";
+
+// Safe Lazy Initializer
 let _supabase: SupabaseClient | null = null;
 function getSupabase() {
+  if (typeof window === "undefined") return null; // Never run on server
+  
   if (!_supabase) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
     if (!url || !key) {
-      throw new Error("Supabase credentials missing. Please check your environment variables.");
+      return null; // Return null instead of crashing
     }
     _supabase = createClient(url, key);
   }
@@ -47,63 +50,94 @@ export default function StrategyReportPage() {
   const [strategy, setStrategy] = useState<StrategyJson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    
     const params = new URLSearchParams(window.location.search);
     const clientId = params.get("id");
-    if (!clientId) { setError("No client ID in URL."); setLoading(false); return; }
+    
+    if (!clientId) { 
+      setError("No client ID found in URL. Please start from onboarding."); 
+      setLoading(false); 
+      return; 
+    }
 
     const supabase = getSupabase();
+    if (!supabase) {
+      setError("Supabase connection failed. Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in Vercel.");
+      setLoading(false);
+      return;
+    }
+
     let pollTimer: ReturnType<typeof setTimeout>;
 
     const pollForStrategy = async (attempt = 0) => {
-      // Max 36 attempts × 5s = 3 minutes timeout
-      if (attempt > 36) {
-        setError("Strategy generation timed out. Please go back and try again.");
+      // Max 60 attempts × 5s = 5 minutes timeout
+      if (attempt > 60) {
+        setError("AI Strategy generation is taking longer than expected. Please check your n8n workflow or try again later.");
         setLoading(false);
         return;
       }
 
-      const { data, error: dbError } = await supabase
-        .from("clients")
-        .select("*")
-        .eq("id", clientId)
-        .single();
+      try {
+        const { data, error: dbError } = await supabase
+          .from("clients")
+          .select("*")
+          .eq("id", clientId)
+          .single();
 
-      if (dbError || !data) {
-        setError("Could not load client data. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      setClient(data);
-
-      if (data.strategy_json && data.strategy_json !== "=" && data.strategy_json !== "") {
-        // Strategy is ready — parse and display
-        try {
-          const parsed = typeof data.strategy_json === "string"
-            ? JSON.parse(data.strategy_json)
-            : data.strategy_json;
-          setStrategy(parsed);
+        if (dbError || !data) {
+          setError("Could not find your business data. Please try onboarding again.");
           setLoading(false);
-        } catch {
-          setError("Strategy data format is invalid. Please regenerate.");
-          setLoading(false);
+          return;
         }
-      } else {
-        // Not ready yet — poll again in 5 seconds
+
+        setClient(data);
+
+        // Check if strategy is ready and not just a placeholder
+        if (data.strategy_json && data.strategy_json !== "=" && data.strategy_json !== "" && data.strategy_json !== "null") {
+          const rawStrategy = data.strategy_json;
+          let parsed: StrategyJson;
+          
+          try {
+            parsed = typeof rawStrategy === "string" ? JSON.parse(rawStrategy) : rawStrategy;
+            
+            // If it's an error object from n8n
+            if (parsed.error) {
+              setError(`AI Error: ${parsed.error}. Please check n8n logs.`);
+              setLoading(false);
+              return;
+            }
+
+            setStrategy(parsed);
+            setLoading(false);
+          } catch (e) {
+            console.error("JSON Parse Error:", e);
+            // Don't error out yet, maybe it's still being written
+            pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
+          }
+        } else {
+          // Not ready — poll again
+          pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
+        }
+      } catch (e) {
+        console.error("Polling error:", e);
         pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
       }
     };
 
     pollForStrategy();
-
     return () => clearTimeout(pollTimer);
   }, []);
 
+  // Prevent SSR issues
+  if (!isClient) return null;
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
-  if (!strategy) return <ErrorState message="No strategy data found." />;
+  if (!strategy) return <ErrorState message="Strategy data is being prepared..." />;
 
   const competitors = strategy?.competitor_analysis?.competitors ?? [];
   const contentPillars = strategy?.content_strategy?.content_pillars ?? [];
@@ -115,7 +149,7 @@ export default function StrategyReportPage() {
   const pillarColors = ["bg-orange-100 text-orange-700", "bg-blue-100 text-blue-700", "bg-green-100 text-green-700", "bg-purple-100 text-purple-700", "bg-pink-100 text-pink-700"];
 
   return (
-    <div className="bg-[#f8f7f5] min-h-screen font-sans antialiased">
+    <div className="bg-[#f8f7f5] min-h-screen font-sans antialiased text-slate-900">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 fixed top-0 w-full z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -123,7 +157,7 @@ export default function StrategyReportPage() {
             <span className="text-xl font-bold text-slate-900">FlowPilot AI</span>
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
-              Strategy Ready
+              Analysis Complete
             </span>
           </div>
           <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-800 transition-colors font-medium">
@@ -136,203 +170,112 @@ export default function StrategyReportPage() {
         {/* Hero */}
         <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <p className="text-sm font-semibold text-orange-600 uppercase tracking-widest mb-2">AI Deep Audit Report</p>
-            <h1 className="text-4xl font-black text-slate-900 mb-2">{client?.business_name} — Marketing Strategy</h1>
-            <p className="text-slate-500 text-lg">Based on live web research of your site and competitors.</p>
+            <p className="text-sm font-semibold text-orange-600 uppercase tracking-widest mb-2">Deep Audit Strategy Report</p>
+            <h1 className="text-4xl font-black text-slate-900 mb-2">{client?.business_name}</h1>
+            <p className="text-slate-500 text-lg">Your customized marketing roadmap generated by AI.</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-5 py-2.5 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">download</span> Download PDF
-            </button>
-            <Link href="/dashboard" className="px-5 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">dashboard</span> Go to Dashboard
+            <Link href="/dashboard" className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200">
+              Go to Dashboard
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT: Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* Executive Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
             <Card>
-              <SectionTitle icon="flag" label="Executive Summary" />
-              <p className="text-slate-700 leading-relaxed text-base">{strategy.executive_summary ?? "No summary generated."}</p>
+              <SectionTitle icon="description" label="Executive Summary" />
+              <p className="text-slate-700 leading-relaxed text-lg">{strategy.executive_summary}</p>
             </Card>
 
-            {/* Brand Positioning */}
-            {strategy.brand_positioning && (
-              <Card>
-                <SectionTitle icon="diamond" label="Brand Positioning" />
-                <div className="space-y-4">
-                  {strategy.brand_positioning.unique_value_proposition && (
-                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Unique Value Proposition</p>
-                      <p className="text-slate-800 font-semibold leading-relaxed">{strategy.brand_positioning.unique_value_proposition}</p>
-                    </div>
-                  )}
-                  {strategy.brand_positioning.brand_voice && (
-                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Brand Voice</p>
-                      <p className="text-slate-800 leading-relaxed">{strategy.brand_positioning.brand_voice}</p>
-                    </div>
-                  )}
-                  {differentiators.length > 0 && (
-                    <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Key Differentiators</p>
-                      <div className="flex flex-wrap gap-2">
-                        {differentiators.map((d, i) => (
-                          <span key={i} className="bg-orange-50 text-orange-800 border border-orange-200 text-sm font-medium px-3 py-1 rounded-full">{d}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+            <Card>
+              <SectionTitle icon="stars" label="Brand Positioning" />
+              <div className="space-y-6">
+                <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100">
+                  <h4 className="text-xs font-black text-orange-600 uppercase tracking-widest mb-2">Unique Value Proposition</h4>
+                  <p className="text-xl font-bold text-slate-900 leading-tight">{strategy.brand_positioning?.unique_value_proposition}</p>
                 </div>
-              </Card>
-            )}
-
-            {/* Target Audience */}
-            {strategy.target_audience && (
-              <Card>
-                <SectionTitle icon="group" label="Target Audience" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {strategy.target_audience.primary && (
-                    <AudienceCard title="Primary Audience" data={strategy.target_audience.primary} color="orange" />
-                  )}
-                  {strategy.target_audience.secondary && (
-                    <AudienceCard title="Secondary Audience" data={strategy.target_audience.secondary} color="blue" />
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {/* Content Pillars */}
-            {contentPillars.length > 0 && (
-              <Card>
-                <SectionTitle icon="view_kanban" label="Content Pillars" />
-                <div className="space-y-3">
-                  {contentPillars.map((p, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <span className={`shrink-0 text-xs font-black px-2.5 py-1 rounded-lg ${pillarColors[i % pillarColors.length]}`}>
-                        {p.percentage != null ? `${p.percentage}%` : "—"}
-                      </span>
-                      <div>
-                        <h5 className="font-bold text-slate-900 mb-0.5">{p.pillar}</h5>
-                        <p className="text-sm text-slate-500">{p.description}</p>
-                      </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Brand Voice</h4>
+                    <p className="text-slate-700">{strategy.brand_positioning?.brand_voice}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Differentiators</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {differentiators.map((d, i) => (
+                        <span key={i} className="bg-white border border-slate-200 text-slate-700 px-3 py-1 rounded-lg text-sm font-medium">{d}</span>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </Card>
-            )}
+              </div>
+            </Card>
 
-            {/* Platform Strategy */}
-            {platforms.length > 0 && (
-              <Card>
-                <SectionTitle icon="devices" label="Platform Strategy" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {platforms.map((p, i) => (
-                    <div key={i} className="p-5 border border-slate-200 rounded-xl bg-white hover:shadow-sm transition-shadow">
-                      <h5 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-orange-500 text-base">public</span>
-                        {p.platform}
-                      </h5>
-                      {p.posting_frequency && <p className="text-xs text-slate-500 mb-2">📅 {p.posting_frequency}</p>}
-                      {p.best_times && <p className="text-xs text-slate-500 mb-3">⏰ {p.best_times}</p>}
-                      {(p.content_types ?? []).length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {(p.content_types ?? []).map((ct, j) => (
-                            <span key={j} className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">{ct}</span>
-                          ))}
+            <Card>
+              <SectionTitle icon="groups" label="Target Audience" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AudienceBox title="Primary" data={strategy.target_audience?.primary} />
+                <AudienceBox title="Secondary" data={strategy.target_audience?.secondary} />
+              </div>
+            </Card>
+
+            <Card>
+              <SectionTitle icon="account_tree" label="Content Strategy" />
+              <div className="space-y-8">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 mb-4">Content Pillars</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    {contentPillars.map((p, i) => (
+                      <div key={i} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold ${pillarColors[i % pillarColors.length]}`}>
+                          {p.percentage}%
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <div>
+                          <p className="font-bold text-slate-900">{p.pillar}</p>
+                          <p className="text-sm text-slate-500">{p.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </Card>
-            )}
-
-            {/* Growth Tactics */}
-            {growthTactics.length > 0 && (
-              <Card>
-                <SectionTitle icon="trending_up" label="Growth Tactics" />
-                <ul className="space-y-3">
-                  {growthTactics.map((t, i) => (
-                    <li key={i} className="flex items-start gap-3 text-slate-700">
-                      <span className="mt-0.5 w-6 h-6 shrink-0 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                      <span className="text-sm leading-relaxed">{t}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
+              </div>
+            </Card>
           </div>
 
-          {/* RIGHT: Sidebar */}
-          <div className="space-y-6">
-            {/* Competitor Intel */}
-            {competitors.length > 0 && (
-              <div className="bg-slate-900 text-white p-6 rounded-2xl">
-                <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-orange-400">radar</span>
-                  Competitor Intel
-                </h3>
-                <div className="space-y-5">
-                  {competitors.map((c, i) => (
-                    <div key={i}>
-                      <p className="font-bold text-white text-sm mb-2">{c.name ?? `Competitor ${i + 1}`}</p>
-                      {(c.weaknesses ?? []).length > 0 && (
-                        <div className="mb-2">
-                          <p className="text-xs text-red-400 font-semibold uppercase tracking-wider mb-1">Weaknesses</p>
-                          {(c.weaknesses ?? []).map((w, j) => (
-                            <p key={j} className="text-xs text-slate-400 leading-relaxed">• {w}</p>
-                          ))}
-                        </div>
-                      )}
-                      {(c.opportunities ?? []).length > 0 && (
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider mb-1">Opportunities</p>
-                          {(c.opportunities ?? []).map((o, j) => (
-                            <p key={j} className="text-xs text-slate-400 leading-relaxed">• {o}</p>
-                          ))}
-                        </div>
-                      )}
-                      {i < competitors.length - 1 && <div className="mt-4 border-t border-slate-800" />}
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl shadow-slate-200">
+              <SectionTitle icon="monitoring" label="Competitor Analysis" isDark />
+              <div className="space-y-6">
+                {competitors.map((c, i) => (
+                  <div key={i} className="space-y-2">
+                    <p className="font-bold text-white flex items-center gap-2">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                      {c.name}
+                    </p>
+                    <div className="pl-4 border-l border-slate-700 space-y-2">
+                      <p className="text-xs text-slate-400"><span className="text-red-400 font-bold">Weakness:</span> {c.weaknesses?.[0]}</p>
+                      <p className="text-xs text-slate-400"><span className="text-emerald-400 font-bold">Opportunity:</span> {c.opportunities?.[0]}</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* KPIs */}
-            {kpis.length > 0 && (
-              <Card>
-                <SectionTitle icon="bar_chart" label="Target KPIs" />
-                <div className="space-y-3">
-                  {kpis.map((k, i) => (
-                    <div key={i} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
-                      <span className="text-sm text-slate-600">{k.metric}</span>
-                      <span className="text-sm font-bold text-orange-600">{k.target}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-
-            {/* CTA */}
-            <div className="bg-orange-50 border border-orange-200 p-6 rounded-2xl">
-              <h3 className="font-bold text-slate-900 text-lg mb-2">Ready to execute?</h3>
-              <p className="text-sm text-slate-600 mb-5">Generate your first month of content based on this strategy.</p>
-              <div className="space-y-3">
-                <button className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 shadow-md">
-                  <span className="material-symbols-outlined text-sm">magic_button</span>
-                  Generate Content Calendar
-                </button>
-                <Link href="/dashboard" className="w-full py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 block text-center">
-                  Go to Dashboard
-                </Link>
+                  </div>
+                ))}
               </div>
             </div>
+
+            <Card>
+              <SectionTitle icon="ads_click" label="Growth Tactics" />
+              <div className="space-y-4">
+                {growthTactics.map((t, i) => (
+                  <div key={i} className="flex gap-3 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl">
+                    <span className="text-orange-500 font-bold">0{i+1}</span>
+                    {t}
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </main>
@@ -340,54 +283,48 @@ export default function StrategyReportPage() {
   );
 }
 
-// --- Sub-components ---
-
 function Card({ children }: { children: React.ReactNode }) {
-  return <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-7">{children}</div>;
+  return <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">{children}</div>;
 }
 
-function SectionTitle({ icon, label }: { icon: string; label: string }) {
+function SectionTitle({ icon, label, isDark = false }: { icon: string; label: string; isDark?: boolean }) {
   return (
-    <h3 className="font-bold text-xl text-slate-900 mb-5 flex items-center gap-2.5">
+    <h3 className={`flex items-center gap-3 font-black text-xl mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
       <span className="material-symbols-outlined text-orange-500">{icon}</span>
       {label}
     </h3>
   );
 }
 
-function AudienceCard({ title, data, color }: { title: string; data: { description?: string; pain_points?: string[] }; color: string }) {
-  const colorMap: Record<string, string> = { orange: "bg-orange-50 border-orange-200", blue: "bg-blue-50 border-blue-200" };
+function AudienceBox({ title, data }: { title: string; data: any }) {
   return (
-    <div className={`p-5 rounded-xl border ${colorMap[color] ?? "bg-slate-50 border-slate-200"}`}>
-      <h4 className="font-bold text-slate-900 mb-2">{title}</h4>
-      {data.description && <p className="text-sm text-slate-600 mb-3">{data.description}</p>}
-      {(data.pain_points ?? []).length > 0 && (
-        <ul className="space-y-1.5">
-          {(data.pain_points ?? []).map((pp, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-              <span className="material-symbols-outlined text-green-500 text-sm mt-0.5">check_circle</span>
-              {pp}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+      <h4 className="font-bold text-slate-900 mb-3">{title} Audience</h4>
+      <p className="text-sm text-slate-600 mb-4">{data?.description}</p>
+      <div className="space-y-2">
+        {data?.pain_points?.slice(0, 3).map((pp: string, i: number) => (
+          <div key={i} className="flex items-center gap-2 text-xs text-slate-500">
+            <span className="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+            {pp}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 function LoadingState() {
   return (
-    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center">
-      <div className="text-center max-w-md px-6">
-        <div className="relative w-20 h-20 mx-auto mb-6">
-          <div className="absolute inset-0 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-          <div className="absolute inset-3 bg-orange-50 rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-orange-500 text-2xl">smart_toy</span>
-          </div>
+    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6 text-center">
+      <div className="max-w-sm">
+        <div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-8 animate-bounce">
+          <span className="material-symbols-outlined text-4xl text-orange-500 animate-spin">cyclone</span>
         </div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">AI is working on your strategy...</h2>
-        <p className="text-slate-500 mb-4">Our agent is scraping your website and competitors live. This usually takes 20–30 seconds.</p>
-        <p className="text-xs text-slate-400 bg-slate-100 rounded-lg px-4 py-2 inline-block">This page will update automatically — no need to refresh.</p>
+        <h2 className="text-2xl font-black text-slate-900 mb-3">AI Deep Audit in progress...</h2>
+        <p className="text-slate-500 mb-8">Our agents are analyzing your website, competitors, and market data. This takes about 30 seconds.</p>
+        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+          <div className="bg-orange-500 h-full animate-[progress_10s_ease-in-out_infinite]" style={{ width: '60%' }}></div>
+        </div>
       </div>
     </div>
   );
@@ -395,25 +332,19 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center px-4 font-sans">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-10 max-w-md w-full text-center">
+    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6 text-center font-sans">
+      <div className="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full">
         <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-4xl">error</span>
+          <span className="material-symbols-outlined text-4xl">warning</span>
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">Analysis Error</h2>
-        <p className="text-slate-600 text-base mb-8 leading-relaxed">{message}</p>
-        <div className="flex flex-col gap-3">
-          <Link 
-            href="/onboarding" 
-            className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
-          >
-            Try Onboarding Again
+        <h2 className="text-2xl font-black text-slate-900 mb-3">Configuration Needed</h2>
+        <p className="text-slate-600 mb-8 leading-relaxed">{message}</p>
+        <div className="space-y-3">
+          <Link href="/onboarding" className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-lg shadow-slate-200">
+            Try Again
           </Link>
-          <Link 
-            href="/dashboard" 
-            className="w-full py-4 bg-white text-slate-600 border border-slate-200 rounded-2xl font-semibold text-sm hover:bg-slate-50 transition-colors"
-          >
-            Go to Dashboard
+          <Link href="/dashboard" className="block w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-2xl font-bold">
+            Back to Dashboard
           </Link>
         </div>
       </div>
