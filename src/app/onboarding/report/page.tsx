@@ -102,12 +102,27 @@ export default function StrategyReportPage() {
           let parsed: StrategyJson;
           
           try {
-            parsed = typeof rawStrategy === "string" ? JSON.parse(rawStrategy) : rawStrategy;
+            // Handle single OR double encoded JSON from n8n
+            // n8n sometimes double-stringifies: JSON.stringify(JSON.stringify(obj))
+            let value: unknown = typeof rawStrategy === "string" ? JSON.parse(rawStrategy) : rawStrategy;
+            
+            // Unwrap up to 2 more times if still a string (double/triple encoding)
+            if (typeof value === "string") value = JSON.parse(value);
+            if (typeof value === "string") value = JSON.parse(value);
+            
+            parsed = value as StrategyJson;
             
             // If it's an error object from n8n
             if (parsed.error) {
               setError(`AI Error: ${parsed.error}. Please check n8n logs.`);
               setLoading(false);
+              return;
+            }
+
+            // Verify it has actual strategy content before showing
+            if (!parsed.executive_summary) {
+              // Not a valid strategy yet, keep polling
+              pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
               return;
             }
 
