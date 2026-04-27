@@ -328,9 +328,9 @@ export default function ContentReviewDetailPage() {
               {posts.map((post: any, pi: number) => (
                 <div key={pi} className="mb-8 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
                   {/* Post header */}
-                  <div className="bg-secondary px-5 py-3 flex items-center justify-between">
+                  <div className="bg-[#0f172a] px-5 py-3 flex items-center justify-between">
                     <span className="text-sm font-bold text-white">{post.format || "Post"}</span>
-                    <span className="text-xs font-semibold text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md">Post #{pi + 1}</span>
+                    <span className="text-xs font-semibold text-slate-400 bg-white/10 px-2.5 py-1 rounded-md">Post #{pi + 1}</span>
                   </div>
 
                   {/* Slides */}
@@ -460,7 +460,7 @@ export default function ContentReviewDetailPage() {
               {/* ── Stage 2 ── */}
               <div className={`rounded-xl border p-4 ${isApproved ? "bg-green-50 border-green-200" : "bg-white border-slate-200"}`}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black ${isApproved ? "bg-green-600 text-white" : isReviewed ? "bg-secondary text-white" : "bg-slate-200 text-slate-400"}`}>2</span>
+                  <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black ${isApproved ? "bg-green-600 text-white" : isReviewed ? "bg-[#0f172a] text-white" : "bg-slate-200 text-slate-400"}`}>2</span>
                   <p className="text-xs font-black text-slate-700 uppercase tracking-wider">Final Approval</p>
                   {isApproved && <Check className="w-3.5 h-3.5 text-green-600 ml-auto" />}
                 </div>
