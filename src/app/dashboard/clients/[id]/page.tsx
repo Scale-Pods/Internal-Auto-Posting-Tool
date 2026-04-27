@@ -21,6 +21,7 @@ import {
   ChevronRight,
   FileText,
   RefreshCw,
+  RotateCcw,
 } from "lucide-react";
 import { LoadingLottie } from "@/components/loading-lottie";
 
@@ -189,6 +190,26 @@ export default function ClientDetailPage() {
     }
   };
 
+  const handleResetStatus = async () => {
+    if (!client) return;
+    try {
+      const supabase = getSupabase();
+      if (supabase) {
+        await supabase
+          .from("clients")
+          .update({ status: "Awaiting Strategy" })
+          .eq("id", client.id);
+        setClient((prev) => prev ? { ...prev, status: "Awaiting Strategy" } : prev);
+        setGenerating(false);
+        setGeneratingContent(false);
+        setGenerateError("");
+        setGenerateSuccess(false);
+      }
+    } catch (err) {
+      console.error("Failed to reset status:", err);
+    }
+  };
+
   const competitors = client?.competitors
     ? client.competitors.split(",").map((c) => c.trim()).filter(Boolean)
     : [];
@@ -312,6 +333,17 @@ export default function ClientDetailPage() {
                 </>
               )}
             </button>
+
+            {/* Reset button shown only when stuck */}
+            {(client.status === "Generating" || client.status === "Generating Content") && (
+              <button
+                onClick={handleResetStatus}
+                title="Reset stuck status"
+                className="flex items-center justify-center p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-lg transition-all border border-slate-200"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
