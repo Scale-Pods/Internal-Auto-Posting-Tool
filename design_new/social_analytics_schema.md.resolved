@@ -1,0 +1,188 @@
+# Social Analytics — API Parameters & Database Schema
+
+## Platform-by-Platform API Breakdown
+
+---
+
+### 1. 📸 Instagram (Meta Graph API)
+
+**Endpoint (per post):** `GET /{ig-media-id}/insights`  
+**Endpoint (account-level):** `GET /{ig-user-id}/insights`  
+**Auth Required:** `instagram_basic`, `instagram_manage_insights` permissions  
+**Account Requirement:** Must be a Business or Creator account linked to a Facebook Page  
+
+> [!IMPORTANT]
+> As of **April 21, 2025 (v22.0+)**, `impressions` and `plays` are **deprecated**. The new primary metric is `media_views`.
+
+| API Field | Maps To Our Column | Notes |
+|---|---|---|
+| `media_views` | `impressions` | Replaces old `impressions` metric |
+| `reach` | `reach` | Unique accounts that saw the post |
+| `likes` | `likes` | Total likes |
+| `comments` | `comments` | Total comments |
+| `shares` | `shares` | Times shared |
+| `saved` | `saves` | Times saved to collection |
+| `engagement` | computed | Total interactions (sum) |
+| `reels_skip_rate` | `skip_rate` | Reels only — % skipped in 3s |
+| `profile_visits` | `profile_visits` | Profile visits from post |
+| `follows` | `new_followers` | New follows from post |
+
+**Credentials Needed:**
+- `INSTAGRAM_USER_ACCESS_TOKEN` (long-lived, 60-day, refreshable)
+- `INSTAGRAM_BUSINESS_ACCOUNT_ID`
+- `FACEBOOK_APP_ID` + `FACEBOOK_APP_SECRET`
+
+---
+
+### 2. 💼 LinkedIn (Marketing API)
+
+**Endpoint (page stats):** `GET /rest/organizationPageStatistics`  
+**Endpoint (post/share stats):** `GET /rest/organizationalEntityShareStatistics`  
+**Auth Required:** OAuth 2.0, `r_organization_social_admin` permission  
+**Granularity:** `DAY` or `MONTH` with epoch timestamps  
+
+| API Field | Maps To Our Column | Notes |
+|---|---|---|
+| `allPageViews.pageViews` | `impressions` | Total page views |
+| `overviewPageViews.uniquePageViews` | `reach` | Unique page views |
+| `totalClicks` | `clicks` | CTA + link clicks |
+| `likes` (share stats) | `likes` | Reactions on posts |
+| `comments` | `comments` | Comments on posts |
+| `shares` | `shares` | Reshares |
+| `engagement` (calculated) | `engagement_rate` | (clicks+likes+comments+shares)/impressions |
+| `followers` | `followers` | Follower count at snapshot |
+
+**Credentials Needed:**
+- `LINKEDIN_ACCESS_TOKEN` (OAuth 2.0)
+- `LINKEDIN_ORGANIZATION_URN` (e.g. `urn:li:organization:12345678`)
+
+---
+
+### 3. 🌐 Website / Blog (Google Analytics 4)
+
+**Endpoint:** `POST https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}:runReport`  
+**Auth Required:** Service Account JSON key  
+**Dimensions:** `date`, `pagePath`, `deviceCategory`  
+
+| GA4 Metric | Maps To Our Column | Notes |
+|---|---|---|
+| `screenPageViews` | `impressions` | Total page views |
+| `activeUsers` | `reach` | Unique visitors |
+| `sessions` | `sessions` | Total sessions |
+| `bounceRate` | `bounce_rate` | % single-page sessions |
+| `averageSessionDuration` | `avg_time_on_page` | Seconds |
+| `conversions` | `conversions` | Goal completions |
+| `newUsers` | `new_visitors` | First-time visitors |
+
+**Credentials Needed:**
+- `GA4_PROPERTY_ID` (e.g. `properties/123456789`)
+- `GOOGLE_SERVICE_ACCOUNT_JSON` (service account key file)
+
+---
+
+## ✅ Final `social_analytics` Table SQL
+
+Run this in **Supabase → SQL Editor**:
+
+```sql
+-- Drop and recreate with full schema
+create table if not exists social_analytics (
+  id                uuid default gen_random_uuid() primary key,
+  
+  -- Link to post (optional — account-level rows have no post_id)
+  post_id           uuid references content_deliverables(id) on delete set null,
+  client_id         uuid references clients(id) on delete cascade,
+  
+  -- Platform identifier
+  platform          text not null check (platform in ('instagram', 'linkedin', 'website')),
+  
+  -- ── Shared metrics (all platforms) ──
+  impressions       integer default 0,   -- media_views (IG), allPageViews (LI), screenPageViews (GA4)
+  reach             integer default 0,   -- reach (IG), uniquePageViews (LI), activeUsers (GA4)
+  likes             integer default 0,   -- likes / reactions
+  comments          integer default 0,   -- comments
+  shares            integer default 0,   -- shares / reshares
+  engagement_rate   numeric(6,2) default 0,  -- % engagement
+
+  -- ── Instagram-specific ──
+  saves             integer default 0,   -- saved to collection
+  profile_visits    integer default 0,   -- profile visits from post
+  new_followers     integer default 0,   -- follows gained
+  skip_rate         numeric(5,2) default 0, -- reels skip rate %
+  
+  -- ── LinkedIn-specific ──
+  clicks            integer default 0,   -- link + CTA clicks
+  followers         integer default 0,   -- follower count snapshot
+
+  -- ── Website-specific ──
+  sessions          integer default 0,   -- GA4 sessions
+  bounce_rate       numeric(5,2) default 0, -- bounce %
+  avg_time_on_page  integer default 0,   -- seconds
+  conversions       integer default 0,   -- goal completions
+  new_visitors      integer default 0,   -- first-time users
+
+  -- ── Meta / audit ──
+  data_source       text default 'manual',  -- 'meta_api' | 'linkedin_api' | 'ga4_api' | 'manual'
+  recorded_at       timestamp with time zone default now(),
+  created_at        timestamp with time zone default now()
+);
+
+-- RLS
+alter table social_analytics enable row level security;
+create policy "Allow all" on social_analytics for all using (true) with check (true);
+
+-- Index for fast date-range queries
+create index if not exists idx_social_analytics_recorded_at on social_analytics(recorded_at desc);
+create index if not exists idx_social_analytics_platform    on social_analytics(platform);
+create index if not exists idx_social_analytics_client      on social_analytics(client_id);
+
+-- Seed data with all columns populated
+insert into social_analytics 
+  (platform, impressions, reach, likes, comments, shares, saves, engagement_rate, recorded_at, data_source)
+values
+  ('instagram', 4200, 3800, 312, 45, 28, 91, 7.42, now() - interval '6 days', 'meta_api'),
+  ('linkedin',  2100, 1900, 180, 32, 15, 0,  8.57, now() - interval '5 days', 'linkedin_api'),
+  ('instagram', 5600, 4900, 428, 67, 41, 138, 7.64, now() - interval '4 days', 'meta_api'),
+  ('website',   1800, 1600,  0,  12,  0, 0,  5.00, now() - interval '3 days', 'ga4_api'),
+  ('instagram', 6300, 5700, 510, 88, 52, 164, 8.09, now() - interval '2 days', 'meta_api'),
+  ('linkedin',  3100, 2800, 240, 41, 22, 0,  7.74, now() - interval '1 day',  'linkedin_api'),
+  ('instagram', 7200, 6400, 620, 102, 65, 201, 8.61, now(),                   'meta_api');
+```
+
+---
+
+## 🔑 Environment Variables to Add to `.env.local`
+
+```env
+# Meta / Instagram
+META_APP_ID=your_app_id
+META_APP_SECRET=your_app_secret
+INSTAGRAM_USER_ACCESS_TOKEN=your_long_lived_token
+INSTAGRAM_BUSINESS_ACCOUNT_ID=your_ig_business_id
+
+# LinkedIn
+LINKEDIN_ACCESS_TOKEN=your_oauth_token
+LINKEDIN_ORGANIZATION_URN=urn:li:organization:YOUR_ORG_ID
+
+# Google Analytics 4
+GA4_PROPERTY_ID=properties/YOUR_PROPERTY_ID
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your-sa@project.iam.gserviceaccount.com
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+```
+
+---
+
+## 🔄 How Data Will Flow (n8n Sync)
+
+```
+n8n Scheduled Trigger (daily @ 2 AM IST)
+  ├── Call Meta Graph API → fetch yesterday's post insights
+  ├── Call LinkedIn API   → fetch page + post stats
+  ├── Call GA4 API        → fetch website metrics
+  └── INSERT all rows → Supabase social_analytics
+                              ↓
+               Dashboard auto-refreshes → real charts
+```
+
+> [!NOTE]
+> The n8n workflow for pulling analytics can be built after the designer integration is complete.

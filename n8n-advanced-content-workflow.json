@@ -1,0 +1,157 @@
+{
+  "name": "Advanced SaaS Content Creation Pipeline (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-content-creation",
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook (Content)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "clients",
+        "limit": 1,
+        "matchType": "all",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Supabase (Read)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "model": "gpt-4o",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "content": "You are a senior marketing strategist and brand analyst with deep expertise in growth, positioning, and content strategy.\n\nYour task is to analyze the business’s existing strategy data and generate a comprehensive, insight-driven marketing analysis.\n\nSTEP 1: Parse the provided Strategy JSON to understand Brand Positioning, Target Audience (ICP) pain points, Messaging Tone, and Funnel Gaps.\n\nSTEP 2: Output a clear Consultant Report breaking down:\n1. Executive Summary\n2. Brand & ICP Analysis\n3. Messaging Gaps\n4. Recommended Content Themes to address these gaps.\n\nIMPORTANT: Be specific, base insights only on the provided JSON data, and think like a senior consultant."
+            },
+            {
+              "role": "user",
+              "content": "Here is the raw Strategy JSON from the database:\n\n{{$json.strategy_json}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3",
+      "name": "OpenAI (Strategist)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "model": "gpt-4o",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "content": "You are an expert Social Media Art Director and Master Copywriter. Your goal is to translate the Senior Consultant's strategy analysis into EXTREMELY SPECIFIC, ready-to-design content deliverables.\n\nYOUR OUTPUT MUST BE ONLY RAW JSON.\n\nREQUIRED STRUCTURE:\n{\n  \"instagram\": [\n    {\n      \"format\": \"Carousel (1080x1350)\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe imagery, layout, mood]\",\n          \"text_on_image\": \"[Exact hook]\",\n          \"designer_notes\": \"[Specific design rules]\"\n        }\n      ],\n      \"caption\": \"[Engaging caption]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ],\n  \"linkedin\": [\n    {\n      \"format\": \"Text + Image Post\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe graphic]\",\n          \"text_on_image\": \"[Text inside graphic]\",\n          \"designer_notes\": \"[Design instructions]\"\n        }\n      ],\n      \"caption\": \"[Professional hook, body, and CTA. Use spacing.]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ]\n}\n\nINSTRUCTIONS:\n1. Read the Consultant's Strategy Analysis.\n2. Read any User Feedback to fix.\n3. Output the exact JSON structure above for Instagram and LinkedIn."
+            },
+            {
+              "role": "user",
+              "content": "Here is the Consultant's Analysis:\n\n{{$json.message.content}}\n\nFeedback to fix/incorporate (if any): {{$node['Webhook (Content)'].json.body.feedback}}"
+            }
+          ]
+        },
+        "options": {
+            "responseFormat": "jsonObject"
+        }
+      },
+      "id": "4",
+      "name": "OpenAI (Art Director)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [950, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clients",
+        "matchType": "all",
+        "updateKey": "id",
+        "columns": "content_json,status",
+        "data": {
+          "id": "={{ $('Webhook (Content)').item.json.body.client_id }}",
+          "content_json": "={{ $json.message.content }}",
+          "status": "Content Ready for Approval"
+        }
+      },
+      "id": "5",
+      "name": "Supabase (Save)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1200, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Content)": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Read)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase (Read)": {
+      "main": [
+        [
+          {
+            "node": "OpenAI (Strategist)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI (Strategist)": {
+      "main": [
+        [
+          {
+            "node": "OpenAI (Art Director)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI (Art Director)": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Save)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

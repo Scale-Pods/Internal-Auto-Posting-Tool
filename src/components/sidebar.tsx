@@ -7,11 +7,12 @@ import { useState, useEffect } from "react";
 
 // --- Navigation items per role ---
 const USER_NAV = [
-  { href: "/",           icon: "dashboard",   label: "Dashboard" },
-  { href: "/clients",    icon: "groups",      label: "Clients" },
-  { href: "/calendar",   icon: "campaign",    label: "Calendar" },
-  { href: "/review",     icon: "rate_review", label: "Review" },
-  { href: "/analytics",  icon: "leaderboard", label: "Analytics" },
+  { href: "/",           icon: "dashboard",    label: "Dashboard" },
+  { href: "/clients",    icon: "groups",       label: "Clients" },
+  { href: "/approval",   icon: "how_to_reg",   label: "Approval" },
+  { href: "/calendar",   icon: "campaign",     label: "Calendar" },
+  { href: "/review",     icon: "rate_review",  label: "Review" },
+  { href: "/analytics",  icon: "leaderboard",  label: "Analytics" },
 ];
 
 const DESIGNER_NAV = [

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { supabase } from "@/lib/supabase";
 import { Rocket, Shield, Briefcase, Palette, CheckCircle2, Zap, Ban } from "lucide-react";
 
@@ -64,7 +65,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex font-body-base selection:bg-primary-container selection:text-white">
+    <div suppressHydrationWarning className="min-h-screen flex font-body-base selection:bg-primary-container selection:text-white">
       {/* Left Panel - Visual/Brand */}
       <div className="hidden lg:flex flex-col justify-center w-1/2 bg-[#FFF5F0] p-12 xl:p-24 relative overflow-hidden">
         <motion.div 
@@ -73,34 +74,34 @@ export default function SignupPage() {
           transition={{ duration: 0.6 }}
           className="absolute top-10 left-12 flex items-center gap-2"
         >
-          <Rocket className="text-primary-container w-6 h-6" />
-          <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+
+            <div className="bg-primary p-3 rounded-xl flex items-center justify-center shadow-lg">
+              <img src="/logo-light.png" alt="ScalePods" className="h-8 object-contain" />
+            </div>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="z-10 mt-10"
+          className="z-10 mt-16"
         >
-          {/* Illustration Container */}
-          <div className="bg-white p-6 rounded-3xl shadow-xl mb-12 max-w-sm flex items-center justify-center aspect-square relative">
-             <div className="absolute inset-0 bg-teal-500/10 rounded-3xl -z-10 transform translate-x-4 translate-y-4"></div>
-             <Image 
-               src="/signup-illustration.png" 
-               alt="Start automating today" 
-               width={400} 
-               height={400} 
-               className="rounded-2xl object-cover w-full h-full"
-               priority
-             />
+          {/* Lottie Animation Container */}
+          <div className="mb-8 w-full max-w-[350px] xl:max-w-[450px] aspect-[4/3] mx-auto flex items-center justify-center relative">
+            <div className="absolute inset-0 bg-teal-500/10 rounded-3xl -z-10 transform translate-x-4 translate-y-4"></div>
+            <DotLottieReact
+              src="https://assets-v2.lottiefiles.com/a/59ae3046-117b-11ee-88a7-ef3838e9662f/rNxvGjWbsn.lottie"
+              loop
+              autoplay
+              className="w-full h-full object-contain"
+            />
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black text-slate-900 font-h1 leading-tight mb-4">
             Start automating<br/>today
           </h1>
           <p className="text-slate-600 font-medium text-lg mb-8 max-w-md">
-            Join 10,000+ teams using FlowPilot AI to supercharge their marketing workflows.
+            Join 10,000+ teams using ScalePods to supercharge their marketing workflows.
           </p>
           
           <div className="space-y-6">
@@ -125,8 +126,10 @@ export default function SignupPage() {
         <div className="w-full max-w-md py-10">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-2 mb-10">
-            <Rocket className="text-primary-container w-6 h-6" />
-            <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+
+            <div className="bg-primary p-3 rounded-xl flex items-center justify-center shadow-lg">
+              <img src="/logo-light.png" alt="ScalePods" className="h-8 object-contain" />
+            </div>
           </div>
 
           <motion.div
@@ -135,7 +138,7 @@ export default function SignupPage() {
             transition={{ duration: 0.4 }}
           >
             <h2 className="text-3xl font-black text-slate-900 font-h2 mb-2">Create your account</h2>
-            <p className="text-slate-500 mb-8 font-medium">Get started with FlowPilot AI</p>
+            <p className="text-slate-500 mb-8 font-medium">Get started with ScalePods</p>
 
             {/* Google Signup */}
             <button 

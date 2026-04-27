@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -46,7 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex font-body-base selection:bg-primary-container selection:text-white">
+    <div suppressHydrationWarning className="min-h-screen flex font-body-base selection:bg-primary-container selection:text-white">
       {/* Left Panel - Visual/Brand */}
       <div className="hidden lg:flex flex-col justify-center w-1/2 bg-[#FFF5F0] p-12 xl:p-24 relative overflow-hidden">
         <motion.div 
@@ -55,46 +56,30 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="absolute top-10 left-12 flex items-center gap-2"
         >
-          <span className="text-primary-container material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
-          <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+
+            <div className="bg-primary p-3 rounded-xl flex items-center justify-center shadow-lg">
+              <img src="/logo-light.png" alt="ScalePods" className="h-8 object-contain" />
+            </div>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="z-10 mt-10"
+          className="z-10 mt-16"
         >
-          {/* Mockup Container */}
-          <div className="bg-white p-4 rounded-3xl shadow-2xl mb-12 transform -rotate-2 hover:rotate-0 transition-transform duration-500 max-w-lg">
-            <div className="bg-[#1C2331] rounded-2xl p-6 aspect-[4/3] relative overflow-hidden flex flex-col">
-               <h3 className="text-white font-h2 text-2xl mb-6">Dashboard</h3>
-               <div className="flex-1 bg-[#151B26] rounded-xl border border-white/5 p-4 flex flex-col gap-3">
-                 {/* Mock UI Rows */}
-                 <div className="flex justify-between items-center pb-2 border-b border-white/10">
-                   <div className="w-1/3 h-2 bg-white/20 rounded-full"></div>
-                   <div className="w-1/4 h-2 bg-blue-400/50 rounded-full"></div>
-                 </div>
-                 <div className="flex justify-between items-center py-1">
-                   <div className="w-1/4 h-2 bg-white/10 rounded-full"></div>
-                   <div className="w-1/2 h-2 bg-green-400/50 rounded-full"></div>
-                 </div>
-                 <div className="flex justify-between items-center py-1">
-                   <div className="w-1/5 h-2 bg-white/10 rounded-full"></div>
-                   <div className="w-2/5 h-2 bg-teal-400/50 rounded-full"></div>
-                 </div>
-                 {/* Graph Area */}
-                 <div className="mt-auto pt-4 border-t border-white/5 flex items-end gap-1 h-16">
-                   {[30, 45, 25, 60, 40, 70, 50, 85].map((h, i) => (
-                     <div key={i} className="flex-1 bg-white/10 rounded-t-sm hover:bg-primary-container/80 transition-colors" style={{ height: `${h}%` }}></div>
-                   ))}
-                 </div>
-               </div>
-            </div>
+          {/* Lottie Animation Container */}
+          <div className="mb-8 w-full max-w-[350px] xl:max-w-[450px] aspect-[4/3] mx-auto flex items-center justify-center">
+            <DotLottieReact
+              src="https://assets-v2.lottiefiles.com/a/59ae3046-117b-11ee-88a7-ef3838e9662f/rNxvGjWbsn.lottie"
+              loop
+              autoplay
+              className="w-full h-full object-contain"
+            />
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black text-[#3A1F16] font-h1 leading-tight mb-4">
-            Welcome back to<br/>FlowPilot
+            Welcome back to<br/>ScalePods
           </h1>
           <p className="text-[#6D4C41] font-medium text-lg mb-8 max-w-md">
             Automate smarter, grow faster with AI-powered marketing
@@ -118,12 +103,14 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white relative">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-background relative">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-2 mb-12">
-            <span className="text-primary-container material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
-            <span className="font-h1 font-black text-xl text-slate-900 tracking-tight">FlowPilot AI</span>
+
+            <div className="bg-primary p-3 rounded-xl flex items-center justify-center shadow-lg">
+              <img src="/logo-light.png" alt="ScalePods" className="h-8 object-contain" />
+            </div>
           </div>
 
           <motion.div
@@ -131,13 +118,13 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h2 className="text-3xl font-black text-slate-900 font-h2 mb-2">Sign in to your account</h2>
-            <p className="text-slate-500 mb-8 font-medium">Enter your credentials to continue</p>
+            <h2 className="text-3xl font-black text-foreground font-h2 mb-2">Sign in to your account</h2>
+            <p className="text-muted-foreground mb-8 font-medium">Enter your credentials to continue</p>
 
             {/* Google Login */}
             <button 
               onClick={handleGoogleLogin}
-              className="w-full py-3.5 px-4 border border-slate-200 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors font-bold text-slate-700 shadow-sm mb-6"
+              className="w-full py-3.5 px-4 border border-border rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors font-bold text-slate-700 shadow-sm mb-6"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -169,7 +156,7 @@ export default function LoginPage() {
                   type="email" 
                   required
                   placeholder="you@company.com"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-foreground bg-background"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -184,7 +171,7 @@ export default function LoginPage() {
                   type="password" 
                   required
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-foreground bg-background"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -194,7 +181,7 @@ export default function LoginPage() {
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Sign in as</label>
                 <div className="relative">
                   <select 
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all appearance-none text-slate-900 bg-white font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all appearance-none text-foreground bg-background font-medium"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                   >

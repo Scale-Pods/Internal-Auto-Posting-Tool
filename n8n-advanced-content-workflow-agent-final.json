@@ -1,0 +1,215 @@
+{
+  "name": "Advanced SaaS Content Pipeline (Agent Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-content-creation",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook (Content)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "clients",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Supabase (Read)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($('Supabase (Read)').item.json.strategy_json) }}",
+        "options": {
+          "systemMessage": "You are a senior marketing strategist and brand analyst with deep expertise in growth, positioning, and content strategy.\n\nYour task is to analyze the business’s existing strategy data and generate a comprehensive, insight-driven marketing analysis.\n\nSTEP 1: Parse the provided Strategy JSON to understand Brand Positioning, Target Audience (ICP) pain points, Messaging Tone, and Funnel Gaps.\n\nSTEP 2: Output a clear Consultant Report breaking down:\n1. Executive Summary\n2. Brand & ICP Analysis\n3. Messaging Gaps\n4. Recommended Content Themes to address these gaps.\n\nIMPORTANT: Be specific, base insights only on the provided JSON data, and think like a senior consultant."
+        }
+      },
+      "id": "3",
+      "name": "AI Agent (Strategist)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "chat_model_1",
+      "name": "OpenAI Chat Model 1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [700, 500]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Here is the Consultant's Analysis:\n\n{{$json.output}}\n\nFeedback to fix/incorporate (if any): {{$node['Webhook (Content)'].json.body.feedback}}",
+        "options": {
+          "systemMessage": "You are an expert Social Media Art Director and Master Copywriter. Your goal is to translate the Senior Consultant's strategy analysis into EXTREMELY SPECIFIC, ready-to-design content deliverables.\n\nYOUR OUTPUT MUST BE ONLY RAW JSON.\n\nREQUIRED STRUCTURE:\n{\n  \"instagram\": [\n    {\n      \"format\": \"Carousel (1080x1350)\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe imagery, layout, mood]\",\n          \"text_on_image\": \"[Exact hook]\",\n          \"designer_notes\": \"[Specific design rules]\"\n        }\n      ],\n      \"caption\": \"[Engaging caption]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ],\n  \"linkedin\": [\n    {\n      \"format\": \"Text + Image Post\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe graphic]\",\n          \"text_on_image\": \"[Text inside graphic]\",\n          \"designer_notes\": \"[Design instructions]\"\n        }\n      ],\n      \"caption\": \"[Professional hook, body, and CTA. Use spacing.]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ]\n}\n\nINSTRUCTIONS:\n1. Read the Consultant's Strategy Analysis.\n2. Read any User Feedback to fix.\n3. Output the exact JSON structure above for Instagram and LinkedIn."
+        }
+      },
+      "id": "4",
+      "name": "AI Agent (Art Director)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "chat_model_2",
+      "name": "OpenAI Chat Model 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "position"
+      },
+      "id": "merge_1",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clients",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.body.client_id }}"
+            }
+          ]
+        },
+        "fieldsToSet": {
+          "values": [
+            {
+              "name": "content_json",
+              "stringValue": "={{ $json.output.replace(/```json\\n/g, '').replace(/```/g, '') }}"
+            },
+            {
+              "name": "status",
+              "stringValue": "Content Ready for Approval"
+            }
+          ]
+        }
+      },
+      "id": "5",
+      "name": "Supabase (Save)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Content)": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Read)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase (Read)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Strategist)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Strategist)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Art Director)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Art Director)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Save)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model 1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Strategist)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Art Director)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

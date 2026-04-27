@@ -2,25 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-// Safe Lazy Initializer
-let _supabase: SupabaseClient | null = null;
 function getSupabase() {
-  if (typeof window === "undefined") return null; // Never run on server
-  
-  if (!_supabase) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!url || !key) {
-      return null; // Return null instead of crashing
-    }
-    _supabase = createClient(url, key);
-  }
-  return _supabase;
+  return supabase;
 }
 
 interface StrategyJson {
@@ -103,10 +90,9 @@ export default function StrategyReportPage() {
           
           try {
             // Handle single OR double encoded JSON from n8n
-            // n8n sometimes double-stringifies: JSON.stringify(JSON.stringify(obj))
             let value: unknown = typeof rawStrategy === "string" ? JSON.parse(rawStrategy) : rawStrategy;
             
-            // Unwrap up to 2 more times if still a string (double/triple encoding)
+            // Unwrap up to 2 more times if still a string
             if (typeof value === "string") value = JSON.parse(value);
             if (typeof value === "string") value = JSON.parse(value);
             
@@ -119,9 +105,15 @@ export default function StrategyReportPage() {
               return;
             }
 
-            // Verify it has actual strategy content before showing
-            if (!parsed.executive_summary) {
-              // Not a valid strategy yet, keep polling
+            // If the status is approved in the database, we should stop polling and show what we have
+            if (data.status === "Strategy Approved") {
+              setStrategy(parsed);
+              setLoading(false);
+              return;
+            }
+
+            // Verify it has actual strategy content before showing (only if we are actively polling/generating)
+            if (!parsed.executive_summary && data.status !== "Strategy Approved") {
               pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
               return;
             }
@@ -129,11 +121,23 @@ export default function StrategyReportPage() {
             setStrategy(parsed);
             setLoading(false);
           } catch (e) {
-            console.error("JSON Parse Error:", e);
-            // Don't error out yet, maybe it's still being written
+            // Suppress JSON parse errors to prevent Next.js dev overlay from interrupting polling
+            if (data.status === "Strategy Approved") {
+              // n8n finished, but the output is not valid JSON. Stop polling.
+              const errorText = typeof rawStrategy === "string" ? rawStrategy : "output was malformed";
+              setError(`AI Generation Failed: ${errorText}. Please check the AI agent in n8n and regenerate the strategy.`);
+              setLoading(false);
+              return;
+            }
+            // Still generating, maybe it's still being written
             pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
           }
         } else {
+          if (data.status === "Strategy Approved") {
+             setError("Strategy is marked as Approved, but the JSON data is empty or missing. Please regenerate.");
+             setLoading(false);
+             return;
+          }
           // Not ready — poll again
           pollTimer = setTimeout(() => pollForStrategy(attempt + 1), 5000);
         }
@@ -151,8 +155,8 @@ export default function StrategyReportPage() {
   if (!isClient) return null;
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (!strategy) return <ErrorState message="Strategy data is being prepared..." />;
+  if (error) return <ErrorState message={error} clientId={client?.id} />;
+  if (!strategy) return <ErrorState message="Strategy data is being prepared..." clientId={client?.id} />;
 
   const competitors = strategy?.competitor_analysis?.competitors ?? [];
   const contentPillars = strategy?.content_strategy?.content_pillars ?? [];
@@ -169,7 +173,9 @@ export default function StrategyReportPage() {
       <header className="bg-white border-b border-slate-200 fixed top-0 w-full z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="text-xl font-bold text-slate-900">FlowPilot AI</span>
+            <div className="bg-primary p-2.5 rounded-lg flex items-center justify-center shadow-md">
+              <img src="/logo-light.png" alt="ScalePods" className="h-7 object-contain" />
+            </div>
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
               Analysis Complete
@@ -329,40 +335,121 @@ function AudienceBox({ title, data }: { title: string; data: any }) {
 }
 
 function LoadingState() {
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const steps = [
+    "Analyzing website content",
+    "Scanning LinkedIn presence",
+    "Reviewing Instagram profile",
+    "Identifying content gaps",
+    "Generating strategic recommendations",
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return 95;
+        const newProgress = prev + 1;
+        setCurrentStep(Math.floor((newProgress / 100) * steps.length));
+        return newProgress;
+      });
+    }, 400);
+    return () => clearInterval(timer);
+  }, [steps.length]);
+
   return (
-    <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6 text-center">
-      <div className="max-w-sm">
-        <div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-8 animate-bounce">
-          <span className="material-symbols-outlined text-4xl text-orange-500 animate-spin">cyclone</span>
+    <div className="bg-[#fcfbf9] min-h-screen flex items-center justify-center font-sans text-slate-900 overflow-hidden relative">
+      <main className="relative z-10 w-full max-w-2xl px-6 py-12 flex flex-col items-center">
+        {/* Logo Section */}
+        <div className="relative w-32 h-32 mb-12">
+          {/* Rotating Outer Ring */}
+          <div className="absolute inset-0 border-4 border-dashed border-orange-200 rounded-full animate-spin" style={{ animationDuration: "8s" }}></div>
+          {/* Pulsing Center Circle */}
+          <div className="absolute inset-4 bg-white shadow-xl shadow-orange-100 rounded-full flex items-center justify-center animate-pulse">
+            <span className="material-symbols-outlined text-orange-500 text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              rocket_launch
+            </span>
+          </div>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-3">AI Deep Audit in progress...</h2>
-        <p className="text-slate-500 mb-8">Our agents are analyzing your website, competitors, and market data. This takes about 30 seconds.</p>
-        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div className="bg-orange-500 h-full animate-[progress_10s_ease-in-out_infinite]" style={{ width: '60%' }}></div>
+
+        {/* Heading */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Analyzing your business...</h1>
+          <p className="font-medium text-slate-500 text-lg">Our AI agents are crawling your digital footprint.</p>
         </div>
-      </div>
+
+        {/* Progress List Card */}
+        <div className="w-full bg-white rounded-3xl shadow-xl shadow-slate-100/50 border border-slate-100 p-8 mb-8 space-y-6">
+          {steps.map((stepName, index) => {
+            const isCompleted = index < currentStep;
+            const isActive = index === currentStep;
+
+            return (
+               <div key={index} className={`flex items-center gap-4 ${!isCompleted && !isActive ? 'opacity-40' : ''}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  isCompleted ? 'bg-emerald-100 text-emerald-600' :
+                  isActive ? 'border-2 border-orange-500 border-t-transparent animate-spin' :
+                  'border-2 border-slate-200'
+                }`}>
+                  {isCompleted && <span className="material-symbols-outlined text-xl font-bold">check</span>}
+                </div>
+                <span className={`font-medium ${isActive ? 'font-bold text-orange-600' : 'text-slate-700'}`}>
+                  {stepName}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Progress Bar Section */}
+        <div className="w-full mb-12">
+          <div className="flex justify-between items-end mb-3 px-1">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Overall Progress</span>
+            <span className="text-lg font-black text-orange-500">{progress}% Complete</span>
+          </div>
+          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300 ease-in-out relative bg-gradient-to-r from-orange-400 to-orange-500"
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute top-0 right-0 h-full w-4 bg-white/30 skew-x-12 animate-pulse"></div>
+            </div>
+          </div>
+          <p className="text-center mt-4 text-sm font-medium text-slate-400 italic">This usually takes 2-3 minutes</p>
+        </div>
+
+        {/* Tip Box */}
+        <div className="w-full bg-orange-50/50 border border-orange-100 rounded-2xl p-6 flex gap-4 items-start">
+          <span className="text-2xl">💡</span>
+          <div>
+            <span className="text-xs font-black text-orange-600 uppercase tracking-widest block mb-1">PRO TIP</span>
+            <p className="text-sm font-medium text-orange-900 leading-relaxed">We're comparing your brand against 1,000+ marketing strategies to ensure peak performance.</p>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
 
-function ErrorState({ message }: { message: string }) {
+function ErrorState({ message, clientId }: { message: string, clientId?: string | null }) {
   return (
     <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6 text-center font-sans">
       <div className="bg-white p-10 rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full">
         <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Configuration Needed</h2>
+        <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Strategy Generation Failed</h2>
         <p className="text-slate-600 mb-8 leading-relaxed font-medium">{message}</p>
         <div className="space-y-3">
           <button 
             onClick={() => window.location.reload()}
-            className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all"
+            className="block w-full py-4 bg-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all"
           >
             Check Again
           </button>
-          <Link href="/onboarding" className="block w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">
-            Restart Onboarding
+          <Link href={clientId ? `/dashboard/clients/${clientId}` : "/dashboard/clients"} className="block w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all">
+            Back to Client Page
           </Link>
         </div>
       </div>

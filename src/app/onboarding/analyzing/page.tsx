@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AnalyzingPage() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  // Guard against React StrictMode double-firing useEffect in development
+  const triggered = useRef(false);
 
   const steps = [
     "Analyzing website content",
@@ -17,6 +19,10 @@ export default function AnalyzingPage() {
   ];
 
   useEffect(() => {
+    // Prevent double execution from React StrictMode
+    if (triggered.current) return;
+    triggered.current = true;
+
     // We expect the URL to have ?id=CLIENT_ID
     const params = new URLSearchParams(window.location.search);
     const clientId = params.get("id");
@@ -35,14 +41,14 @@ export default function AnalyzingPage() {
           return;
         }
 
-        // Trigger workflow without blocking
+        // Trigger workflow without blocking (fire and forget)
         fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: clientId })
         }).catch(err => console.error("Webhook trigger failed:", err));
 
-        // Redirect immediately to report page
+        // Redirect immediately to report page — it polls Supabase for the result
         router.push(`/onboarding/report?id=${clientId}`);
       } catch (err) {
         console.error("Setup error:", err);
@@ -55,15 +61,16 @@ export default function AnalyzingPage() {
     // Visual progress bar animation
     const timer = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 95) return 95; // Wait at 95% until API responds
+        if (prev >= 95) return 95;
         const newProgress = prev + 1;
         setCurrentStep(Math.floor((newProgress / 100) * steps.length));
         return newProgress;
       });
-    }, 400); // Slower progress to account for API latency
+    }, 400);
 
     return () => clearInterval(timer);
-  }, [router, steps.length]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="bg-surface min-h-screen flex items-center justify-center font-body-base text-on-background overflow-hidden relative">

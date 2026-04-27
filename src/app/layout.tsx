@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FlowPilot AI",
+  title: "ScalePods",
   description: "High-velocity automation tools for marketing professionals",
 };
 

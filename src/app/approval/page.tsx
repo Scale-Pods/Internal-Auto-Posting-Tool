@@ -1,212 +1,424 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import Sidebar from "@/components/sidebar";
+
+type Deliverable = {
+  id: string;
+  task_name: string;
+  post_type: string;
+  platform: string;
+  topic: string;
+  status: string;
+  created_at: string;
+  client_id: string;
+  rework_comments?: string;
+  clients?: { business_name: string };
+};
+
+const PLATFORM_ICON: Record<string, string> = {
+  instagram: "photo_camera",
+  linkedin: "business_center",
+  website: "language",
+};
+
+const PLATFORM_COLOR: Record<string, string> = {
+  instagram: "text-pink-500 bg-pink-50 border-pink-200",
+  linkedin: "text-blue-600 bg-blue-50 border-blue-200",
+  website: "text-emerald-600 bg-emerald-50 border-emerald-200",
+};
 
 export default function ApprovalPage() {
-  const [activeTab, setActiveTab] = useState("instagram");
+  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTask, setSelectedTask] = useState<Deliverable | null>(null);
+  const [feedback, setFeedback] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeAction, setActiveAction] = useState<"approve" | "revisions" | "reject" | null>(null);
+  const [filterPlatform, setFilterPlatform] = useState("all");
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  async function fetchQueue() {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("content_deliverables")
+      .select(`*, clients(business_name)`)
+      .eq("status", "Pending Content Approval")
+      .order("created_at", { ascending: false });
+
+    if (!error) setDeliverables(data || []);
+    setIsLoading(false);
+  }
+
+  async function handleApprove() {
+    if (!selectedTask) return;
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("content_deliverables")
+        .update({ status: "Pending Design", rework_comments: null })
+        .eq("id", selectedTask.id);
+
+      if (error) throw error;
+      setDeliverables((prev) => prev.filter((d) => d.id !== selectedTask.id));
+      setSelectedTask(null);
+      setFeedback("");
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleRevisions() {
+    if (!selectedTask || !feedback.trim()) {
+      alert("Please provide revision feedback before submitting.");
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("content_deliverables")
+        .update({ status: "Pending Content Approval", rework_comments: feedback })
+        .eq("id", selectedTask.id);
+
+      if (error) throw error;
+      // Update locally to show the comment
+      setDeliverables((prev) =>
+        prev.map((d) => d.id === selectedTask.id ? { ...d, rework_comments: feedback } : d)
+      );
+      setSelectedTask(null);
+      setFeedback("");
+      setActiveAction(null);
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleReject() {
+    if (!selectedTask || !feedback.trim()) {
+      alert("Please provide a rejection reason.");
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("content_deliverables")
+        .update({ status: "Rejected", rework_comments: feedback })
+        .eq("id", selectedTask.id);
+
+      if (error) throw error;
+      setDeliverables((prev) => prev.filter((d) => d.id !== selectedTask.id));
+      setSelectedTask(null);
+      setFeedback("");
+      setActiveAction(null);
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  const filtered = deliverables.filter((d) => {
+    if (filterPlatform === "all") return true;
+    return (d.platform || "").toLowerCase() === filterPlatform;
+  });
+
+  const platformKey = (platform: string) => (platform || "instagram").toLowerCase();
 
   return (
-    <div className="bg-surface min-h-screen font-body-base text-on-surface flex">
-      {/* Side Navigation Shell */}
-      <aside className="w-[240px] h-screen fixed left-0 top-0 border-r border-slate-100 bg-white flex flex-col z-50">
-        <div className="p-6">
-          <span className="text-2xl font-black text-primary-container tracking-tighter">
-            AutoMarketer
-          </span>
-          <div className="mt-1 text-xs text-slate-400 font-medium">Enterprise Plan</div>
-        </div>
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          <Link href="/dashboard" className="flex items-center gap-3 text-slate-500 px-4 py-3 hover:text-slate-900 transition-all rounded-lg">
-            <span className="material-symbols-outlined">dashboard</span> Dashboard
-          </Link>
-          <Link href="#" className="flex items-center gap-3 bg-[#FFF3E0] text-primary-container border-l-4 border-primary-container px-4 py-3 rounded-r-lg font-medium">
-            <span className="material-symbols-outlined">campaign</span> Campaigns
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-slate-500 px-4 py-3 hover:text-slate-900 transition-all rounded-lg">
-            <span className="material-symbols-outlined">library_books</span> Content Library
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-slate-500 px-4 py-3 hover:text-slate-900 transition-all rounded-lg">
-            <span className="material-symbols-outlined">monitoring</span> Analytics
-          </Link>
-        </nav>
-      </aside>
+    <div className="min-h-screen bg-background text-on-background flex font-sans antialiased">
+      <Sidebar />
 
-      {/* Main Content */}
-      <main className="ml-[240px] flex-1 flex flex-col min-h-screen">
-        {/* Top AppBar */}
-        <header className="flex justify-between items-center px-8 h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
-          <div className="flex flex-col">
-            <nav className="flex items-center gap-2 text-xs text-slate-400 font-medium mb-1">
-              <span>Dashboard</span>
-              <span className="material-symbols-outlined text-[10px]">chevron_right</span>
-              <span className="text-primary-container">Approval Queue</span>
-            </nav>
-            <h1 className="text-lg font-bold text-slate-900">Content Approval</h1>
+      <main className="flex-1 overflow-y-auto md:ml-64">
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-surface-container-low/80 backdrop-blur-xl border-b border-white/5 px-8 h-16 flex items-center justify-between shadow-sm">
+          <div>
+            <p className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Step 5</p>
+            <h1 className="text-xl font-[900] text-white">Content Approval Queue</h1>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-slate-900">John Doe</div>
-                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Senior Reviewer</div>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold">
-                JD
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-on-surface-variant">
+              <span className="font-bold text-white">{filtered.length}</span> pending
+            </span>
+            <button
+              onClick={fetchQueue}
+              className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all"
+              title="Refresh"
+            >
+              <span className="material-symbols-outlined text-[18px]">refresh</span>
+            </button>
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto w-full">
+        <div className="p-8 max-w-7xl mx-auto w-full space-y-6">
           {/* Workflow Stepper */}
-          <div className="mb-10 bg-white p-6 rounded-xl shadow-soft flex items-center justify-between border border-outline-variant/30">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 border-2 border-green-200">
-                <span className="material-symbols-outlined">check</span>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-green-700">Maker: Created</div>
-                <div className="text-[11px] text-slate-400">Sarah Johnson • May 2, 2026</div>
-              </div>
-            </div>
-            <div className="flex-1 h-px bg-slate-100 mx-6 relative">
-              <div className="absolute inset-0 bg-primary-container w-1/2"></div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container border-2 border-primary-container">
-                <span className="material-symbols-outlined">pending</span>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-primary-container">Checker: Pending Review</div>
-                <div className="text-[11px] text-slate-400">Awaiting your approval</div>
-              </div>
-            </div>
-            <div className="flex-1 h-px bg-slate-100 mx-6"></div>
-            <div className="flex items-center gap-4 opacity-40">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border-2 border-slate-200">
-                <span className="material-symbols-outlined">rocket_launch</span>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-slate-600">Published</div>
-                <div className="text-[11px] text-slate-400">End goal</div>
-              </div>
-            </div>
+          <div className="bg-surface-container-low border border-white/5 rounded-2xl p-5 flex items-center gap-4 overflow-x-auto">
+            {[
+              { label: "Strategy Approved", icon: "auto_awesome", done: true },
+              { label: "Content Approval", icon: "how_to_reg", active: true },
+              { label: "Designer", icon: "brush", done: false },
+              { label: "Design Review", icon: "rate_review", done: false },
+              { label: "Scheduled", icon: "calendar_month", done: false },
+              { label: "Published", icon: "rocket_launch", done: false },
+            ].map((step, i, arr) => (
+              <React.Fragment key={step.label}>
+                <div className={`flex items-center gap-2 shrink-0 ${step.done ? "text-sp-secondary" : step.active ? "text-sp-primary" : "text-gray-600"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step.done ? "border-sp-secondary bg-sp-secondary/10" : step.active ? "border-sp-primary bg-sp-primary/10" : "border-white/10 bg-white/5"}`}>
+                    <span className="material-symbols-outlined text-[16px]">{step.done ? "check" : step.icon}</span>
+                  </div>
+                  <span className={`text-xs font-bold whitespace-nowrap ${step.active ? "text-white" : ""}`}>{step.label}</span>
+                </div>
+                {i < arr.length - 1 && (
+                  <div className={`h-px flex-1 min-w-6 ${step.done ? "bg-sp-secondary/40" : "bg-white/5"}`} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Panel: Preview (2 Columns) */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl shadow-soft overflow-hidden border border-outline-variant/30">
-                {/* Platform Tabs */}
-                <div className="flex border-b border-slate-100">
-                  <button
-                    onClick={() => setActiveTab("instagram")}
-                    className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-                      activeTab === "instagram" ? "text-primary-container border-b-2 border-primary-container bg-primary-container/5" : "text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-lg">photo_camera</span> Instagram
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("linkedin")}
-                    className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-                      activeTab === "linkedin" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50" : "text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-lg">business_center</span> LinkedIn
-                  </button>
-                </div>
+          {/* Platform Filter */}
+          <div className="flex items-center gap-2">
+            {["all", "instagram", "linkedin", "website"].map((p) => (
+              <button
+                key={p}
+                onClick={() => setFilterPlatform(p)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all border ${
+                  filterPlatform === p
+                    ? "bg-sp-primary/10 border-sp-primary/30 text-sp-primary"
+                    : "border-white/10 text-gray-400 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                {p === "all" ? "All Platforms" : p}
+              </button>
+            ))}
+          </div>
 
-                <div className="p-8 bg-surface-container-lowest flex justify-center min-h-[500px]">
-                  {/* Phone Mockup Wrapper */}
-                  <div className="w-[320px] bg-white rounded-[3rem] p-3 shadow-2xl border-[8px] border-slate-900 relative">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-xl z-10"></div>
-                    <div className="bg-white rounded-[2.2rem] h-full overflow-hidden border border-slate-100 flex flex-col">
-                      <div className="px-3 pt-6 pb-3 flex items-center justify-between border-b border-slate-50">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-[2px]">
-                            <div className="w-full h-full rounded-full border-2 border-white bg-slate-200"></div>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold">flowpilot_ai</p>
-                            <p className="text-[8px] text-slate-500">Sponsored</p>
-                          </div>
-                        </div>
-                        <span className="material-symbols-outlined text-[14px]">more_horiz</span>
-                      </div>
-                      <div className="aspect-square bg-slate-100 flex items-center justify-center text-slate-400">
-                        [Image Placeholder]
-                      </div>
-                      <div className="p-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="material-symbols-outlined text-[20px]">favorite</span>
-                          <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
-                          <span className="material-symbols-outlined text-[20px]">send</span>
-                        </div>
-                        <p className="text-[10px] leading-tight line-clamp-3">
-                          <span className="font-bold">flowpilot_ai</span> Automate your marketing workflows with our new AI designer tool. 🚀
+          {/* Content Cards Grid */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="w-10 h-10 border-2 border-sp-primary/20 border-t-sp-primary rounded-full animate-spin" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-white/5 rounded-2xl">
+              <span className="material-symbols-outlined text-5xl text-gray-600 mb-4">check_circle</span>
+              <h3 className="text-xl font-bold text-white">All caught up!</h3>
+              <p className="text-on-surface-variant mt-2 text-sm">No content is pending approval right now.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filtered.map((task) => {
+                const pKey = platformKey(task.platform);
+                const colorClass = PLATFORM_COLOR[pKey] || "text-gray-400 bg-white/5 border-white/10";
+                return (
+                  <div
+                    key={task.id}
+                    onClick={() => { setSelectedTask(task); setActiveAction(null); setFeedback(""); }}
+                    className="bg-surface-container-low border border-white/5 rounded-2xl p-5 flex flex-col gap-4 hover:border-white/15 hover:bg-surface-container-high transition-all cursor-pointer group shadow-lg"
+                  >
+                    {/* Top Row */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">
+                          {task.clients?.business_name || "Unknown Client"}
                         </p>
+                        <h3 className="text-base font-bold text-white line-clamp-2">{task.task_name}</h3>
                       </div>
+                      <span className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border shrink-0 ${colorClass}`}>
+                        <span className="material-symbols-outlined text-[12px]">{PLATFORM_ICON[pKey] || "public"}</span>
+                        {task.platform}
+                      </span>
+                    </div>
+
+                    {/* Topic */}
+                    {task.topic && (
+                      <p className="text-sm text-on-surface-variant bg-surface-container-highest rounded-xl p-3 line-clamp-3 border border-white/5">
+                        {task.topic}
+                      </p>
+                    )}
+
+                    {/* Rework Comment Badge */}
+                    {task.rework_comments && (
+                      <div className="flex items-start gap-2 bg-sp-error/10 border border-sp-error/20 rounded-xl px-3 py-2">
+                        <span className="material-symbols-outlined text-sp-error text-sm mt-0.5">feedback</span>
+                        <p className="text-xs text-on-surface-variant line-clamp-2">{task.rework_comments}</p>
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
+                      <span className="text-[10px] text-gray-500">
+                        {new Date(task.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </span>
+                      <span className="text-[10px] font-bold text-sp-primary group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                        Review <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                      </span>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* ─── Review Modal ─── */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !isProcessing && setSelectedTask(null)} />
+          <div className="relative z-10 bg-surface-container-low border border-white/10 rounded-t-3xl md:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-300">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-white/5 flex items-start justify-between bg-[#1c1b1b] shrink-0">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${PLATFORM_COLOR[platformKey(selectedTask.platform)] || "text-gray-400 bg-white/5 border-white/10"}`}>
+                    <span className="material-symbols-outlined text-[12px]">{PLATFORM_ICON[platformKey(selectedTask.platform)] || "public"}</span>
+                    {selectedTask.platform}
+                  </span>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">{selectedTask.post_type || "Post"}</span>
                 </div>
+                <h3 className="text-lg font-[900] text-white">{selectedTask.task_name}</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">{selectedTask.clients?.business_name}</p>
               </div>
+              {!isProcessing && (
+                <button onClick={() => setSelectedTask(null)} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              )}
             </div>
 
-            {/* Right Panel: Controls & Feedback */}
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-xl shadow-soft border border-outline-variant/30">
-                <h3 className="font-h2 text-lg mb-4">Review Action</h3>
-                <div className="space-y-4">
-                  <button className="w-full py-3 bg-green-500 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-600 transition-colors shadow-md">
-                    <span className="material-symbols-outlined">check_circle</span> Approve & Schedule
-                  </button>
-                  <button className="w-full py-3 bg-white border border-outline-variant text-slate-700 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors">
-                    <span className="material-symbols-outlined text-primary-container">edit</span> Request Revisions
-                  </button>
-                  <button className="w-full py-3 bg-white border border-error-container text-error rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-error-container/20 transition-colors">
-                    <span className="material-symbols-outlined">cancel</span> Reject Content
-                  </button>
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              {/* Maker-Checker Stepper */}
+              <div className="bg-surface-container-high border border-white/5 rounded-xl p-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-sp-secondary/10 border-2 border-sp-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-sp-secondary text-[14px]">check</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-white">Maker: AI Strategy Agent</p>
+                  <p className="text-[10px] text-on-surface-variant">Generated from approved strategy</p>
+                </div>
+                <div className="h-px w-8 bg-white/10" />
+                <div className="w-8 h-8 rounded-full bg-sp-primary/10 border-2 border-sp-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-sp-primary text-[14px]">pending</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white">Checker: You</p>
+                  <p className="text-[10px] text-on-surface-variant">Pending review</p>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-soft border border-outline-variant/30">
-                <h3 className="font-h2 text-lg mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary-container">comment</span>
-                  Feedback
-                </h3>
-                <textarea 
-                  className="w-full h-32 p-3 bg-surface border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary-container/20 focus:outline-none transition-all"
-                  placeholder="Leave comments for the Maker or Designer..."
-                ></textarea>
-                <button className="mt-3 w-full py-2 bg-surface-container-highest text-slate-700 font-semibold rounded-lg hover:bg-surface-variant transition-colors text-sm">
-                  Add Comment
-                </button>
-              </div>
-
-              <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg">
-                <h3 className="font-h2 text-lg mb-2">AI Analysis</h3>
-                <div className="space-y-3 mt-4">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-green-400 text-sm mt-0.5">check_circle</span>
-                    <div>
-                      <p className="text-sm font-bold">Tone Match</p>
-                      <p className="text-xs text-slate-400">95% match with "Professional & Bold" guidelines.</p>
-                    </div>
+              {/* Content Preview */}
+              <div className="bg-surface-container-high rounded-xl border border-white/5 p-4 space-y-3">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Content Brief</p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-[10px] text-gray-500 mb-0.5">Platform</p>
+                    <p className="text-white font-bold">{selectedTask.platform}</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-yellow-400 text-sm mt-0.5">warning</span>
-                    <div>
-                      <p className="text-sm font-bold">Image Density</p>
-                      <p className="text-xs text-slate-400">Text in image exceeds 20% limit for optimal reach.</p>
-                    </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 mb-0.5">Post Type</p>
+                    <p className="text-white font-bold">{selectedTask.post_type || "Post"}</p>
                   </div>
                 </div>
+                {selectedTask.topic && (
+                  <div>
+                    <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest font-bold">Topic / Content Angle</p>
+                    <p className="text-sm text-on-surface-variant leading-relaxed bg-surface-container-highest rounded-lg p-3 border border-white/5">
+                      {selectedTask.topic}
+                    </p>
+                  </div>
+                )}
               </div>
+
+              {/* Previous Feedback */}
+              {selectedTask.rework_comments && (
+                <div className="bg-sp-error/10 border border-sp-error/20 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-sp-error uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]">history</span>
+                    Previous Feedback
+                  </p>
+                  <p className="text-sm text-on-surface-variant">{selectedTask.rework_comments}</p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              {activeAction === null && (
+                <div className="space-y-3">
+                  <button
+                    onClick={handleApprove}
+                    disabled={isProcessing}
+                    className="w-full py-3.5 bg-sp-secondary text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined">check_circle</span>
+                    Approve — Pass to Designer
+                  </button>
+                  <button
+                    onClick={() => setActiveAction("revisions")}
+                    className="w-full py-3.5 bg-surface-container-high border border-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sp-primary">edit_note</span>
+                    Request Revisions
+                  </button>
+                  <button
+                    onClick={() => setActiveAction("reject")}
+                    className="w-full py-3.5 bg-sp-error/10 border border-sp-error/20 text-sp-error font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-sp-error/20 transition-all"
+                  >
+                    <span className="material-symbols-outlined">cancel</span>
+                    Reject Content
+                  </button>
+                </div>
+              )}
+
+              {/* Revision / Reject Feedback Form */}
+              {(activeAction === "revisions" || activeAction === "reject") && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className={`rounded-xl border p-4 ${activeAction === "reject" ? "bg-sp-error/10 border-sp-error/30" : "bg-sp-primary/5 border-sp-primary/20"}`}>
+                    <p className={`text-xs font-bold mb-1 ${activeAction === "reject" ? "text-sp-error" : "text-sp-primary"}`}>
+                      {activeAction === "reject" ? "Rejection Reason" : "Revision Notes"}
+                    </p>
+                    <p className="text-[10px] text-on-surface-variant mb-3">
+                      {activeAction === "reject"
+                        ? "This content will be marked as rejected and removed from the queue."
+                        : "The content will remain in queue with your notes for the AI/team to address."}
+                    </p>
+                    <textarea
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      rows={4}
+                      placeholder={activeAction === "reject" ? "e.g., Content does not align with our brand tone..." : "e.g., Change the hook, make it more concise, add a CTA..."}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-sp-primary outline-none resize-none"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { setActiveAction(null); setFeedback(""); }}
+                      className="flex-1 py-3 font-bold text-gray-400 hover:text-white rounded-xl hover:bg-white/5 transition-all"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={activeAction === "reject" ? handleReject : handleRevisions}
+                      disabled={isProcessing || !feedback.trim()}
+                      className={`flex-1 py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${activeAction === "reject" ? "bg-sp-error text-white hover:opacity-90" : "bg-sp-primary text-black hover:opacity-90"}`}
+                    >
+                      {isProcessing ? (
+                        <div className="w-5 h-5 border-2 border-current/20 border-t-current rounded-full animate-spin" />
+                      ) : activeAction === "reject" ? "Confirm Rejection" : "Submit Revisions"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

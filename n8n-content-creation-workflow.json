@@ -1,0 +1,109 @@
+{
+  "name": "SaaS Content Creation Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-content-creation",
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook (Content)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "clients",
+        "limit": 1,
+        "matchType": "all",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Supabase (Read)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "model": "gpt-4o",
+        "prompt": "Strategy JSON: {{$json.strategy_json}}\n\nFeedback to fix (if any): {{$node['Webhook (Content)'].json.body.feedback}}",
+        "systemMessage": "You are an expert Social Media Art Director and Master Copywriter. Your goal is to translate high-level marketing strategies into EXTREMELY SPECIFIC, ready-to-design content deliverables. Output ONLY RAW JSON representing the design specs and captions.",
+        "options": {}
+      },
+      "id": "3",
+      "name": "OpenAI (GPT-4o)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clients",
+        "matchType": "all",
+        "updateKey": "id",
+        "columns": "content_json,status",
+        "data": {
+          "id": "={{ $('Webhook (Content)').item.json.body.client_id }}",
+          "content_json": "={{ $json.message.content }}",
+          "status": "Content Ready for Approval"
+        }
+      },
+      "id": "4",
+      "name": "Supabase (Save)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [950, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Content)": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Read)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase (Read)": {
+      "main": [
+        [
+          {
+            "node": "OpenAI (GPT-4o)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI (GPT-4o)": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Save)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

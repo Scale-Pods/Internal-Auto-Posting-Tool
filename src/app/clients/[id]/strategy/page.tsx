@@ -81,7 +81,7 @@ export default function StrategyReviewPage() {
             post_type: post.post_type || post.type || "Post",
             platform: post.platform || "Instagram",
             topic: post.topic || post.theme || "General",
-            status: 'Pending Design'
+            status: 'Pending Content Approval'
           });
         });
       }

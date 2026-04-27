@@ -22,7 +22,9 @@ export default function DesignerWorkspacePage() {
               <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-tight">FlowPilot AI</h1>
+              <div className="bg-primary p-2.5 rounded-lg flex items-center justify-center shadow-md">
+                <img src="/logo-light.png" alt="ScalePods" className="h-6 object-contain" />
+              </div>
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">DesignOps Engine</p>
             </div>
           </div>
@@ -95,7 +97,7 @@ export default function DesignerWorkspacePage() {
                   <p className="font-label-caps text-[10px] text-slate-400">Generated Caption</p>
                 </div>
                 <p className="text-sm text-slate-800 leading-relaxed">
-                  Transform your DesignOps with FlowPilot AI. Automate the mundane, amplify the creative. 🚀
+                  Transform your DesignOps with ScalePods. Automate the mundane, amplify the creative. 🚀
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -197,7 +199,7 @@ export default function DesignerWorkspacePage() {
               <div className="absolute bottom-6 left-6 right-6 flex justify-center">
                 <div className="bg-slate-900 text-white px-6 py-3 rounded-full flex items-center gap-4 shadow-2xl">
                   <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
-                  <span className="text-xs font-semibold">FlowPilot AI suggests a "Multi-platform resize"</span>
+                  <span className="text-xs font-semibold">ScalePods suggests a "Multi-platform resize"</span>
                   <button className="px-4 py-1.5 bg-primary-container rounded-full text-xs font-bold hover:bg-primary transition-colors shadow-sm">Apply Resize</button>
                 </div>
               </div>
@@ -276,7 +278,7 @@ export default function DesignerWorkspacePage() {
                 <span className="material-symbols-outlined text-green-500">check_circle</span>
                 <span className="font-semibold text-slate-800">Connection active</span>
               </div>
-              <p className="text-xs text-slate-500 ml-8">Workspace: FlowPilot Marketing Team</p>
+              <p className="text-xs text-slate-500 ml-8">Workspace: ScalePods Marketing Team</p>
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowExportModal(false)} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">

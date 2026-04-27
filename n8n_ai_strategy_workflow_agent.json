@@ -1,0 +1,291 @@
+{
+  "name": "AI Strategy Deep Audit Workflow - V3 (Long-term Fix)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-strategy-audit",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook (Trigger)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "table": "clients",
+        "matchType": "any",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "name": "Fetch Client (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase_credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client_id_field",
+              "name": "client_id",
+              "value": "={{$json.id}}",
+              "type": "string"
+            },
+            {
+              "id": "business_name_field",
+              "name": "business_name",
+              "value": "={{$json.business_name}}",
+              "type": "string"
+            },
+            {
+              "id": "industry_type_field",
+              "name": "industry_type",
+              "value": "={{$json.industry_type}}",
+              "type": "string"
+            },
+            {
+              "id": "website_url_field",
+              "name": "website_url",
+              "value": "={{$json.website_url}}",
+              "type": "string"
+            },
+            {
+              "id": "competitors_field",
+              "name": "competitors",
+              "value": "={{$json.competitors}}",
+              "type": "string"
+            },
+            {
+              "id": "target_audience_field",
+              "name": "target_audience",
+              "value": "={{$json.target_audience}}",
+              "type": "string"
+            },
+            {
+              "id": "primary_goal_field",
+              "name": "primary_goal",
+              "value": "={{$json.primary_goal}}",
+              "type": "string"
+            },
+            {
+              "id": "brand_tone_field",
+              "name": "brand_tone",
+              "value": "={{$json.brand_tone}}",
+              "type": "string"
+            },
+            {
+              "id": "additional_notes_field",
+              "name": "additional_notes",
+              "value": "={{$json.additional_notes}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Preserve Client Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=IMPORTANT - Client ID (copy this EXACTLY into your output JSON): {{$json.client_id}}\n\nBusiness to research: {{$json.business_name}}\nIndustry: {{$json.industry_type}}\nWebsite: {{$json.website_url}}\nCompetitors: {{$json.competitors}}\nGoals: {{$json.primary_goal}}\nTarget Audience: {{$json.target_audience}}\nBrand Tone: {{$json.brand_tone}}\nAdditional Notes: {{$json.additional_notes}}\n\nINSTRUCTIONS:\n1. Use your Firecrawl_Scraper tool to visit their Website URL and extract text.\n2. Use your Firecrawl_Scraper tool to visit each Competitor URL and extract their text.\n3. Analyze all extracted data thoroughly.\n\nOUTPUT: You MUST output ONLY a single valid JSON object (no markdown, no backticks) with this exact structure. The client_id field must be copied EXACTLY as given above:\n{\n  \"client_id\": \"PASTE_THE_CLIENT_ID_HERE\",\n  \"executive_summary\": \"string\",\n  \"brand_positioning\": {\n    \"unique_value_proposition\": \"string\",\n    \"brand_voice\": \"string\",\n    \"key_differentiators\": [\"string\"]\n  },\n  \"target_audience\": {\n    \"primary\": { \"description\": \"string\", \"pain_points\": [\"string\"] },\n    \"secondary\": { \"description\": \"string\", \"pain_points\": [\"string\"] }\n  },\n  \"competitor_analysis\": {\n    \"competitors\": [\n      { \"name\": \"string\", \"website\": \"string\", \"strengths\": [\"string\"], \"weaknesses\": [\"string\"], \"opportunities\": [\"string\"] }\n    ]\n  },\n  \"content_strategy\": {\n    \"content_pillars\": [\n      { \"pillar\": \"string\", \"percentage\": 40, \"description\": \"string\" }\n    ],\n    \"platforms\": [\n      { \"platform\": \"string\", \"content_types\": [\"string\"], \"posting_frequency\": \"string\", \"best_times\": \"string\" }\n    ]\n  },\n  \"growth_tactics\": [\"string\"],\n  \"kpis\": [\n    { \"metric\": \"string\", \"target\": \"string\" }\n  ]\n}",
+        "options": {
+          "systemMessage": "You are an elite digital intelligence researcher with web scraping tools. You MUST use your Firecrawl_Scraper tool to visit every URL before making any claims. DO NOT hallucinate or use training data for website content. Always scrape first, then analyze. CRITICAL: Always include the exact client_id value you were given in your JSON output. Return ONLY valid JSON with no markdown or backticks."
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [820, 520],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai_credentials",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [970, 520]
+    },
+    {
+      "parameters": {
+        "name": "Firecrawl_Scraper",
+        "description": "Call this tool to accurately scrape text content from a live website URL. Always pass the full URL including https://",
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_FIRECRAWL_API_KEY_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"url\": \"{url}\", \"formats\": [\"markdown\"]}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "url",
+              "description": "The exact website URL to scrape including https://",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "name": "HTTP Request Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1120, 520]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "strategy_field",
+              "name": "strategy_json",
+              "value": "={{JSON.parse($json.output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim())}}",
+              "type": "object"
+            },
+            {
+              "id": "client_id_pass",
+              "name": "client_id",
+              "value": "={{JSON.parse($json.output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim()).client_id}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Prepare Update Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "clients",
+        "matchType": "any",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$json.client_id}}"
+            }
+          ]
+        },
+        "updateFields": {
+          "fields": [
+            {
+              "keyName": "strategy_json",
+              "keyValue": "={{$json.strategy_json}}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "strategy_approved"
+            }
+          ]
+        }
+      },
+      "name": "Update Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1550, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase_credentials",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"message\": \"Strategy generated successfully\"}",
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Trigger)": {
+      "main": [[{ "node": "Fetch Client (Supabase)", "type": "main", "index": 0 }]]
+    },
+    "Fetch Client (Supabase)": {
+      "main": [[{ "node": "Preserve Client Data", "type": "main", "index": 0 }]]
+    },
+    "Preserve Client Data": {
+      "main": [
+        [{ "node": "AI Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "AI Agent": {
+      "main": [[{ "node": "Prepare Update Fields", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [[{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]]
+    },
+    "HTTP Request Tool": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Prepare Update Fields": {
+      "main": [[{ "node": "Update Supabase", "type": "main", "index": 0 }]]
+    },
+    "Update Supabase": {
+      "main": [[{ "node": "Webhook Response", "type": "main", "index": 0 }]]
+    }
+  }
+}

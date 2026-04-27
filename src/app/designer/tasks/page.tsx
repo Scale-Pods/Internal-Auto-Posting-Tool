@@ -15,7 +15,9 @@ export default function DesignerTaskQueuePage() {
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight font-h1 leading-none">FlowPilot AI</h1>
+            <div className="bg-primary p-2.5 rounded-lg flex items-center justify-center shadow-md">
+              <img src="/logo-light.png" alt="ScalePods" className="h-6 object-contain" />
+            </div>
             <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">DesignOps Engine</p>
           </div>
         </div>

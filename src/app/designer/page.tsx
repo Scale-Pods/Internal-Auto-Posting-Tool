@@ -17,6 +17,7 @@ export default function DesignerPage() {
   const [platformTarget, setPlatformTarget] = useState<string>("instagram");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [externalDesignUrl, setExternalDesignUrl] = useState<string>("");
 
   // Designer assignment
   const [currentDesigner, setCurrentDesigner] = useState<string>("Designer 1");
@@ -62,44 +63,54 @@ export default function DesignerPage() {
   }
 
 async function handleFileUpload() {
-    if (!selectedTask || uploadFiles.length === 0) return;
+    const hasFiles = uploadFiles.length > 0;
+    const hasExternalUrl = externalDesignUrl.trim().length > 0;
+    if (!selectedTask || (!hasFiles && !hasExternalUrl)) return;
     setIsUploading(true);
     setUploadError(null);
 
     try {
-      let publicUrls: string[] = [];
+      let finalMediaUrl = "";
 
-      // 1. Sequentially upload each file to Supabase Storage
-      for (let i = 0; i < uploadFiles.length; i++) {
-        const file = uploadFiles[i];
-        const fileExt = file.name.split('.').pop() || 'tmp';
-        const fileName = `${selectedTask.id}-${Date.now()}-${i}.${fileExt}`;
-        const filePath = `${selectedTask.client_id}/${fileName}`;
+      if (hasFiles) {
+        let publicUrls: string[] = [];
+        // 1. Sequentially upload each file to Supabase Storage
+        for (let i = 0; i < uploadFiles.length; i++) {
+          const file = uploadFiles[i];
+          const fileExt = file.name.split('.').pop() || 'tmp';
+          const fileName = `${selectedTask.id}-${Date.now()}-${i}.${fileExt}`;
+          const filePath = `${selectedTask.client_id}/${fileName}`;
 
-        console.log(`[Upload] Attempting item ${i+1}/${uploadFiles.length}:`, filePath);
+          console.log(`[Upload] Attempting item ${i+1}/${uploadFiles.length}:`, filePath);
 
-        const { error: uploadError } = await supabase.storage
-          .from('agency_media')
-          .upload(filePath, file, { 
-            upsert: true,
-            contentType: file.type
-          });
+          const { error: uploadError } = await supabase.storage
+            .from('agency_media')
+            .upload(filePath, file, { 
+              upsert: true,
+              contentType: file.type
+            });
 
-        if (uploadError) {
-          throw new Error(`Storage Error on File ${i+1}: ${uploadError.message}`);
+          if (uploadError) {
+            throw new Error(`Storage Error on File ${i+1}: ${uploadError.message}`);
+          }
+
+          // 2. Get Public URL
+          const { data: urlData } = supabase.storage
+            .from('agency_media')
+            .getPublicUrl(filePath);
+          if (urlData?.publicUrl) {
+            publicUrls.push(urlData.publicUrl);
+          }
         }
-
-        // 2. Get Public URL
-        const { data: urlData } = supabase.storage
-          .from('agency_media')
-          .getPublicUrl(filePath);
-        if (urlData?.publicUrl) {
-          publicUrls.push(urlData.publicUrl);
-        }
+        console.log("[Upload] Success! All Public URLs:", publicUrls);
+        finalMediaUrl = publicUrls.join(",");
+        // Append external design URL as a reference if also provided
+        if (hasExternalUrl) finalMediaUrl += "," + externalDesignUrl.trim();
+      } else {
+        // External URL only (Figma / Canva export)
+        finalMediaUrl = externalDesignUrl.trim();
+        console.log("[Upload] Using external design URL:", finalMediaUrl);
       }
-
-      console.log("[Upload] Success! All Public URLs:", publicUrls);
-      const finalMediaUrl = publicUrls.join(",");
 
       // 3. Update the deliverable row in the database
       const { error: dbError } = await supabase
@@ -127,8 +138,12 @@ async function handleFileUpload() {
 
       setSelectedTask(null);
       setUploadFiles([]);
+      setExternalDesignUrl("");
       setPlatformTarget("instagram");
-      alert(`✅ ${uploadFiles.length} asset(s) uploaded! Sent to client for review.`);
+      const msg = hasFiles
+        ? `✅ ${uploadFiles.length} asset(s) uploaded! Sent to client for review.`
+        : `✅ External design link saved! Sent to client for review.`;
+      alert(msg);
 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Upload failed.";
@@ -468,6 +483,42 @@ async function handleFileUpload() {
                 </div>
               </div>
 
+              {/* ── External Design Link (Figma / Canva) ── */}
+              <div className="bg-gradient-to-r from-sp-primary/5 to-sp-secondary/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sp-primary text-[18px]">link</span>
+                  <p className="text-xs font-bold text-white">External Design Link <span className="text-gray-500 font-normal">(Figma / Canva export)</span></p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  {[
+                    { label: '🎨 Figma', hint: 'figma.com/file/...' },
+                    { label: '🖌 Canva', hint: 'canva.com/design/...' },
+                  ].map((t) => (
+                    <button
+                      key={t.label}
+                      type="button"
+                      onClick={() => setExternalDesignUrl(t.hint)}
+                      className="text-[10px] font-bold py-1.5 px-2 rounded-lg border border-white/10 text-gray-400 hover:border-sp-primary/40 hover:text-sp-primary transition-all text-left"
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="url"
+                  value={externalDesignUrl}
+                  onChange={(e) => setExternalDesignUrl(e.target.value)}
+                  placeholder="Paste Figma or Canva export URL here..."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-gray-600 focus:ring-1 focus:ring-sp-primary focus:border-sp-primary outline-none transition-all"
+                />
+                {externalDesignUrl.trim() && (
+                  <p className="text-[10px] text-sp-primary flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                    URL set. You can skip file upload and submit directly.
+                  </p>
+                )}
+              </div>
+
               <div>
                 <p className="text-xs font-bold text-white mb-2">Select Media File(s)</p>
                 <div className="flex items-center justify-between mb-2">
@@ -561,7 +612,7 @@ async function handleFileUpload() {
             <div className="p-6 bg-surface-container-highest flex gap-3">
               <button 
                 onClick={handleFileUpload}
-                disabled={uploadFiles.length === 0 || isUploading}
+                disabled={(uploadFiles.length === 0 && !externalDesignUrl.trim()) || isUploading}
                 className="flex-1 bg-sp-primary text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUploading ? (

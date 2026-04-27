@@ -115,7 +115,7 @@ export default function OnboardingPage() {
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-8">
             <span className="text-xl font-bold text-slate-900 font-h2">
-              FlowPilot AI
+              ScalePods
             </span>
             {/* Step Progress */}
             <nav className="hidden md:flex items-center gap-6">

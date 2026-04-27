@@ -1,0 +1,245 @@
+{
+  "name": "ScalePods Content Pipeline (FINAL)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "saas-ai-content-creation",
+        "options": {}
+      },
+      "id": "eae05607-0e26-40e7-92be-03c2cce7cd89",
+      "name": "Webhook (Content)1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [3168, 3120],
+      "webhookId": "c3a0b2e8-2a88-4c49-ad5b-cb23746f1e75"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "clients",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{$json.body.client_id}}"
+            }
+          ]
+        }
+      },
+      "id": "1841db02-06b0-45dd-80a1-630f462f2328",
+      "name": "Supabase (Read)1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [3440, 3120],
+      "credentials": {
+        "supabaseApi": {
+          "id": "XGzB95wXOZmYBRym",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($('Supabase (Read)1').item.json.strategy_json) }}",
+        "options": {
+          "systemMessage": "You are a senior marketing strategist and brand analyst with deep expertise in growth, positioning, and content strategy.\n\nYour task is to analyze the business's existing strategy data and generate a comprehensive, insight-driven marketing analysis.\n\nSTEP 1: Parse the provided Strategy JSON to understand Brand Positioning, Target Audience (ICP) pain points, Messaging Tone, and Funnel Gaps.\n\nSTEP 2: Output a clear Consultant Report breaking down:\n1. Executive Summary\n2. Brand & ICP Analysis\n3. Messaging Gaps\n4. Recommended Content Themes to address these gaps.\n\nIMPORTANT: Be specific, base insights only on the provided JSON data, and think like a senior consultant."
+        }
+      },
+      "id": "6bf52025-c223-4f57-bee1-6e5dc05ae51f",
+      "name": "AI Agent (Strategist)1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [3648, 3120]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "8cf5fa09-1514-4260-a540-d98cebd349dc",
+      "name": "OpenAI Chat Model ",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [3696, 3328],
+      "credentials": {
+        "openAiApi": {
+          "id": "VWwgkmcjUOSbOyPw",
+          "name": "info@scalepods.co"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the Consultant's Analysis:\n\n{{$json.output}}",
+        "options": {
+          "systemMessage": "You are an expert Social Media Art Director and Master Copywriter. Your goal is to translate the Senior Consultant's strategy analysis into EXTREMELY SPECIFIC, ready-to-design content deliverables.\n\nYOUR OUTPUT MUST BE ONLY RAW JSON. No markdown, no backticks, no explanation. Just the JSON object.\n\nREQUIRED STRUCTURE:\n{\n  \"instagram\": [\n    {\n      \"format\": \"Carousel (1080x1350)\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe imagery, layout, mood]\",\n          \"text_on_image\": \"[Exact hook]\",\n          \"designer_notes\": \"[Specific design rules]\"\n        }\n      ],\n      \"caption\": \"[Engaging caption]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ],\n  \"linkedin\": [\n    {\n      \"format\": \"Text + Image Post\",\n      \"slides\": [\n        {\n          \"slide_number\": 1,\n          \"visual_description\": \"[Describe graphic]\",\n          \"text_on_image\": \"[Text inside graphic]\",\n          \"designer_notes\": \"[Design instructions]\"\n        }\n      ],\n      \"caption\": \"[Professional hook, body, and CTA. Use spacing.]\",\n      \"hashtags\": [\"#tag\"]\n    }\n  ]\n}\n\nINSTRUCTIONS:\n1. Read the Consultant's Strategy Analysis.\n2. Output ONLY the raw JSON structure above. No backticks. No markdown."
+        }
+      },
+      "id": "0b96e1e0-a698-41c4-b29f-ca330012be6c",
+      "name": "AI Agent (Art Director)1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [4000, 3120]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "d5947991-620d-4a9d-9fca-93205b6dedfd",
+      "name": "OpenAI Chat Model 3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [4048, 3328],
+      "credentials": {
+        "openAiApi": {
+          "id": "VWwgkmcjUOSbOyPw",
+          "name": "info@scalepods.co"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-node-001",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [4320, 3120]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clients",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook (Content)1').first().json.body.client_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "content_json",
+              "fieldValue": "={{ $('AI Agent (Art Director)1').first().json.output }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Content Ready for Approval"
+            }
+          ]
+        }
+      },
+      "id": "72404e87-9d52-4810-9eee-7455678189b8",
+      "name": "Supabase (Save)1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [4560, 3120],
+      "credentials": {
+        "supabaseApi": {
+          "id": "XGzB95wXOZmYBRym",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook (Content)1": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Read)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase (Read)1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Strategist)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Strategist)1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Art Director)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Art Director)1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Supabase (Save)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model ": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Strategist)1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model 3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Art Director)1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "11e350345aae172743fe2665ba36f76304fbd6b68282474d7d08206f6a010061"
+  }
+}

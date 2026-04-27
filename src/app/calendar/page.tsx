@@ -1,328 +1,434 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/lib/supabase";
+import Sidebar from "@/components/sidebar";
+
+type Deliverable = {
+  id: string;
+  task_name: string;
+  post_type: string;
+  platform: string;
+  platform_target?: string;
+  topic: string;
+  status: string;
+  created_at: string;
+  scheduled_time?: string;
+  client_id: string;
+  media_url?: string;
+  clients?: { business_name: string };
+};
+
+const PLATFORM_ICON: Record<string, string> = {
+  instagram: "photo_camera",
+  linkedin: "business_center",
+  website: "language",
+};
+
+const PLATFORM_COLOR: Record<string, string> = {
+  instagram: "text-pink-500 bg-pink-500/10 border-pink-500/20",
+  linkedin: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  website: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  Scheduled: "bg-sp-primary/10 text-sp-primary border border-sp-primary/20",
+  Published: "bg-sp-secondary/10 text-sp-secondary border border-sp-secondary/20",
+  "Ready for Publishing": "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+};
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function platformKey(p?: string) {
+  return (p || "instagram").toLowerCase();
+}
 
 export default function CalendarPage() {
-  const [showModal, setShowModal] = useState(false);
+  const today = new Date();
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Schedule modal
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [approvedContent, setApprovedContent] = useState<Deliverable[]>([]);
+  const [selectedContent, setSelectedContent] = useState<Deliverable | null>(null);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("10:00");
+  const [isScheduling, setIsScheduling] = useState(false);
+
+  // Day detail
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchScheduledItems();
+  }, [currentYear, currentMonth]);
+
+  async function fetchScheduledItems() {
+    setIsLoading(true);
+    const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString();
+    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+
+    const { data } = await supabase
+      .from("content_deliverables")
+      .select(`*, clients(business_name)`)
+      .in("status", ["Scheduled", "Published", "Ready for Publishing"])
+      .order("scheduled_time", { ascending: true });
+
+    setDeliverables(data || []);
+    setIsLoading(false);
+  }
+
+  async function openScheduleModal() {
+    // Fetch ready-for-publishing content
+    const { data } = await supabase
+      .from("content_deliverables")
+      .select(`*, clients(business_name)`)
+      .eq("status", "Ready for Publishing")
+      .order("created_at", { ascending: false });
+
+    setApprovedContent(data || []);
+    setShowScheduleModal(true);
+    setSelectedContent(null);
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    setScheduleDate(d.toISOString().split("T")[0]);
+    setScheduleTime("10:00");
+  }
+
+  async function handleSchedule() {
+    if (!selectedContent || !scheduleDate) {
+      alert("Please select content and a date.");
+      return;
+    }
+    setIsScheduling(true);
+    try {
+      const scheduledISO = new Date(`${scheduleDate}T${scheduleTime}:00`).toISOString();
+      const { error } = await supabase
+        .from("content_deliverables")
+        .update({ status: "Scheduled", scheduled_time: scheduledISO })
+        .eq("id", selectedContent.id);
+
+      if (error) throw error;
+
+      // Refresh
+      await fetchScheduledItems();
+      setShowScheduleModal(false);
+      setSelectedContent(null);
+    } catch (err: any) {
+      alert("Error scheduling: " + err.message);
+    } finally {
+      setIsScheduling(false);
+    }
+  }
+
+  // Calendar calculations
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Map of day number → deliverables on that day
+  const dayMap = useMemo(() => {
+    const map: Record<number, Deliverable[]> = {};
+    deliverables.forEach((d) => {
+      if (!d.scheduled_time) return;
+      const dt = new Date(d.scheduled_time);
+      if (dt.getFullYear() === currentYear && dt.getMonth() === currentMonth) {
+        const day = dt.getDate();
+        if (!map[day]) map[day] = [];
+        map[day].push(d);
+      }
+    });
+    return map;
+  }, [deliverables, currentYear, currentMonth]);
+
+  const scheduledThisMonth = Object.values(dayMap).flat().length;
+
+  function prevMonth() {
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
+    else setCurrentMonth(m => m - 1);
+  }
+  function nextMonth() {
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1); }
+    else setCurrentMonth(m => m + 1);
+  }
+
+  const selectedDayItems = selectedDay ? (dayMap[selectedDay] || []) : [];
+
+  // Build grid cells: blanks + days
+  const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
 
   return (
-    <div className="bg-background font-body-base text-on-background min-h-screen flex">
-      {/* SideNavBar */}
-      <aside className="fixed left-0 top-0 h-screen w-60 border-r border-slate-200 bg-white z-50 flex flex-col py-6">
-        <div className="px-6 mb-8 flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center text-white">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix</span>
-          </div>
-          <div>
-            <h2 className="font-bold text-slate-900 text-sm">FlowPilot AI</h2>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Enterprise Plan</p>
-          </div>
-        </div>
-        <nav className="flex-1 space-y-1">
-          <Link href="/dashboard" className="text-slate-500 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">dashboard</span>
-            <span className="font-h2 text-[14px]">Dashboard</span>
-          </Link>
-          <div className="bg-primary-container/10 text-primary-container border-l-4 border-primary-container font-semibold flex items-center gap-3 px-6 py-3 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-            <span className="font-h2 text-[14px]">Calendar</span>
-          </div>
-          <Link href="#" className="text-slate-500 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">auto_fix</span>
-            <span className="font-h2 text-[14px]">Automations</span>
-          </Link>
-          <Link href="#" className="text-slate-500 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">group</span>
-            <span className="font-h2 text-[14px]">Audiences</span>
-          </Link>
-          <Link href="/analytics" className="text-slate-500 flex items-center gap-3 px-6 py-3 hover:bg-slate-50 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">bar_chart</span>
-            <span className="font-h2 text-[14px]">Reports</span>
-          </Link>
-        </nav>
-        <div className="px-6 mt-auto space-y-4">
-          <button className="w-full py-2 px-4 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all">
-            Upgrade Plan
-          </button>
-          <div className="pt-4 border-t border-slate-100">
-            <Link href="#" className="text-slate-500 flex items-center gap-3 py-2 hover:text-slate-900 transition-colors">
-              <span className="material-symbols-outlined text-[20px]">help</span>
-              <span className="text-[14px] font-semibold">Help Center</span>
-            </Link>
-            <Link href="#" className="text-slate-500 flex items-center gap-3 py-2 hover:text-slate-900 transition-colors">
-              <span className="material-symbols-outlined text-[20px]">logout</span>
-              <span className="text-[14px] font-semibold">Log Out</span>
-            </Link>
-          </div>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-background text-on-background flex font-sans antialiased">
+      <Sidebar />
 
-      {/* Main Content Wrapper */}
-      <div className="ml-[240px] flex-1 flex flex-col min-h-screen">
-        {/* TopAppBar */}
-        <header className="sticky top-0 w-full z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm">
-          <div className="flex items-center gap-8">
-            <span className="text-lg font-black tracking-tight text-slate-900">MarketFlow</span>
-            <nav className="flex items-center gap-6">
-              <Link href="/analytics" className="text-slate-500 hover:text-slate-900 font-semibold text-sm">Analytics</Link>
-              <span className="text-primary-container border-b-2 border-primary-container pb-1 font-semibold text-sm">Campaigns</span>
-              <Link href="#" className="text-slate-500 hover:text-slate-900 font-semibold text-sm">Assets</Link>
-            </nav>
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto md:ml-64">
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-surface-container-low/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-8 shadow-sm">
+          <div className="flex items-center gap-6">
+            <div>
+              <p className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Step 8</p>
+              <h1 className="text-xl font-[900] text-white">Publishing Calendar</h1>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-            <div className="h-8 w-px bg-slate-200 mx-2"></div>
-            <button 
-              onClick={() => setShowModal(true)}
-              className="bg-primary-container text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm hover:bg-primary transition-all flex items-center gap-2"
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openScheduleModal}
+              className="bg-sp-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:opacity-90 transition-all flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">add_task</span>
               Schedule Post
             </button>
-            <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-600">JD</div>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
-          {/* Calendar Header Tools */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="font-h1 text-3xl font-bold text-slate-900 mb-1">April 2026</h1>
-              <p className="text-sm text-slate-500 flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-primary-container"></span>
-                14 Scheduled posts this month
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-white border border-slate-200 p-1 rounded-xl flex shadow-sm">
-                <button className="px-4 py-1.5 text-sm font-bold bg-slate-100 text-slate-900 rounded-lg">Month</button>
-                <button className="px-4 py-1.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">Week</button>
-                <button className="px-4 py-1.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">Day</button>
-                <button className="px-4 py-1.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">List</button>
-              </div>
-              <button className="bg-white border border-slate-200 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
-                <span className="material-symbols-outlined text-[18px]">filter_list</span>
-                Filters
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
+          {/* Month Nav + Stats */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all border border-white/10">
+                <span className="material-symbols-outlined">chevron_left</span>
               </button>
+              <div>
+                <h2 className="text-2xl font-[900] text-white">{MONTHS[currentMonth]} {currentYear}</h2>
+                <p className="text-sm text-on-surface-variant flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-sp-primary inline-block" />
+                  {scheduledThisMonth} scheduled post{scheduledThisMonth !== 1 ? "s" : ""} this month
+                </p>
+              </div>
+              <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all border border-white/10">
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 text-xs font-bold">
+              {[
+                { label: "Scheduled", color: "bg-sp-primary" },
+                { label: "Published", color: "bg-sp-secondary" },
+                { label: "Ready", color: "bg-yellow-400" },
+              ].map((l) => (
+                <span key={l.label} className="flex items-center gap-1.5 text-on-surface-variant">
+                  <span className={`w-2 h-2 rounded-full ${l.color}`} />{l.label}
+                </span>
+              ))}
             </div>
           </div>
 
           {/* Calendar Grid */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            {/* Day Names */}
-            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/50">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                <div key={day} className="py-3 px-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">{day}</div>
+          <div className="bg-surface-container-low border border-white/5 rounded-2xl overflow-hidden shadow-xl">
+            {/* Day name headers */}
+            <div className="grid grid-cols-7 border-b border-white/5">
+              {DAY_NAMES.map((d) => (
+                <div key={d} className="py-3 text-center text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">
+                  {d}
+                </div>
               ))}
             </div>
 
-            {/* Days Grid - simplified for component */}
-            <div className="grid grid-cols-7 auto-rows-[minmax(140px,1fr)]">
-              {/* Empty slots */}
-              <div className="border-r border-b border-slate-100 bg-slate-50/30 p-2"></div>
-              <div className="border-r border-b border-slate-100 bg-slate-50/30 p-2"></div>
-              
-              {/* Day 1 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer">
-                <span className="text-sm font-bold text-slate-400">1</span>
-              </div>
-              
-              {/* Day 2 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors">
-                <span className="text-sm font-bold text-slate-400">2</span>
-                <div className="mt-2 bg-white rounded-lg border border-slate-200 shadow-sm p-2 cursor-grab active:cursor-grabbing hover:-translate-y-0.5 transition-transform">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Posted</span>
-                    <span className="material-symbols-outlined text-slate-300 text-[16px]">share</span>
+            {/* Day cells */}
+            <div className="grid grid-cols-7 auto-rows-[minmax(120px,1fr)]">
+              {Array.from({ length: totalCells }).map((_, idx) => {
+                const dayNum = idx - firstDayOfMonth + 1;
+                const isValid = dayNum >= 1 && dayNum <= daysInMonth;
+                const isToday = isValid && dayNum === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                const items = isValid ? (dayMap[dayNum] || []) : [];
+                const isSelected = selectedDay === dayNum && isValid;
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => isValid && setSelectedDay(isSelected ? null : dayNum)}
+                    className={`border-b border-r border-white/5 p-2 transition-all ${isValid ? "cursor-pointer hover:bg-white/3" : "bg-black/20"} ${isToday ? "ring-2 ring-inset ring-sp-primary/40 bg-sp-primary/5" : ""} ${isSelected ? "bg-white/5" : ""}`}
+                  >
+                    {isValid && (
+                      <>
+                        <span className={`text-sm font-bold mb-1 block w-7 h-7 flex items-center justify-center rounded-full ${isToday ? "bg-sp-primary text-black" : "text-on-surface-variant"}`}>
+                          {dayNum}
+                        </span>
+                        <div className="space-y-1">
+                          {items.slice(0, 2).map((item) => {
+                            const pKey = platformKey(item.platform_target || item.platform);
+                            const dotColor = item.status === "Published" ? "bg-sp-secondary" : item.status === "Scheduled" ? "bg-sp-primary" : "bg-yellow-400";
+                            return (
+                              <div key={item.id} className="flex items-center gap-1.5 bg-surface-container-high rounded-md px-1.5 py-1 border border-white/5 group">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
+                                <span className="text-[10px] font-medium text-on-surface truncate flex-1">{item.task_name}</span>
+                                <span className="material-symbols-outlined text-[10px] text-gray-600">{PLATFORM_ICON[pKey] || "public"}</span>
+                              </div>
+                            );
+                          })}
+                          {items.length > 2 && (
+                            <p className="text-[9px] text-on-surface-variant pl-1">+{items.length - 2} more</p>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <p className="text-[10px] font-bold text-slate-700 line-clamp-1">AI Trends 2026 Intro</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex -space-x-1">
-                      <span className="material-symbols-outlined text-blue-600 text-[14px]">business_center</span>
-                      <span className="material-symbols-outlined text-pink-600 text-[14px]">photo_camera</span>
-                    </div>
-                    <span className="text-[9px] font-medium text-slate-400">09:00 AM</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Day 3, 4, 5 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">3</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">4</span></div>
-              <div className="border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">5</span></div>
-
-              {/* Day 6 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors">
-                <span className="text-sm font-bold text-slate-900">6</span>
-                <div className="mt-2 bg-white rounded-lg border-l-4 border-l-primary-container border-y border-r border-slate-200 shadow-sm p-2 cursor-grab hover:-translate-y-0.5 transition-transform">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="bg-primary-fixed/30 text-primary-container text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Scheduled</span>
-                  </div>
-                  <div className="w-full h-12 bg-slate-100 rounded mb-2 flex items-center justify-center text-slate-400 border border-slate-200 text-[10px]">[Image]</div>
-                  <p className="text-[10px] font-bold text-slate-700 line-clamp-1">Automation 101 Guide</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="material-symbols-outlined text-pink-600 text-[14px]">photo_camera</span>
-                    <span className="text-[9px] font-medium text-slate-400">02:30 PM</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Day 7, 8 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">7</span></div>
-              <div className="border-r border-b border-slate-100 p-3 bg-surface-container-low">
-                <span className="text-sm font-bold text-slate-900">8</span>
-                <div className="mt-2 bg-white rounded-lg border border-red-200 shadow-sm p-2 cursor-grab hover:-translate-y-0.5 transition-transform">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="bg-red-50 text-red-600 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Failed</span>
-                  </div>
-                  <p className="text-[10px] font-bold text-slate-700 line-clamp-1">Webinar Recap Video</p>
-                  <span className="text-[9px] font-medium text-red-500 mt-1 block">API Error: Invalid Token</span>
-                </div>
-              </div>
-
-              {/* Day 9, 10, 11, 12 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">9</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">10</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">11</span></div>
-              <div className="border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">12</span></div>
-
-              {/* Remaining placeholders */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">13</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">14</span></div>
-              
-              {/* Day 15 (Active/Today) */}
-              <div className="border-r border-b border-slate-100 p-3 ring-2 ring-primary-container ring-inset rounded-lg z-10 bg-primary-container/5">
-                <span className="w-7 h-7 rounded-full bg-primary-container text-white flex items-center justify-center text-sm font-bold">15</span>
-                <div className="mt-2 bg-white rounded-lg border-l-4 border-l-primary-container border-y border-r border-slate-200 shadow-sm p-2 cursor-grab hover:-translate-y-0.5 transition-transform">
-                  <p className="text-[10px] font-bold text-slate-700">5 Ways to Automate...</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="material-symbols-outlined text-blue-800 text-[14px]">language</span>
-                    <span className="text-[9px] font-medium text-slate-400">11:15 AM</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* More placeholders */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">16</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">17</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">18</span></div>
-              <div className="border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">19</span></div>
-
-              {/* Week 4 */}
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">20</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">21</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">22</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">23</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">24</span></div>
-              <div className="border-r border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-900">25</span></div>
-              <div className="border-b border-slate-100 p-3 hover:bg-surface transition-colors cursor-pointer"><span className="text-sm font-bold text-slate-400">26</span></div>
+                );
+              })}
             </div>
           </div>
+
+          {/* Day Detail Panel */}
+          {selectedDay && selectedDayItems.length > 0 && (
+            <div className="bg-surface-container-low border border-white/5 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-white">
+                  {MONTHS[currentMonth]} {selectedDay}, {currentYear}
+                  <span className="ml-2 text-sm font-normal text-on-surface-variant">— {selectedDayItems.length} post{selectedDayItems.length !== 1 ? "s" : ""}</span>
+                </h3>
+                <button onClick={() => setSelectedDay(null)} className="text-gray-500 hover:text-white transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {selectedDayItems.map((item) => {
+                  const pKey = platformKey(item.platform_target || item.platform);
+                  const time = item.scheduled_time ? new Date(item.scheduled_time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—";
+                  return (
+                    <div key={item.id} className="bg-surface-container-high border border-white/5 rounded-xl p-4 flex gap-3">
+                      <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border ${PLATFORM_COLOR[pKey] || "bg-white/5 border-white/10"}`}>
+                        <span className="material-symbols-outlined text-[18px]">{PLATFORM_ICON[pKey] || "public"}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white line-clamp-1">{item.task_name}</p>
+                        <p className="text-[10px] text-on-surface-variant">{item.clients?.business_name}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLE[item.status] || "bg-white/5 text-gray-400"}`}>
+                            {item.status}
+                          </span>
+                          <span className="text-[9px] text-gray-500 flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[10px]">schedule</span>{time}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
-      {/* Schedule Post Modal Overlay */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-          <div className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h3 className="font-h2 text-xl text-slate-900 font-bold">Schedule New Post</h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+      {/* ─── Schedule Post Modal ─── */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !isScheduling && setShowScheduleModal(false)} />
+          <div className="relative z-10 bg-surface-container-low border border-white/10 rounded-t-3xl md:rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-300">
+            {/* Header */}
+            <div className="p-6 border-b border-white/5 bg-[#1c1b1b] flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg font-[900] text-white">Schedule a Post</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">Select approved content and pick a date & time</p>
+              </div>
+              {!isScheduling && (
+                <button onClick={() => setShowScheduleModal(false)} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              {/* Content Selector */}
+              <div>
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-3">
+                  Select Approved Content ({approvedContent.length} available)
+                </label>
+                {approvedContent.length === 0 ? (
+                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center">
+                    <span className="material-symbols-outlined text-3xl text-gray-600 block mb-2">check_circle</span>
+                    <p className="text-sm text-on-surface-variant">No content is ready for publishing yet.</p>
+                    <p className="text-xs text-gray-600 mt-1">Content must pass through Design Approval first.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    {approvedContent.map((item) => {
+                      const isSelected = selectedContent?.id === item.id;
+                      const pKey = platformKey(item.platform_target || item.platform);
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setSelectedContent(item)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${isSelected ? "border-sp-primary bg-sp-primary/5" : "border-white/5 bg-surface-container-high hover:border-white/15"}`}
+                        >
+                          <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border ${PLATFORM_COLOR[pKey] || "bg-white/5 border-white/10"}`}>
+                            <span className="material-symbols-outlined text-[18px]">{PLATFORM_ICON[pKey] || "public"}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-white line-clamp-1">{item.task_name}</p>
+                            <p className="text-[10px] text-on-surface-variant">{item.clients?.business_name} • {item.platform}</p>
+                          </div>
+                          {isSelected && <span className="material-symbols-outlined text-sp-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-white text-sm focus:ring-1 focus:ring-sp-primary outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-2">Time</label>
+                  <input
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-white text-sm focus:ring-1 focus:ring-sp-primary outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* AI Recommendation Box */}
+              <div className="bg-sp-primary/5 border border-sp-primary/20 rounded-xl p-4 flex items-center gap-3">
+                <span className="material-symbols-outlined text-sp-primary">lightbulb</span>
+                <div>
+                  <p className="text-sm font-bold text-white">AI Recommended Time</p>
+                  <p className="text-xs text-on-surface-variant">Best engagement window: <span className="text-sp-primary font-bold">10:00 AM – 12:00 PM</span> on weekdays</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-5 border-t border-white/5 bg-surface-container-highest flex gap-3 shrink-0">
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                disabled={isScheduling}
+                className="flex-1 py-3 font-bold text-gray-400 hover:text-white rounded-xl hover:bg-white/5 transition-all"
+              >
+                Cancel
               </button>
-            </div>
-            
-            {/* Stepper */}
-            <div className="flex items-center px-8 py-4 bg-slate-50 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-primary-container text-white text-[10px] flex items-center justify-center font-bold">1</div>
-                <span className="text-sm font-bold text-slate-900">Content</span>
-              </div>
-              <div className="h-px w-8 bg-slate-300 mx-4"></div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 text-[10px] flex items-center justify-center font-bold">2</div>
-                <span className="text-sm font-semibold text-slate-500">Scheduling</span>
-              </div>
-              <div className="h-px w-8 bg-slate-300 mx-4"></div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 text-[10px] flex items-center justify-center font-bold">3</div>
-                <span className="text-sm font-semibold text-slate-500">Platforms</span>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-8 max-h-[60vh] overflow-y-auto">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <label className="block text-sm font-bold text-slate-700">Select Approved Content</label>
-                  <div className="grid grid-cols-1 gap-3">
-                    <button className="flex items-start gap-4 p-4 rounded-xl border-2 border-primary-container bg-primary-fixed/10 text-left transition-all">
-                      <div className="w-16 h-16 rounded-lg bg-slate-200 flex-shrink-0"></div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-slate-900">5 ways to automate your content flow</h4>
-                        <p className="text-sm text-slate-600 mt-1">Generated by FlowPilot AI • Approved by Sarah</p>
-                        <div className="flex gap-2 mt-2">
-                          <span className="px-2 py-0.5 bg-white border border-primary-container/20 rounded-md text-[10px] font-bold text-primary-container uppercase">Article</span>
-                        </div>
-                      </div>
-                      <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    </button>
-                    <button className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition-all">
-                      <div className="w-16 h-16 rounded-lg bg-slate-100 flex-shrink-0"></div>
-                      <div>
-                        <h4 className="font-bold text-slate-700">Weekly ROI Performance Report</h4>
-                        <p className="text-sm text-slate-500 mt-1">Ready for review • Drafted 2h ago</p>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-surface rounded-xl border border-outline-variant flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-primary-container">lightbulb</span>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">AI Recommended Posting Time</p>
-                      <p className="text-xs text-slate-600 font-medium">Based on your Instagram audience activity</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-black text-primary-container">Tomorrow, 10:45 AM</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-              <button className="text-sm font-bold text-slate-500 hover:text-slate-700 px-4 py-2 transition-colors">Save as Draft</button>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setShowModal(false)} className="text-sm font-bold text-slate-700 px-6 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 transition-colors">Cancel</button>
-                <button className="text-sm font-bold text-white px-8 py-2.5 rounded-lg bg-primary-container shadow-md hover:bg-primary transition-all">Next Step</button>
-              </div>
+              <button
+                onClick={handleSchedule}
+                disabled={!selectedContent || !scheduleDate || isScheduling}
+                className="flex-1 bg-sp-primary text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-40"
+              >
+                {isScheduling ? (
+                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]">event_available</span>
+                    Confirm Schedule
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Drag & Drop Visual (Floating context) */}
-      <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce">
-        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-          <span className="material-symbols-outlined">drag_indicator</span>
-        </div>
-        <div>
-          <p className="text-sm font-bold">New: Drag &amp; Drop</p>
-          <p className="text-[11px] text-slate-400">Rearrange your calendar by dragging cards</p>
-        </div>
-        <button className="text-white/40 hover:text-white transition-colors">
-          <span className="material-symbols-outlined text-[18px]">close</span>
-        </button>
-      </div>
     </div>
   );
 }

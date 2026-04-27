@@ -1,229 +1,334 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import Sidebar from "@/components/sidebar";
+
+type AnalyticsRow = {
+  id: string;
+  post_id?: string;
+  platform: string;
+  impressions: number;
+  reach: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  engagement_rate: number;
+  recorded_at: string;
+  task_name?: string;
+  clients?: { business_name: string };
+};
+
+type Deliverable = {
+  id: string;
+  task_name: string;
+  platform: string;
+  platform_target?: string;
+  status: string;
+  created_at: string;
+  clients?: { business_name: string };
+};
+
+const PLATFORM_COLOR: Record<string, string> = {
+  instagram: "text-pink-400",
+  linkedin: "text-blue-400",
+  website: "text-emerald-400",
+};
+
+const PLATFORM_ICON: Record<string, string> = {
+  instagram: "photo_camera",
+  linkedin: "business_center",
+  website: "language",
+};
+
+function platformKey(p?: string) {
+  return (p || "instagram").toLowerCase();
+}
 
 export default function AnalyticsDashboardPage() {
-  const [dateRange, setDateRange] = useState("Apr 1 - Apr 30, 2026");
+  const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
+  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [platformFilter, setPlatformFilter] = useState("all");
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    setIsLoading(true);
+
+    // Fetch analytics rows if the table exists
+    const { data: analyticsData } = await supabase
+      .from("social_analytics")
+      .select("*")
+      .order("recorded_at", { ascending: false })
+      .limit(100);
+
+    // Fetch published deliverables for the post performance table
+    const { data: delData } = await supabase
+      .from("content_deliverables")
+      .select("*, clients(business_name)")
+      .in("status", ["Published", "Scheduled", "Ready for Publishing"])
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    setAnalytics(analyticsData || []);
+    setDeliverables(delData || []);
+    setIsLoading(false);
+  }
+
+  // Aggregate totals from analytics rows
+  const filtered = analytics.filter((a) =>
+    platformFilter === "all" ? true : platformKey(a.platform) === platformFilter
+  );
+
+  const totalImpressions = filtered.reduce((sum, a) => sum + (a.impressions || 0), 0);
+  const totalReach = filtered.reduce((sum, a) => sum + (a.reach || 0), 0);
+  const avgEngagementRate = filtered.length > 0
+    ? (filtered.reduce((sum, a) => sum + (a.engagement_rate || 0), 0) / filtered.length).toFixed(2)
+    : "0.00";
+  const totalLikes = filtered.reduce((sum, a) => sum + (a.likes || 0), 0);
+
+  const hasAnalytics = analytics.length > 0;
+
+  // Chart bars: last 12 analytics entries impressions, scaled to %
+  const chartData = filtered.slice(0, 12).reverse();
+  const maxImp = Math.max(...chartData.map((a) => a.impressions || 0), 1);
 
   return (
-    <div className="bg-surface font-body-base text-on-surface min-h-screen flex">
-      {/* SideNavBar Component */}
-      <aside className="fixed left-0 top-0 h-screen w-[240px] border-r border-slate-100 bg-white z-50 flex flex-col py-6">
-        <div className="px-6 mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-white shadow-sm">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 font-h2">FlowPilot AI</h2>
-            <p className="text-xs text-slate-500 font-body-sm font-medium">Marketing Velocity</p>
-          </div>
-        </div>
-        <nav className="flex-1 px-4 space-y-1">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg font-medium">
-            <span className="material-symbols-outlined text-slate-400 group-hover:text-primary-container">dashboard</span>
-            <span>Dashboard</span>
-          </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg font-medium">
-            <span className="material-symbols-outlined text-slate-400 group-hover:text-primary-container">auto_awesome</span>
-            <span>Automations</span>
-          </Link>
-          {/* Active State */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-primary-container/10 text-primary-container border-l-4 border-primary-container transition-all duration-200 font-bold rounded-r-lg">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
-            <span>Analytics</span>
-          </div>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg font-medium">
-            <span className="material-symbols-outlined text-slate-400 group-hover:text-primary-container">groups</span>
-            <span>Audience</span>
-          </Link>
-          <Link href="/calendar" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg font-medium">
-            <span className="material-symbols-outlined text-slate-400 group-hover:text-primary-container">calendar_month</span>
-            <span>Calendar</span>
-          </Link>
-        </nav>
-        <div className="px-4 mt-auto space-y-1">
-          <button className="w-full mb-6 bg-primary-container text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-primary transition-all">
-            <span className="material-symbols-outlined text-lg">add</span>
-            New Workflow
-          </button>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all duration-200 group rounded-lg">
-            <span className="material-symbols-outlined text-slate-400 group-hover:text-primary-container">settings</span>
-            <span className="font-semibold text-sm">Settings</span>
-          </Link>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-background text-on-background flex font-sans antialiased">
+      <Sidebar />
 
-      <div className="ml-[240px] flex-1 flex flex-col min-h-screen">
-        {/* TopNavBar Component */}
-        <header className="sticky top-0 z-40 w-full h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center px-8 shadow-sm">
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto md:ml-64">
+        {/* TopNavBar */}
+        <header className="sticky top-0 z-40 w-full h-16 bg-surface-container-low/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 shadow-sm">
           <div className="flex items-center gap-6">
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 font-h1">Marketing Analytics</h1>
-            <div className="h-6 w-px bg-slate-200"></div>
-            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-              <span className="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
-              <span className="text-sm font-bold text-slate-600">{dateRange}</span>
-              <span className="text-xs text-slate-400 font-medium ml-2">vs Prev Month</span>
+            <div>
+              <p className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Step 9</p>
+              <h1 className="text-xl font-[900] text-white">Analytics Dashboard</h1>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 mr-4">
-              <select className="bg-transparent border-none text-sm font-bold text-slate-600 focus:ring-0 cursor-pointer">
-                <option>All Platforms</option>
-                <option>Instagram</option>
-                <option>LinkedIn</option>
-              </select>
+          <div className="flex items-center gap-3">
+            {/* Platform Filter */}
+            <div className="flex items-center gap-2">
+              {["all", "instagram", "linkedin", "website"].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPlatformFilter(p)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize transition-all border ${
+                    platformFilter === p
+                      ? "bg-sp-primary/10 border-sp-primary/30 text-sp-primary"
+                      : "border-white/10 text-gray-400 hover:border-white/20"
+                  }`}
+                >
+                  {p === "all" ? "All" : p}
+                </button>
+              ))}
             </div>
-            <div className="flex items-center gap-3">
-              <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors font-bold text-sm shadow-sm">
-                <span className="material-symbols-outlined text-sm">download</span> Export
-              </button>
-              <div className="w-9 h-9 rounded-full bg-slate-200 border-2 border-slate-100 shadow-sm flex items-center justify-center font-bold text-xs text-slate-600">
-                JD
-              </div>
-            </div>
+            <button
+              onClick={fetchData}
+              className="p-2 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <span className="material-symbols-outlined text-[18px]">refresh</span>
+            </button>
           </div>
         </header>
 
         <main className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8">
+
+          {/* No Analytics Data Banner */}
+          {!isLoading && !hasAnalytics && (
+            <div className="bg-sp-primary/5 border border-sp-primary/20 rounded-2xl p-6 flex items-center gap-4">
+              <span className="material-symbols-outlined text-sp-primary text-3xl">info</span>
+              <div>
+                <p className="font-bold text-white">No analytics data yet</p>
+                <p className="text-sm text-on-surface-variant mt-0.5">
+                  Analytics will populate once data is inserted into the <code className="bg-white/10 px-1 rounded text-sp-primary">social_analytics</code> table. 
+                  The post history below reflects your current Supabase deliverables.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: "Total Impressions", value: "124,830", icon: "visibility", trend: "+18.4%" },
-              { title: "Total Reach", value: "89,420", icon: "group", trend: "+12.3%" },
-              { title: "Engagement Rate", value: "7.2%", icon: "touch_app", trend: "+0.8%" },
-              { title: "Follower Growth", value: "+1,245", icon: "person_add", trend: "+8.5%" }
+              { title: "Total Impressions", value: hasAnalytics ? totalImpressions.toLocaleString() : "—", icon: "visibility", color: "text-sp-primary bg-sp-primary/10" },
+              { title: "Total Reach", value: hasAnalytics ? totalReach.toLocaleString() : "—", icon: "group", color: "text-sp-secondary bg-sp-secondary/10" },
+              { title: "Avg. Engagement Rate", value: hasAnalytics ? `${avgEngagementRate}%` : "—", icon: "touch_app", color: "text-sp-tertiary bg-sp-tertiary/10" },
+              { title: "Total Likes", value: hasAnalytics ? totalLikes.toLocaleString() : "—", icon: "favorite", color: "text-pink-400 bg-pink-400/10" },
             ].map((metric, i) => (
-              <div key={i} className="bg-white p-6 rounded-xl shadow-soft border border-outline-variant/30 hover:-translate-y-1 transition-transform duration-200">
+              <div key={i} className="bg-surface-container-low border border-white/5 p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-200 shadow-lg">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
-                    <span className="material-symbols-outlined">{metric.icon}</span>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${metric.color}`}>
+                    <span className="material-symbols-outlined text-xl">{metric.icon}</span>
                   </div>
-                  <div className="text-green-600 text-sm font-bold flex items-center bg-green-50 px-2 py-0.5 rounded">
-                    <span className="material-symbols-outlined text-sm mr-1">trending_up</span>
-                    {metric.trend}
-                  </div>
+                  {hasAnalytics && (
+                    <div className="text-sp-secondary text-xs font-bold flex items-center bg-sp-secondary/10 px-2 py-0.5 rounded-full">
+                      <span className="material-symbols-outlined text-sm mr-1">trending_up</span>
+                      Live
+                    </div>
+                  )}
                 </div>
-                <p className="text-slate-500 text-sm font-bold mb-1">{metric.title}</p>
-                <h3 className="text-3xl font-bold text-slate-900 font-h2 mb-4">{metric.value}</h3>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary-container rounded-full" style={{ width: `${Math.random() * 40 + 40}%` }}></div>
-                </div>
+                <p className="text-on-surface-variant text-sm font-bold mb-1">{metric.title}</p>
+                <h3 className="text-3xl font-[900] text-white">{isLoading ? "..." : metric.value}</h3>
               </div>
             ))}
           </div>
 
           {/* Main Dashboard Area */}
           <div className="grid grid-cols-12 gap-6">
-            
-            {/* Impressions Over Time Chart (Bento Left) */}
-            <div className="col-span-12 lg:col-span-8 bg-white rounded-xl shadow-soft border border-outline-variant/30 p-6">
+
+            {/* Impressions Chart */}
+            <div className="col-span-12 lg:col-span-8 bg-surface-container-low border border-white/5 rounded-2xl p-6 shadow-lg">
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 font-h2">Impressions Over Time</h3>
-                  <p className="text-sm text-slate-500 font-medium">Tracking daily reach across all platforms</p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="px-4 py-1.5 text-xs font-bold bg-primary-container text-white rounded-lg shadow-sm">Daily</button>
-                  <button className="px-4 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-colors">Weekly</button>
+                  <h3 className="text-lg font-bold text-white">Impressions Over Time</h3>
+                  <p className="text-sm text-on-surface-variant">
+                    {hasAnalytics ? `Showing last ${chartData.length} data points` : "No data yet — awaiting social_analytics entries"}
+                  </p>
                 </div>
               </div>
-              
-              {/* Mock Chart Visualization */}
-              <div className="relative h-64 w-full flex items-end justify-between gap-3">
-                <div className="absolute inset-0 grid grid-rows-4 w-full">
-                  <div className="border-t border-slate-100 border-dashed"></div>
-                  <div className="border-t border-slate-100 border-dashed"></div>
-                  <div className="border-t border-slate-100 border-dashed"></div>
-                  <div className="border-t border-slate-100 border-dashed"></div>
-                </div>
-                
-                {[30, 45, 60, 40, 70, 85, 65, 100, 75, 50, 65, 45].map((height, i) => (
-                  <div key={i} className={`relative flex-1 rounded-t-lg transition-all hover:opacity-80 ${height === 100 ? 'bg-primary-container' : height > 60 ? 'bg-primary-fixed' : 'bg-slate-200'}`} style={{ height: `${height}%` }}>
-                    {height === 100 && (
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-3 py-1.5 rounded shadow-xl font-bold whitespace-nowrap">Peak</div>
-                    )}
+
+              {hasAnalytics ? (
+                <>
+                  <div className="relative h-48 w-full flex items-end justify-between gap-2">
+                    <div className="absolute inset-0 grid grid-rows-4 w-full pointer-events-none">
+                      {[0,1,2,3].map((i) => (
+                        <div key={i} className="border-t border-white/5 border-dashed" />
+                      ))}
+                    </div>
+                    {chartData.map((a, i) => {
+                      const heightPct = Math.max(((a.impressions || 0) / maxImp) * 100, 4);
+                      const pKey = platformKey(a.platform);
+                      const barColor = pKey === "instagram" ? "bg-pink-400" : pKey === "linkedin" ? "bg-blue-400" : "bg-sp-primary";
+                      return (
+                        <div
+                          key={i}
+                          className={`relative flex-1 rounded-t-lg transition-all hover:opacity-80 ${barColor}`}
+                          style={{ height: `${heightPct}%` }}
+                          title={`${a.impressions?.toLocaleString() || 0} impressions`}
+                        />
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-              <div className="mt-4 flex justify-between text-xs text-slate-400 font-bold">
-                <span>Apr 1</span>
-                <span>Apr 8</span>
-                <span>Apr 15</span>
-                <span>Apr 22</span>
-                <span>Apr 30</span>
+                  <div className="mt-4 flex justify-between text-[10px] text-on-surface-variant font-bold">
+                    {chartData.slice(0, 5).map((a, i) => (
+                      <span key={i}>{new Date(a.recorded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+                    ))}
+                    {chartData.length > 5 && <span>…</span>}
+                    {chartData.length > 0 && <span>{new Date(chartData[chartData.length - 1].recorded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>}
+                  </div>
+                </>
+              ) : (
+                <div className="h-48 flex items-center justify-center border-2 border-dashed border-white/5 rounded-xl">
+                  <div className="text-center">
+                    <span className="material-symbols-outlined text-4xl text-gray-600 block mb-2">bar_chart</span>
+                    <p className="text-sm text-on-surface-variant">Chart will appear here once analytics data is available</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Top Performing Posts (from deliverables) */}
+            <div className="col-span-12 lg:col-span-4 bg-surface-container-low border border-white/5 rounded-2xl p-6 shadow-lg flex flex-col">
+              <h3 className="text-lg font-bold text-white mb-6">Published Posts</h3>
+              <div className="space-y-3 flex-1">
+                {isLoading ? (
+                  <div className="animate-pulse space-y-3">
+                    {[0,1,2].map(i => <div key={i} className="h-14 bg-white/5 rounded-xl" />)}
+                  </div>
+                ) : deliverables.filter(d => d.status === "Published").length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-8">
+                    <span className="material-symbols-outlined text-3xl text-gray-600 mb-2">article</span>
+                    <p className="text-sm text-on-surface-variant text-center">No published posts yet</p>
+                  </div>
+                ) : (
+                  deliverables.filter(d => d.status === "Published").slice(0, 5).map((item) => {
+                    const pKey = platformKey(item.platform_target || item.platform);
+                    return (
+                      <div key={item.id} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-colors border border-transparent hover:border-white/5">
+                        <div className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 ${PLATFORM_COLOR[pKey]}`}>
+                          <span className="material-symbols-outlined text-[18px]">{PLATFORM_ICON[pKey] || "public"}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-white truncate">{item.task_name}</h4>
+                          <p className="text-xs text-on-surface-variant">{item.clients?.business_name}</p>
+                        </div>
+                        <span className="text-[10px] font-bold text-sp-secondary bg-sp-secondary/10 px-2 py-0.5 rounded-full">Live</span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            {/* Top Performing Content (Bento Right) */}
-            <div className="col-span-12 lg:col-span-4 bg-white rounded-xl shadow-soft border border-outline-variant/30 p-6 flex flex-col">
-              <h3 className="text-lg font-bold text-slate-900 font-h2 mb-6">Top Performing Content</h3>
-              <div className="space-y-4 flex-1">
-                {[
-                  { title: "Q2 Growth Strategies", platform: "Instagram", stat: "14.2k likes", trend: "+12%" },
-                  { title: "Data Flow Explainer", platform: "LinkedIn", stat: "8.9k shares", trend: "+5%" },
-                  { title: "Productivity Hacks", platform: "Website", stat: "4.5k views", trend: "-2%", neg: true }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 group cursor-pointer p-3 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-100">
-                    <div className="w-14 h-14 rounded-lg bg-slate-200 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-slate-900 truncate">{item.title}</h4>
-                      <p className="text-xs text-slate-500 mt-1 font-medium">{item.platform} • {item.stat}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className={`text-xs font-bold ${item.neg ? 'text-error' : 'text-green-600'}`}>{item.trend}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full mt-6 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
-                View All Content
-              </button>
-            </div>
-
-            {/* Engagement Table */}
-            <div className="col-span-12 bg-white rounded-xl shadow-soft border border-outline-variant/30 overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-surface/50">
-                <h3 className="text-lg font-bold text-slate-900 font-h2">Recent Post Performance</h3>
-                <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-slate-100 text-[10px] font-bold text-slate-600 rounded-full uppercase tracking-wider">Filter: High Engagement</span>
-                </div>
+            {/* Post Performance Table */}
+            <div className="col-span-12 bg-surface-container-low border border-white/5 rounded-2xl overflow-hidden shadow-lg">
+              <div className="px-6 py-5 border-b border-white/5 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-white">Recent Post Activity</h3>
+                <span className="text-xs text-on-surface-variant">{deliverables.length} items</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50/80">
-                    <tr className="text-left border-b border-slate-200">
-                      <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Post Title</th>
-                      <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Platform</th>
-                      <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Impressions</th>
-                      <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Engagement</th>
-                      <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                  <thead>
+                    <tr className="border-b border-white/5 text-left">
+                      <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Post</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Client</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Platform</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Status</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {[
-                      { title: "Designing for SaaS Velocity", platform: "LinkedIn", imp: "18,245", eng: "1,402", date: "Apr 28, 2026", color: "blue" },
-                      { title: "Automation Workflows 101", platform: "Instagram", imp: "32,910", eng: "4,120", date: "Apr 26, 2026", color: "pink" },
-                      { title: "Why Data-Driven?", platform: "Website", imp: "12,400", eng: "890", date: "Apr 24, 2026", color: "orange" }
-                    ].map((row, i) => (
-                      <tr key={i} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-bold text-slate-900">{row.title}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-1 bg-${row.color}-50 text-${row.color}-600 border border-${row.color}-100 text-[10px] font-bold rounded-md uppercase`}>{row.platform}</span>
+                  <tbody className="divide-y divide-white/5">
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center">
+                          <div className="w-8 h-8 border-2 border-sp-primary/20 border-t-sp-primary rounded-full animate-spin mx-auto" />
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right font-medium">{row.imp}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right">{row.eng}</td>
-                        <td className="px-6 py-4 text-xs text-slate-500 font-medium">{row.date}</td>
                       </tr>
-                    ))}
+                    ) : deliverables.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant text-sm">No posts found.</td>
+                      </tr>
+                    ) : (
+                      deliverables.map((row) => {
+                        const pKey = platformKey(row.platform_target || row.platform);
+                        const statusStyle =
+                          row.status === "Published" ? "text-sp-secondary bg-sp-secondary/10 border-sp-secondary/20" :
+                          row.status === "Scheduled" ? "text-sp-primary bg-sp-primary/10 border-sp-primary/20" :
+                          "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
+                        return (
+                          <tr key={row.id} className="hover:bg-white/3 transition-colors">
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-bold text-white line-clamp-1">{row.task_name}</p>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-on-surface-variant">{row.clients?.business_name || "—"}</td>
+                            <td className="px-6 py-4">
+                              <span className={`flex items-center gap-1 text-xs font-bold ${PLATFORM_COLOR[pKey]}`}>
+                                <span className="material-symbols-outlined text-[12px]">{PLATFORM_ICON[pKey] || "public"}</span>
+                                {pKey}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${statusStyle}`}>
+                                {row.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-on-surface-variant">
+                              {new Date(row.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-            
+
           </div>
         </main>
       </div>
