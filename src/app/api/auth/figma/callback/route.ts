@@ -16,7 +16,11 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.NEXT_PUBLIC_FIGMA_CLIENT_ID;
   const clientSecret = process.env.FIGMA_CLIENT_SECRET;
-  const redirectUri = "http://localhost:3000/api/auth/figma/callback";
+  
+  // Use VERCEL_PROJECT_PRODUCTION_URL if available, else VERCEL_URL, else localhost
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000");
+  const redirectUri = `${baseUrl}/api/auth/figma/callback`;
 
   if (!clientId || !clientSecret) {
     return NextResponse.json({ error: "Figma credentials not configured" }, { status: 500 });
@@ -49,7 +53,8 @@ export async function GET(req: NextRequest) {
     const expiresIn = tokenData.expires_in; // usually 90 days
 
     // Store the access token securely in an HTTP-only cookie
-    cookies().set({
+    const cookieStore = await cookies();
+    cookieStore.set({
       name: "figma_access_token",
       value: accessToken,
       httpOnly: true,

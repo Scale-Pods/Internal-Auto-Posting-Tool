@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const clientId = process.env.NEXT_PUBLIC_FIGMA_CLIENT_ID;
-  const redirectUri = "http://localhost:3000/api/auth/figma/callback";
+  
+  // Use VERCEL_PROJECT_PRODUCTION_URL if available, else VERCEL_URL, else localhost
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000");
+  const redirectUri = `${baseUrl}/api/auth/figma/callback`;
   
   if (!clientId) {
     return NextResponse.json({ error: "Figma Client ID not configured" }, { status: 500 });
