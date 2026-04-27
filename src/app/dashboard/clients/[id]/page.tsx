@@ -39,6 +39,7 @@ type Client = {
   additional_notes: string;
   status: string;
   strategy_json: string | null;
+  content_json?: any;
   created_at: string;
 };
 
