@@ -144,10 +144,65 @@ export default function ContentReviewDetailPage() {
   };
 
   const finalApprove = async () => {
+    if (!client) return;
     setProcessing(true);
-    await supabase.from("clients").update({ status: "Content Approved", content_approved_by: "Admin" }).eq("id", client!.id);
-    setClient(c => c ? { ...c, status: "Content Approved", content_approved_by: "Admin" } : c);
-    setProcessing(false);
+    
+    try {
+      // 1. Update client status
+      await supabase.from("clients").update({ 
+        status: "Content Approved", 
+        content_approved_by: "Admin" 
+      }).eq("id", client.id);
+      
+      // 2. Parse content and create deliverables
+      const content = typeof client.content_json === "string" 
+        ? JSON.parse(client.content_json) 
+        : client.content_json;
+        
+      if (content && typeof content === 'object') {
+        const deliverables: any[] = [];
+        
+        // Loop through all platforms (instagram, linkedin, etc)
+        Object.keys(content).forEach((platform) => {
+          const posts = content[platform];
+          if (Array.isArray(posts)) {
+            posts.forEach((post, idx) => {
+              deliverables.push({
+                client_id: client.id,
+                platform: platform,
+                platform_target: platform,
+                task_name: post.topic || `Post #${idx + 1}`,
+                // Map caption to topic since caption column is missing in DB
+                topic: post.caption || post.topic || "",
+                post_type: post.format || "Post",
+                status: "Ready for Publishing",
+                // We store the visual description as a placeholder for media if URL is not yet present
+                media_url: post.slides ? post.slides.map((s: any) => s.visual_description).join(",") : ""
+              });
+            });
+          }
+        });
+        
+        if (deliverables.length > 0) {
+          // Clean up old "Ready for Publishing" deliverables for this client to avoid duplicates
+          await supabase
+            .from("content_deliverables")
+            .delete()
+            .eq("client_id", client.id)
+            .eq("status", "Ready for Publishing");
+
+          const { error: insertError } = await supabase.from("content_deliverables").insert(deliverables);
+          if (insertError) throw insertError;
+        }
+      }
+
+      setClient(c => c ? { ...c, status: "Content Approved", content_approved_by: "Admin" } : c);
+    } catch (e) {
+      console.error("Failed to approve and create deliverables:", e);
+      alert("Error during approval process. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const regenerate = async () => {
