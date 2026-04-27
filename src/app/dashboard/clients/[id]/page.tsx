@@ -290,13 +290,25 @@ export default function ClientDetailPage() {
               Edit
             </Link>
 
-            <Link
-              href={`/onboarding/report?id=${client.id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-sm rounded-lg hover:bg-emerald-100 transition-all shadow-sm"
-            >
-              <FileText className="w-4 h-4" />
-              View Strategy
-            </Link>
+            {client.strategy_json && (
+              <Link
+                href={`/onboarding/report?id=${client.id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-sm rounded-lg hover:bg-emerald-100 transition-all shadow-sm"
+              >
+                <FileText className="w-4 h-4" />
+                AI Strategy Report
+              </Link>
+            )}
+
+            {client.content_json && (
+              <Link
+                href={`/dashboard/approval/${client.id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-sm rounded-lg hover:bg-indigo-100 transition-all shadow-sm"
+              >
+                <Palette className="w-4 h-4" />
+                Content Report
+              </Link>
+            )}
 
             <button
               onClick={handleGenerateStrategy}
