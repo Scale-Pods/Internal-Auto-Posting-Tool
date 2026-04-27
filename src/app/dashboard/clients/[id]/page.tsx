@@ -300,7 +300,7 @@ export default function ClientDetailPage() {
             <button
               onClick={handleGenerateContent}
               disabled={generatingContent || client.status === "Generating Content" || generating}
-              className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-lg transition-all shadow-sm shadow-slate-200"
+              className="flex items-center gap-2 px-4 py-2 bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-lg transition-all shadow-sm shadow-indigo-200"
             >
               {generatingContent || client.status === "Generating Content" ? (
                 <>
