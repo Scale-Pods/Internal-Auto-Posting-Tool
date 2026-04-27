@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Plus, Search, Building2, Globe, ChevronRight, Loader2, AlertCircle, Zap, Clock, CheckCircle2 } from "lucide-react";
+import { LoadingLottie } from "@/components/loading-lottie";
 
 type Client = {
   id: string;
@@ -171,9 +172,8 @@ export default function ClientsPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-3">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-slate-500 font-medium">Loading clients...</p>
+        <div className="flex flex-col items-center justify-center py-24">
+          <LoadingLottie message="Fetching your clients..." size={350} />
         </div>
       ) : error ? (
         <div className="flex items-center gap-3 p-5 bg-red-50 border border-red-200 rounded-xl text-red-700">

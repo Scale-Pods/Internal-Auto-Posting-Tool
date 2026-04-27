@@ -8,6 +8,7 @@ import {
   Edit3, Save, X, ShieldCheck, Check, RotateCcw
 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { LoadingLottie } from "@/components/loading-lottie";
 
 type Client = {
   id: string;
@@ -182,8 +183,8 @@ export default function ContentReviewDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-50">
-        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      <div className="flex items-center justify-center h-screen bg-white">
+        <LoadingLottie message="Preparing content for review..." size={400} />
       </div>
     );
   }

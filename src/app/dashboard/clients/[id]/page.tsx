@@ -22,6 +22,7 @@ import {
   FileText,
   RefreshCw,
 } from "lucide-react";
+import { LoadingLottie } from "@/components/loading-lottie";
 
 type Client = {
   id: string;
@@ -209,11 +210,8 @@ export default function ClientDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
-          <p className="text-slate-500 font-medium">Loading client...</p>
-        </div>
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-white">
+        <LoadingLottie message="Loading client details..." size={400} />
       </div>
     );
   }

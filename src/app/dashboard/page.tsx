@@ -3,17 +3,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import {
-  Users,
-  Zap,
-  Clock,
-  CheckCircle2,
-  Plus,
-  ArrowRight,
-  Building2,
-  Globe,
-  Loader2,
+import { 
+  Users, Building2, Clock, CheckCircle2, Zap, ArrowRight,
+  TrendingUp, Calendar, Palette, Loader2, Plus, Globe
 } from "lucide-react";
+import { LoadingLottie } from "@/components/loading-lottie";
 
 type Client = {
   id: string;
@@ -163,7 +157,7 @@ export default function DashboardPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-7 h-7 text-orange-300 animate-spin" />
+            <LoadingLottie message="Preparing your dashboard..." size={300} />
           </div>
         ) : recent.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
