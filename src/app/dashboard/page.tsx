@@ -157,7 +157,7 @@ export default function DashboardPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <LoadingLottie message="Preparing your dashboard..." size={300} />
+            <LoadingLottie message="Preparing your dashboard..." size={450} />
           </div>
         ) : recent.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">

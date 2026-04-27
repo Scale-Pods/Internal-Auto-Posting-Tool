@@ -211,7 +211,7 @@ export default function ClientDetailPage() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-white">
-        <LoadingLottie message="Loading client details..." size={400} />
+        <LoadingLottie message="Loading client details..." size={550} />
       </div>
     );
   }

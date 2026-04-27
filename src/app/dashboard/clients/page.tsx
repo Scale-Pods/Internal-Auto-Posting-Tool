@@ -173,7 +173,7 @@ export default function ClientsPage() {
       {/* Content */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24">
-          <LoadingLottie message="Fetching your clients..." size={350} />
+          <LoadingLottie message="Fetching your clients..." size={500} />
         </div>
       ) : error ? (
         <div className="flex items-center gap-3 p-5 bg-red-50 border border-red-200 rounded-xl text-red-700">

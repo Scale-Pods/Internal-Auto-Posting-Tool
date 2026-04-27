@@ -10,7 +10,7 @@ interface LoadingLottieProps {
 
 export const LoadingLottie: React.FC<LoadingLottieProps> = ({ 
   message = "Loading...", 
-  size = 300 
+  size = 400 
 }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-4">

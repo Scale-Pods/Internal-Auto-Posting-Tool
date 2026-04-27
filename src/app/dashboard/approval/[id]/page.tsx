@@ -184,7 +184,7 @@ export default function ContentReviewDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-white">
-        <LoadingLottie message="Preparing content for review..." size={400} />
+        <LoadingLottie message="Preparing content for review..." size={550} />
       </div>
     );
   }
