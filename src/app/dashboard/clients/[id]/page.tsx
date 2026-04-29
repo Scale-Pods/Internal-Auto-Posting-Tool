@@ -143,7 +143,7 @@ export default function ClientDetailPage() {
         else setClient(data);
         setLoading(false);
       });
-  }, [clientId]);
+  };
 
   const handleGenerateStrategy = async () => {
     if (!client) return;
