@@ -393,7 +393,7 @@ export default function ClientDetailPage() {
         doc.rect(20, y, 170, 7, "F");
         doc.setFontSize(11);
         doc.setTextColor(249, 115, 22);
-        doc.text("📌 Strategic Notes", 25, y + 5);
+        doc.text("STRATEGIC NOTES", 25, y + 5);
         y += 12;
         doc.setFontSize(10);
         doc.setTextColor(51, 65, 85);
@@ -423,22 +423,42 @@ export default function ClientDetailPage() {
         }
 
         if (strategy.brand_positioning) {
-          if (y > 250) { doc.addPage(); y = 20; }
+          if (y > 230) { doc.addPage(); y = 20; }
           doc.setFontSize(12);
           doc.setTextColor(249, 115, 22);
           doc.text("Brand Positioning", 20, y);
-          y += 7;
+          y += 8;
           doc.setFontSize(10);
+          
+          // UVP
+          doc.setTextColor(15, 23, 42);
+          doc.text("UVP:", 20, y);
           doc.setTextColor(51, 65, 85);
-          doc.text(`UVP: ${strategy.brand_positioning.unique_value_proposition}`, 20, y);
-          y += 6;
-          doc.text(`Voice: ${strategy.brand_positioning.brand_voice}`, 20, y);
-          y += 6;
+          const uvpLines = doc.splitTextToSize(strategy.brand_positioning.unique_value_proposition || "", 150);
+          doc.text(uvpLines, 35, y);
+          y += (uvpLines.length * 5) + 3;
+
+          // Voice
+          if (y > 270) { doc.addPage(); y = 20; }
+          doc.setTextColor(15, 23, 42);
+          doc.text("Voice:", 20, y);
+          doc.setTextColor(51, 65, 85);
+          const voiceLines = doc.splitTextToSize(strategy.brand_positioning.brand_voice || "", 150);
+          doc.text(voiceLines, 35, y);
+          y += (voiceLines.length * 5) + 3;
+
+          // Differentiators
           if (strategy.brand_positioning.key_differentiators) {
-            doc.text(`Differentiators: ${strategy.brand_positioning.key_differentiators.join(", ")}`, 20, y);
-            y += 12;
+            if (y > 270) { doc.addPage(); y = 20; }
+            doc.setTextColor(15, 23, 42);
+            doc.text("Differentiators:", 20, y);
+            doc.setTextColor(51, 65, 85);
+            const diffText = strategy.brand_positioning.key_differentiators.join(", ");
+            const diffLines = doc.splitTextToSize(diffText, 140);
+            doc.text(diffLines, 50, y);
+            y += (diffLines.length * 5) + 10;
           } else {
-            y += 6;
+            y += 5;
           }
         }
 
