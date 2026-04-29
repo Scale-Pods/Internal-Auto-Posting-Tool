@@ -9,10 +9,11 @@ import { useState, useEffect } from "react";
 const USER_NAV = [
   { href: "/",           icon: "dashboard",    label: "Dashboard" },
   { href: "/clients",    icon: "groups",       label: "Clients" },
-  { href: "/approval",   icon: "how_to_reg",   label: "Approval" },
-  { href: "/calendar",   icon: "campaign",     label: "Calendar" },
-  { href: "/review",     icon: "rate_review",  label: "Review" },
-  { href: "/analytics",  icon: "leaderboard",  label: "Analytics" },
+  { href: "/dashboard/approval",   icon: "how_to_reg",   label: "Content Approval" },
+  { href: "/dashboard/website-blogs", icon: "article",      label: "Website Blogs" },
+  { href: "/dashboard/calendar",   icon: "campaign",     label: "Calendar" },
+  { href: "/dashboard/review",     icon: "rate_review",  label: "Review" },
+  { href: "/dashboard/analytics",  icon: "leaderboard",  label: "Analytics" },
 ];
 
 const DESIGNER_NAV = [

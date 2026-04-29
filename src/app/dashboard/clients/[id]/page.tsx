@@ -44,6 +44,8 @@ type Client = {
   status: string;
   strategy_json: string | null;
   content_json?: any;
+  blog_json?: any;
+  blog_status?: string;
   created_at: string;
 };
 
@@ -87,6 +89,7 @@ export default function ClientDetailPage() {
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatingContent, setGeneratingContent] = useState(false);
+  const [generatingBlog, setGeneratingBlog] = useState(false);
   const [generateError, setGenerateError] = useState("");
   const [generateSuccess, setGenerateSuccess] = useState(false);
 
@@ -195,6 +198,46 @@ export default function ClientDetailPage() {
     }
   };
 
+  const handleGenerateBlog = async () => {
+    if (!client) return;
+    setGeneratingBlog(true);
+    setGenerateError("");
+    setGenerateSuccess(false);
+
+    const webhookUrl = process.env.NEXT_PUBLIC_N8N_BLOG_WEBHOOK;
+    if (!webhookUrl) {
+      setGenerateError("Blog Webhook URL not configured in environment variables. (NEXT_PUBLIC_N8N_BLOG_WEBHOOK)");
+      setGeneratingBlog(false);
+      return;
+    }
+
+    try {
+      const supabase = getSupabase();
+      if (supabase) {
+        await supabase
+          .from("clients")
+          .update({ blog_status: "Generating Blog" })
+          .eq("id", client.id);
+        setClient((prev) => prev ? { ...prev, blog_status: "Generating Blog" } : prev);
+      }
+
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ client_id: client.id }),
+      }).catch((err) => console.error("Blog Webhook error:", err));
+
+      setGenerateSuccess(true);
+
+      setTimeout(() => {
+        router.push(`/dashboard/website-blogs`);
+      }, 2000);
+    } catch (err) {
+      setGenerateError("Failed to trigger blog generation. Check n8n webhook URL.");
+      setGeneratingBlog(false);
+    }
+  };
+
   const handleResetStatus = async () => {
     if (!client) return;
     try {
@@ -202,11 +245,15 @@ export default function ClientDetailPage() {
       if (supabase) {
         await supabase
           .from("clients")
-          .update({ status: "Awaiting Strategy" })
+          .update({ 
+            status: "Awaiting Strategy",
+            blog_status: "Idle" 
+          })
           .eq("id", client.id);
-        setClient((prev) => prev ? { ...prev, status: "Awaiting Strategy" } : prev);
+        setClient((prev) => prev ? { ...prev, status: "Awaiting Strategy", blog_status: "Idle" } : prev);
         setGenerating(false);
         setGeneratingContent(false);
+        setGeneratingBlog(false);
         setGenerateError("");
         setGenerateSuccess(false);
       }
@@ -724,6 +771,24 @@ export default function ClientDetailPage() {
                 <>
                   <Palette className="w-4 h-4 shrink-0" />
                   Send for Content Creation
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleGenerateBlog}
+              disabled={generatingBlog || client.blog_status === "Generating Blog" || generating || generatingContent}
+              className="h-10 px-4 flex items-center gap-2 bg-[#0ea5e9] hover:bg-[#0284c7] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[12px] rounded-lg transition-all shadow-sm shadow-sky-200 whitespace-nowrap"
+            >
+              {generatingBlog || client.blog_status === "Generating Blog" ? (
+                <>
+                  <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+                  Generating Blog...
+                </>
+              ) : (
+                <>
+                  <Globe className="w-4 h-4 shrink-0" />
+                  Generate Website Blog
                 </>
               )}
             </button>
