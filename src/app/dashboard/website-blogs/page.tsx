@@ -29,6 +29,29 @@ export default function WebsiteBlogsPage() {
 
   useEffect(() => {
     fetchClients();
+
+    // Real-time subscription for all clients
+    const channel = supabase
+      .channel("blogs-status")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "clients",
+        },
+        (payload) => {
+          console.log("Client update received:", payload.new);
+          setClients((prev) => 
+            prev.map((c) => (c.id === payload.new.id ? { ...c, ...payload.new } : c))
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchClients = async () => {

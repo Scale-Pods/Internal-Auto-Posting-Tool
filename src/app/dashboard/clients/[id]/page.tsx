@@ -96,7 +96,37 @@ export default function ClientDetailPage() {
   const getSupabase = () => supabase;
 
   useEffect(() => {
-    if (!clientId) return;
+    if (clientId) {
+      fetchClient();
+      
+      // Real-time subscription
+      const supabaseInstance = getSupabase();
+      if (supabaseInstance) {
+        const channel = supabaseInstance
+          .channel(`client-${clientId}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "clients",
+              filter: `id=eq.${clientId}`,
+            },
+            (payload) => {
+              console.log("Client updated real-time:", payload.new);
+              setClient((prev) => prev ? { ...prev, ...payload.new } : null);
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabaseInstance.removeChannel(channel);
+        };
+      }
+    }
+  }, [clientId]);
+
+  const fetchClient = () => {
     const supabase = getSupabase();
     if (!supabase) {
       setError("Supabase not configured.");
