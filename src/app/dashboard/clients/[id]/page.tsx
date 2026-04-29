@@ -246,13 +246,55 @@ export default function ClientDetailPage() {
       if (strategy && !strategy.error) {
         text += `2. AI GENERATED STRATEGY\n`;
         text += `----------------------\n`;
+        
         if (strategy.executive_summary) {
           text += `EXECUTIVE SUMMARY\n${strategy.executive_summary}\n\n`;
         }
+
         if (strategy.brand_positioning) {
           text += `BRAND POSITIONING\n`;
           text += `UVP: ${strategy.brand_positioning.unique_value_proposition}\n`;
-          text += `Voice: ${strategy.brand_positioning.brand_voice}\n\n`;
+          text += `Voice: ${strategy.brand_positioning.brand_voice}\n`;
+          if (strategy.brand_positioning.key_differentiators) {
+            text += `Differentiators: ${strategy.brand_positioning.key_differentiators.join(", ")}\n`;
+          }
+          text += `\n`;
+        }
+
+        if (strategy.target_audience) {
+          text += `TARGET AUDIENCE\n`;
+          if (strategy.target_audience.primary) {
+            text += `Primary: ${strategy.target_audience.primary.description}\n`;
+            text += `Pain Points: ${strategy.target_audience.primary.pain_points?.join(", ")}\n`;
+          }
+          if (strategy.target_audience.secondary) {
+            text += `Secondary: ${strategy.target_audience.secondary.description}\n`;
+            text += `Pain Points: ${strategy.target_audience.secondary.pain_points?.join(", ")}\n`;
+          }
+          text += `\n`;
+        }
+
+        if (strategy.content_strategy?.content_pillars) {
+          text += `CONTENT STRATEGY\n`;
+          strategy.content_strategy.content_pillars.forEach((p: any) => {
+            text += `- ${p.pillar} (${p.percentage}): ${p.description}\n`;
+          });
+          text += `\n`;
+        }
+
+        if (strategy.competitor_analysis?.competitors) {
+          text += `COMPETITOR ANALYSIS\n`;
+          strategy.competitor_analysis.competitors.forEach((c: any) => {
+            text += `${c.name}: ${c.strengths?.join(", ")}\n`;
+          });
+          text += `\n`;
+        }
+
+        if (strategy.growth_tactics) {
+          text += `GROWTH TACTICS\n`;
+          strategy.growth_tactics.forEach((t: string, i: number) => {
+            text += `${i + 1}. ${t}\n`;
+          });
         }
       }
 
@@ -391,7 +433,99 @@ export default function ClientDetailPage() {
           doc.text(`UVP: ${strategy.brand_positioning.unique_value_proposition}`, 20, y);
           y += 6;
           doc.text(`Voice: ${strategy.brand_positioning.brand_voice}`, 20, y);
+          y += 6;
+          if (strategy.brand_positioning.key_differentiators) {
+            doc.text(`Differentiators: ${strategy.brand_positioning.key_differentiators.join(", ")}`, 20, y);
+            y += 12;
+          } else {
+            y += 6;
+          }
+        }
+
+        if (strategy.target_audience) {
+          if (y > 240) { doc.addPage(); y = 20; }
+          doc.setFontSize(12);
+          doc.setTextColor(249, 115, 22);
+          doc.text("Target Audience", 20, y);
+          y += 7;
+          doc.setFontSize(10);
+          
+          if (strategy.target_audience.primary) {
+            doc.setTextColor(15, 23, 42);
+            doc.text("Primary Audience", 20, y);
+            y += 5;
+            doc.setTextColor(51, 65, 85);
+            const pLines = doc.splitTextToSize(strategy.target_audience.primary.description, 170);
+            doc.text(pLines, 20, y);
+            y += (pLines.length * 5) + 5;
+          }
+
+          if (strategy.target_audience.secondary) {
+            doc.setTextColor(15, 23, 42);
+            doc.text("Secondary Audience", 20, y);
+            y += 5;
+            doc.setTextColor(51, 65, 85);
+            const sLines = doc.splitTextToSize(strategy.target_audience.secondary.description, 170);
+            doc.text(sLines, 20, y);
+            y += (sLines.length * 5) + 12;
+          }
+        }
+
+        if (strategy.content_strategy?.content_pillars) {
+          if (y > 230) { doc.addPage(); y = 20; }
+          doc.setFontSize(12);
+          doc.setTextColor(249, 115, 22);
+          doc.text("Content Strategy", 20, y);
+          y += 8;
+          strategy.content_strategy.content_pillars.forEach((p: any) => {
+            if (y > 270) { doc.addPage(); y = 20; }
+            doc.setFontSize(10);
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${p.pillar} (${p.percentage})`, 20, y);
+            y += 5;
+            doc.setTextColor(71, 85, 105);
+            const pDesc = doc.splitTextToSize(p.description, 170);
+            doc.text(pDesc, 20, y);
+            y += (pDesc.length * 5) + 8;
+          });
+          y += 5;
+        }
+
+        if (strategy.competitor_analysis?.competitors) {
+          if (y > 230) { doc.addPage(); y = 20; }
+          doc.setFontSize(12);
+          doc.setTextColor(249, 115, 22);
+          doc.text("Competitor Analysis", 20, y);
+          y += 8;
+          strategy.competitor_analysis.competitors.forEach((c: any) => {
+            if (y > 270) { doc.addPage(); y = 20; }
+            doc.setFontSize(10);
+            doc.setTextColor(15, 23, 42);
+            doc.text(c.name, 20, y);
+            y += 5;
+            doc.setTextColor(71, 85, 105);
+            const cInfo = `Strengths: ${c.strengths?.join(", ")}`;
+            const cLines = doc.splitTextToSize(cInfo, 170);
+            doc.text(cLines, 20, y);
+            y += (cLines.length * 5) + 8;
+          });
+          y += 5;
+        }
+
+        if (strategy.growth_tactics) {
+          doc.addPage(); y = 20;
+          doc.setFontSize(14);
+          doc.setTextColor(15, 23, 42);
+          doc.text("3. GROWTH TACTICS", 20, y);
           y += 12;
+          doc.setFontSize(10);
+          doc.setTextColor(51, 65, 85);
+          strategy.growth_tactics.forEach((t: string, i: number) => {
+            if (y > 275) { doc.addPage(); y = 20; }
+            const tLines = doc.splitTextToSize(`${i + 1}. ${t}`, 170);
+            doc.text(tLines, 20, y);
+            y += (tLines.length * 5) + 5;
+          });
         }
       }
 
