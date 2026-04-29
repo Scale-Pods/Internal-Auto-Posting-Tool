@@ -218,35 +218,49 @@ export default function ClientDetailPage() {
   const [exportOpen, setExportOpen] = useState(false);
 
   const exportToTxt = () => {
-    if (!client?.strategy_json) return;
+    if (!client) return;
     try {
-      const strategy = typeof client.strategy_json === "string" ? JSON.parse(client.strategy_json) : client.strategy_json;
-      let text = `AI STRATEGY REPORT: ${client.business_name.toUpperCase()}\n`;
+      const strategy = client.strategy_json ? (typeof client.strategy_json === "string" ? JSON.parse(client.strategy_json) : client.strategy_json) : null;
+      let text = `FULL BUSINESS REPORT: ${client.business_name.toUpperCase()}\n`;
       text += `Generated on: ${new Date().toLocaleDateString()}\n`;
       text += `================================================\n\n`;
 
-      if (strategy.executive_summary) {
-        text += `EXECUTIVE SUMMARY\n-----------------\n${strategy.executive_summary}\n\n`;
+      text += `1. BUSINESS PROFILE\n`;
+      text += `-----------------\n`;
+      text += `Business Name: ${client.business_name}\n`;
+      text += `Industry: ${client.industry_type}\n`;
+      text += `Website: ${client.website_url}\n`;
+      text += `Primary Goal: ${client.primary_goal}\n`;
+      text += `Brand Tone: ${client.brand_tone}\n`;
+      text += `Platforms: ${client.platforms}\n`;
+      text += `Competitors: ${client.competitors}\n\n`;
+
+      if (client.business_description) {
+        text += `DESCRIPTION\n-----------\n${client.business_description}\n\n`;
       }
 
-      if (strategy.brand_positioning) {
-        text += `BRAND POSITIONING\n-----------------\n`;
-        text += `UVP: ${strategy.brand_positioning.unique_value_proposition}\n`;
-        text += `Voice: ${strategy.brand_positioning.brand_voice}\n`;
-        text += `Differentiators: ${strategy.brand_positioning.key_differentiators?.join(", ")}\n\n`;
+      if (client.additional_notes) {
+        text += `STRATEGIC NOTES\n---------------\n${client.additional_notes}\n\n`;
       }
 
-      if (strategy.target_audience) {
-        text += `TARGET AUDIENCE\n---------------\n`;
-        text += `Primary: ${strategy.target_audience.primary?.description}\n`;
-        text += `Pain Points: ${strategy.target_audience.primary?.pain_points?.join(", ")}\n\n`;
+      if (strategy && !strategy.error) {
+        text += `2. AI GENERATED STRATEGY\n`;
+        text += `----------------------\n`;
+        if (strategy.executive_summary) {
+          text += `EXECUTIVE SUMMARY\n${strategy.executive_summary}\n\n`;
+        }
+        if (strategy.brand_positioning) {
+          text += `BRAND POSITIONING\n`;
+          text += `UVP: ${strategy.brand_positioning.unique_value_proposition}\n`;
+          text += `Voice: ${strategy.brand_positioning.brand_voice}\n\n`;
+        }
       }
 
       const blob = new Blob([text], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${client.business_name.replace(/\s+/g, "_")}_Strategy.txt`;
+      a.download = `${client.business_name.replace(/\s+/g, "_")}_Full_Report.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -281,38 +295,107 @@ export default function ClientDetailPage() {
 
       // Divider
       doc.setDrawColor(226, 232, 240); // slate-200
+      doc.setDrawColor(226, 232, 240);
       doc.line(20, y, 190, y);
       y += 15;
 
-      // Executive Summary
-      if (strategy.executive_summary) {
-        doc.setFontSize(14);
-        doc.setTextColor(15, 23, 42);
-        doc.text("EXECUTIVE SUMMARY", 20, y);
-        y += 8;
-        doc.setFontSize(11);
-        doc.setTextColor(51, 65, 85); // slate-700
-        const lines = doc.splitTextToSize(strategy.executive_summary, 170);
-        doc.text(lines, 20, y);
-        y += (lines.length * 6) + 15;
-      }
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("1. BUSINESS PROFILE", 20, y);
+      y += 10;
 
-      // Brand Positioning
-      if (strategy.brand_positioning) {
+      const infoFields = [
+        ["Business Name", client.business_name],
+        ["Industry", client.industry_type],
+        ["Website", client.website_url],
+        ["Primary Goal", client.primary_goal],
+        ["Brand Tone", client.brand_tone],
+        ["Target Audience", client.target_audience],
+        ["Platforms", client.platforms],
+        ["Competitors", client.competitors],
+      ];
+
+      doc.setFontSize(10);
+      infoFields.forEach(([label, value]) => {
+        if (!value) return;
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`${label.toUpperCase()}:`, 20, y);
+        doc.setFontSize(10);
+        doc.setTextColor(51, 65, 85);
+        const valLines = doc.splitTextToSize(value, 130);
+        doc.text(valLines, 60, y);
+        y += (valLines.length * 5) + 2;
+      });
+      y += 5;
+
+      // Description
+      if (client.business_description) {
         if (y > 250) { doc.addPage(); y = 20; }
-        doc.setFontSize(14);
-        doc.setTextColor(15, 23, 42);
-        doc.text("BRAND POSITIONING", 20, y);
-        y += 8;
         doc.setFontSize(11);
-        doc.text(`Unique Value Proposition:`, 20, y);
+        doc.setTextColor(15, 23, 42);
+        doc.text("Business Description", 20, y);
         y += 6;
-        const uvpLines = doc.splitTextToSize(strategy.brand_positioning.unique_value_proposition, 170);
-        doc.text(uvpLines, 20, y);
-        y += (uvpLines.length * 6) + 10;
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        const descLines = doc.splitTextToSize(client.business_description, 170);
+        doc.text(descLines, 20, y);
+        y += (descLines.length * 5) + 10;
       }
 
-      doc.save(`${client.business_name.replace(/\s+/g, "_")}_Strategy.pdf`);
+      // Strategic Notes
+      if (client.additional_notes) {
+        if (y > 250) { doc.addPage(); y = 20; }
+        doc.setFillColor(249, 115, 22, 0.1); // light orange bg
+        doc.rect(20, y, 170, 7, "F");
+        doc.setFontSize(11);
+        doc.setTextColor(249, 115, 22);
+        doc.text("📌 Strategic Notes", 25, y + 5);
+        y += 12;
+        doc.setFontSize(10);
+        doc.setTextColor(51, 65, 85);
+        const noteLines = doc.splitTextToSize(client.additional_notes, 170);
+        doc.text(noteLines, 20, y);
+        y += (noteLines.length * 5) + 15;
+      }
+
+      // AI Strategy (if exists)
+      if (strategy && !strategy.error) {
+        doc.addPage(); y = 20;
+        doc.setFontSize(14);
+        doc.setTextColor(15, 23, 42);
+        doc.text("2. AI GENERATED STRATEGY", 20, y);
+        y += 12;
+
+        if (strategy.executive_summary) {
+          doc.setFontSize(12);
+          doc.setTextColor(249, 115, 22);
+          doc.text("Executive Summary", 20, y);
+          y += 7;
+          doc.setFontSize(10);
+          doc.setTextColor(51, 65, 85);
+          const lines = doc.splitTextToSize(strategy.executive_summary, 170);
+          doc.text(lines, 20, y);
+          y += (lines.length * 5) + 12;
+        }
+
+        if (strategy.brand_positioning) {
+          if (y > 250) { doc.addPage(); y = 20; }
+          doc.setFontSize(12);
+          doc.setTextColor(249, 115, 22);
+          doc.text("Brand Positioning", 20, y);
+          y += 7;
+          doc.setFontSize(10);
+          doc.setTextColor(51, 65, 85);
+          doc.text(`UVP: ${strategy.brand_positioning.unique_value_proposition}`, 20, y);
+          y += 6;
+          doc.text(`Voice: ${strategy.brand_positioning.brand_voice}`, 20, y);
+          y += 12;
+        }
+      }
+
+      doc.save(`${client.business_name.replace(/\s+/g, "_")}_Full_Report.pdf`);
       setExportOpen(false);
     } catch (e) {
       alert("Error exporting PDF: " + (e as Error).message);
@@ -416,7 +499,7 @@ export default function ClientDetailPage() {
                     className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[12px] rounded-lg hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap"
                   >
                     <Download className="w-4 h-4 shrink-0" />
-                    Export
+                    Export info as
                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
                   </button>
 
