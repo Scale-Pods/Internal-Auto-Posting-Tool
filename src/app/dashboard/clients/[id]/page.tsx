@@ -391,10 +391,10 @@ export default function ClientDetailPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/dashboard/clients/${client.id}/edit`}
-              className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[13px] rounded-lg hover:bg-slate-50 transition-all shadow-sm"
+              className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[12px] rounded-lg hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap"
             >
               Edit
             </Link>
@@ -403,9 +403,9 @@ export default function ClientDetailPage() {
               <>
                 <Link
                   href={`/onboarding/report?id=${client.id}`}
-                  className="h-10 px-4 flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[13px] rounded-lg hover:bg-emerald-100 transition-all shadow-sm"
+                  className="h-10 px-4 flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[12px] rounded-lg hover:bg-emerald-100 transition-all shadow-sm whitespace-nowrap"
                 >
-                  <FileText className="w-4 h-4" />
+                  <FileText className="w-4 h-4 shrink-0" />
                   AI Strategy Report
                 </Link>
 
@@ -413,11 +413,11 @@ export default function ClientDetailPage() {
                 <div className="relative">
                   <button
                     onClick={() => setExportOpen(!exportOpen)}
-                    className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[13px] rounded-lg hover:bg-slate-50 transition-all shadow-sm"
+                    className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[12px] rounded-lg hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 shrink-0" />
                     Export
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
                   </button>
 
                   {exportOpen && (
@@ -426,14 +426,14 @@ export default function ClientDetailPage() {
                       <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                         <button
                           onClick={exportToPdf}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-[13px] font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-[12px] font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                         >
                           <FileType className="w-4 h-4 text-red-500" />
                           Export as PDF
                         </button>
                         <button
                           onClick={exportToTxt}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-[13px] font-bold text-slate-700 hover:bg-slate-50 border-t border-slate-100 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-[12px] font-bold text-slate-700 hover:bg-slate-50 border-t border-slate-100 transition-colors"
                         >
                           <FileText className="w-4 h-4 text-blue-500" />
                           Export as TXT
@@ -448,9 +448,9 @@ export default function ClientDetailPage() {
             {client.content_json && (
               <Link
                 href={`/dashboard/approval/${client.id}`}
-                className="h-10 px-4 flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[13px] rounded-lg hover:bg-indigo-100 transition-all shadow-sm"
+                className="h-10 px-4 flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[12px] rounded-lg hover:bg-indigo-100 transition-all shadow-sm whitespace-nowrap"
               >
-                <Palette className="w-4 h-4" />
+                <Palette className="w-4 h-4 shrink-0" />
                 Content Report
               </Link>
             )}
@@ -458,16 +458,16 @@ export default function ClientDetailPage() {
             <button
               onClick={handleGenerateStrategy}
               disabled={generating || client.status === "Generating" || generatingContent}
-              className="h-10 px-4 flex items-center gap-2 bg-primary hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[13px] rounded-lg transition-all shadow-sm shadow-primary/20"
+              className="h-10 px-4 flex items-center gap-2 bg-primary hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[12px] rounded-lg transition-all shadow-sm shadow-primary/20 whitespace-nowrap"
             >
               {generating || client.status === "Generating" ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
                   Generating...
                 </>
               ) : (
                 <>
-                  <Zap className="w-4 h-4" />
+                  <Zap className="w-4 h-4 shrink-0" />
                   Generate Strategy
                 </>
               )}
@@ -476,16 +476,16 @@ export default function ClientDetailPage() {
             <button
               onClick={handleGenerateContent}
               disabled={generatingContent || client.status === "Generating Content" || generating}
-              className="h-10 px-4 flex items-center gap-2 bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[13px] rounded-lg transition-all shadow-sm shadow-indigo-200"
+              className="h-10 px-4 flex items-center gap-2 bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[12px] rounded-lg transition-all shadow-sm shadow-indigo-200 whitespace-nowrap"
             >
               {generatingContent || client.status === "Generating Content" ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
                   Sending...
                 </>
               ) : (
                 <>
-                  <Palette className="w-4 h-4" />
+                  <Palette className="w-4 h-4 shrink-0" />
                   Send for Content Creation
                 </>
               )}
