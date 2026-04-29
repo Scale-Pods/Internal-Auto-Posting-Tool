@@ -653,7 +653,7 @@ export default function ClientDetailPage() {
                     className="h-10 px-4 flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold text-[12px] rounded-lg hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap"
                   >
                     <Download className="w-4 h-4 shrink-0" />
-                    Export info as
+                    Export Strategy as
                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
                   </button>
 
