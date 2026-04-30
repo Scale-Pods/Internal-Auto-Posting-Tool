@@ -15,9 +15,14 @@ import {
   Share2,
   MoreVertical,
   ThumbsUp,
-  MessageSquare
+  MessageSquare,
+  Download,
+  Loader2
 } from "lucide-react";
 import { LoadingLottie } from "@/components/loading-lottie";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
 
 type Client = {
   id: string;
@@ -32,6 +37,56 @@ export default function BlogDetailPage() {
   const clientId = params?.id as string;
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+  const articleRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPdf = async () => {
+    if (!articleRef.current || !client) return;
+    setIsExporting(true);
+    
+    try {
+      const element = articleRef.current;
+      
+      // Capture the element
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Add first page
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
+      heightLeft -= pageHeight;
+      
+      // Add subsequent pages if content is too long
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
+    } catch (error) {
+      console.error("PDF Export Error:", error);
+      alert("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (clientId) fetchClient();
@@ -109,14 +164,23 @@ export default function BlogDetailPage() {
       {/* Top Header Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.back()}
-              className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
+          <div className="flex items-center gap-3">
+              <button 
+                onClick={handleExportPdf}
+                disabled={isExporting}
+                className="h-10 px-4 bg-primary text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {isExporting ? "Exporting..." : "Export PDF"}
+              </button>
+              <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
+                <MoreVertical className="w-5 h-5" />
+              </button>
+            </div>
+          <div>
               <h2 className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
                 {client.business_name}
               </h2>
@@ -147,7 +211,7 @@ export default function BlogDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto mt-8 px-6">
+      <div className="max-w-4xl mx-auto mt-8 px-6" ref={articleRef}>
         <article className="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
           {/* Header Image */}
           <div className="relative h-[450px] w-full bg-slate-100 overflow-hidden">

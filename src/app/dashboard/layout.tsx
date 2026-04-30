@@ -14,6 +14,7 @@ import {
   CalendarDays,
   Send,
   BarChart3,
+  Globe,
   Settings,
   LogOut,
   Search,
@@ -44,6 +45,7 @@ const navGroups = [
       { name: "Calendar Schedule", href: "/dashboard/calendar",       icon: CalendarDays },
       { name: "Ready to Post",     href: "/dashboard/ready-to-post",  icon: Send },
       { name: "Social Analysis",   href: "/dashboard/social-analysis",icon: BarChart3 },
+      { name: "Website Blogs",     href: "/dashboard/website-blogs",  icon: Globe },
     ],
   },
 ];
