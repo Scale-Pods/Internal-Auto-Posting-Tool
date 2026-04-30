@@ -19,7 +19,6 @@ function BlogGeneratingContent() {
   useEffect(() => {
     if (!clientId) return;
 
-    // Fetch initial business name and check if already done
     supabase
       .from("clients")
       .select("business_name, blog_status")
@@ -32,28 +31,16 @@ function BlogGeneratingContent() {
         }
       });
 
-    // Elapsed counter
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    dotsRef.current = setInterval(() => setDots((d) => (d.length >= 3 ? "." : d + ".")), 500);
 
-    // Animated dots
-    dotsRef.current = setInterval(() => {
-      setDots((d) => (d.length >= 3 ? "." : d + "."));
-    }, 500);
-
-    // Real-time Supabase subscription
     const channel = supabase
       .channel(`blog-gen-${clientId}`)
       .on(
         "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "clients",
-          filter: `id=eq.${clientId}`,
-        },
+        { event: "UPDATE", schema: "public", table: "clients", filter: `id=eq.${clientId}` },
         (payload) => {
-          const newStatus = payload.new?.blog_status;
-          if (newStatus === "Ready for Review") {
+          if (payload.new?.blog_status === "Ready for Review") {
             cleanup();
             router.push(`/dashboard/website-blogs/${clientId}`);
           }
@@ -61,7 +48,6 @@ function BlogGeneratingContent() {
       )
       .subscribe();
 
-    // Fallback polling every 6 seconds
     pollingRef.current = setInterval(async () => {
       const { data } = await supabase
         .from("clients")
@@ -86,93 +72,98 @@ function BlogGeneratingContent() {
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
   const steps = [
-    { label: "Analysing client profile & brand voice", done: elapsed > 5 },
-    { label: "Running AI Content Strategist agent", done: elapsed > 15 },
-    { label: "Drafting blog sections & headings", done: elapsed > 30 },
-    { label: "Polishing copy with AI Writer agent", done: elapsed > 50 },
-    { label: "Saving to database & finalising", done: elapsed > 70 },
+    { label: "Analysing client profile & brand voice",   done: elapsed > 5  },
+    { label: "Running AI Content Strategist agent",       done: elapsed > 15 },
+    { label: "Drafting blog sections & headings",         done: elapsed > 30 },
+    { label: "Polishing copy with AI Writer agent",       done: elapsed > 50 },
+    { label: "Saving to database & finalising",           done: elapsed > 70 },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1409] to-[#0f0f0f] flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background ambient glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-orange-400/5 rounded-full blur-[80px] pointer-events-none" />
+    <div className="min-h-screen bg-[#F8F7F5] flex flex-col items-center justify-center px-6 relative overflow-hidden">
 
-      {/* Logo */}
-      <div className="mb-8">
-        <img src="/logo-light.png" alt="ScalePods" className="h-9 object-contain" />
-      </div>
+      {/* Subtle background texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(249,115,22,0.06),transparent_60%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(249,115,22,0.04),transparent_60%)] pointer-events-none" />
 
-      {/* Lottie Animation */}
-      <div className="w-72 h-64 mb-6">
-        <DotLottieReact
-          src="https://lottie.host/f50dffbc-77a8-4f39-95bc-5e5ef9e60ed7/XEz6O9vmfL.lottie"
-          loop
-          autoplay
-          style={{ width: "100%", height: "100%" }}
-        />
-      </div>
+      {/* Card container */}
+      <div className="relative z-10 bg-white rounded-3xl shadow-xl border border-slate-100 px-10 py-12 w-full max-w-lg flex flex-col items-center">
 
-      {/* Headline */}
-      <h1 className="text-3xl md:text-4xl font-black text-white text-center mb-3 tracking-tight">
-        Crafting your blog{dots}
-      </h1>
-      <p className="text-slate-400 text-center text-sm mb-1 max-w-sm">
-        Our AI agents are writing a high-quality blog post
-        {businessName ? (
-          <> for <span className="text-primary font-bold">{businessName}</span></>
-        ) : ""}
-        . This usually takes 1–2 minutes.
-      </p>
-      <p className="text-slate-600 text-xs mb-10">
-        Time elapsed:{" "}
-        <span className="text-primary font-semibold">{formatTime(elapsed)}</span>
-      </p>
-
-      {/* Progress steps */}
-      <div className="w-full max-w-xs space-y-3 mb-10">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div
-              className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-700 ${
-                step.done
-                  ? "bg-primary shadow-[0_0_14px_rgba(249,115,22,0.5)]"
-                  : "border-2 border-slate-700"
-              }`}
-            >
-              {step.done && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </div>
-            <span
-              className={`text-sm transition-colors duration-500 ${
-                step.done ? "text-white font-semibold" : "text-slate-600"
-              }`}
-            >
-              {step.label}
-            </span>
+        {/* Logo */}
+        <div className="mb-6">
+          <div className="bg-primary px-5 py-2 rounded-xl inline-flex items-center justify-center shadow-md">
+            <img src="/logo-light.png" alt="ScalePods" className="h-7 object-contain" />
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Progress bar */}
-      <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-primary to-orange-300 rounded-full transition-all duration-1000"
-          style={{ width: `${Math.min((elapsed / 90) * 100, 95)}%` }}
-        />
+        {/* Lottie Animation — man & robot in workplace */}
+        <div className="w-72 h-56 mb-4">
+          <DotLottieReact
+            src="https://assets-v2.lottiefiles.com/a/43136e14-118a-11ee-afa9-e3a75585f1a0/3RVQ4eVjUH.lottie"
+            loop
+            autoplay
+            style={{ width: "100%", height: "100%" }}
+          />
+        </div>
+
+        {/* Headline */}
+        <h1 className="text-2xl font-black text-slate-900 text-center mb-2 tracking-tight">
+          Crafting your blog{dots}
+        </h1>
+        <p className="text-slate-500 text-center text-sm mb-1 max-w-sm leading-relaxed">
+          Our AI agents are writing a high-quality blog post
+          {businessName ? (
+            <> for <span className="text-primary font-bold">{businessName}</span></>
+          ) : ""}.
+          This usually takes <strong>1–2 minutes</strong>.
+        </p>
+        <p className="text-slate-400 text-xs mb-8">
+          Time elapsed: <span className="text-primary font-semibold">{formatTime(elapsed)}</span>
+        </p>
+
+        {/* Progress steps */}
+        <div className="w-full space-y-3 mb-8">
+          {steps.map((step, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div
+                className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-700 ${
+                  step.done
+                    ? "bg-primary shadow-[0_0_10px_rgba(249,115,22,0.4)]"
+                    : "border-2 border-slate-200 bg-white"
+                }`}
+              >
+                {step.done && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+              <span
+                className={`text-sm transition-colors duration-500 ${
+                  step.done ? "text-slate-800 font-semibold" : "text-slate-400"
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div
+            className="h-full bg-gradient-to-r from-primary to-orange-300 rounded-full transition-all duration-1000"
+            style={{ width: `${Math.min((elapsed / 90) * 100, 95)}%` }}
+          />
+        </div>
+        <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center">
+          You&apos;ll be redirected automatically when ready
+        </p>
       </div>
-      <p className="text-[10px] text-slate-700 mt-3 uppercase tracking-widest">
-        You&apos;ll be redirected automatically when ready
-      </p>
     </div>
   );
 }
@@ -181,8 +172,8 @@ export default function BlogGeneratingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen bg-[#F8F7F5] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >
