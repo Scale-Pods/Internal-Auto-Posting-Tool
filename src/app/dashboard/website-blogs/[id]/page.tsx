@@ -165,32 +165,14 @@ export default function BlogDetailPage() {
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-              <button 
-                onClick={handleExportPdf}
-                disabled={isExporting}
-                className="h-10 px-4 bg-primary text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                {isExporting ? "Exporting..." : "Export PDF"}
-              </button>
-              <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
-                <MoreVertical className="w-5 h-5" />
-              </button>
-            </div>
-          <div>
-              <h2 className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
-                {client.business_name}
-              </h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest uppercase">
-                Reviewing Blog Content
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleExportPdf}
+              disabled={isExporting}
+              className="h-10 px-4 bg-primary text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? "Exporting..." : "Export PDF"}
+            </button>
             {client.blog_status === "Approved" ? (
               <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-sm font-bold border border-emerald-100">
                 <CheckCircle2 className="w-4 h-4" />
@@ -204,9 +186,20 @@ export default function BlogDetailPage() {
                 Approve & Publish
               </button>
             )}
-            <button className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400 border border-slate-100 bg-white">
-              <Share2 className="w-4 h-4" />
+            <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
+              <Share2 className="w-5 h-5" />
             </button>
+            <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
+              <MoreVertical className="w-5 h-5" />
+            </button>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
+              {client.business_name}
+            </h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest uppercase">
+              Reviewing Blog Content
+            </p>
           </div>
         </div>
       </div>
