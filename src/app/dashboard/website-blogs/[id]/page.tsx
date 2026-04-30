@@ -97,7 +97,12 @@ export default function BlogDetailPage() {
     );
   }
 
-  const { title, header_image, author, sections } = client.blog_json;
+  // Robust parsing of blog_json in case it is stored as a string
+  const blogData = typeof client.blog_json === 'string' 
+    ? JSON.parse(client.blog_json) 
+    : client.blog_json;
+
+  const { title, header_image, author, sections } = blogData;
 
   return (
     <div className="flex-1 min-h-screen bg-[#fafafa] pb-20">
@@ -196,12 +201,12 @@ export default function BlogDetailPage() {
           {/* Blog Content */}
           <div className="px-12 py-16">
             {/* Introduction Section */}
-            {client.blog_json.introduction && (
+            {blogData.introduction && (
               <div className="mb-16">
                 <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-lg">
-                   <p className="font-bold text-slate-900 text-xl mb-4">{client.blog_json.introduction.hook}</p>
-                   <p className="mb-6">{client.blog_json.introduction.context}</p>
-                   <p className="italic text-slate-500 border-l-4 border-primary/20 pl-6 my-8">{client.blog_json.introduction.thesis}</p>
+                   <p className="font-bold text-slate-900 text-xl mb-4">{blogData.introduction.hook}</p>
+                   <p className="mb-6">{blogData.introduction.context}</p>
+                   <p className="italic text-slate-500 border-l-4 border-primary/20 pl-6 my-8">{blogData.introduction.thesis}</p>
                 </div>
               </div>
             )}
@@ -244,28 +249,28 @@ export default function BlogDetailPage() {
             ))}
 
             {/* Conclusion Section */}
-            {client.blog_json.conclusion && (
+            {blogData.conclusion && (
               <div className="mt-20 pt-16 border-t border-slate-100">
                 <h2 className="text-3xl font-bold text-slate-900 mb-8">
-                  {client.blog_json.conclusion.heading || "Final Thoughts"}
+                  {blogData.conclusion.heading || "Final Thoughts"}
                 </h2>
                 <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-lg">
-                  {client.blog_json.conclusion.summary?.split('\n').map((para: string, pIdx: number) => (
+                  {blogData.conclusion.summary?.split('\n').map((para: string, pIdx: number) => (
                     para.trim() && <p key={pIdx} className="mb-6">{para.trim()}</p>
                   ))}
                   <p className="font-bold text-slate-900 mt-8 text-xl">
-                    {client.blog_json.conclusion.final_thought}
+                    {blogData.conclusion.final_thought}
                   </p>
                 </div>
               </div>
             )}
 
             {/* FAQ Section */}
-            {client.blog_json.faq && client.blog_json.faq.length > 0 && (
+            {blogData.faq && blogData.faq.length > 0 && (
               <div className="mt-24 pt-16 border-t border-slate-100">
                 <h2 className="text-2xl font-bold text-slate-900 mb-10">Frequently Asked Questions</h2>
                 <div className="space-y-8">
-                  {client.blog_json.faq.map((item: any, fIdx: number) => (
+                  {blogData.faq.map((item: any, fIdx: number) => (
                     <div key={fIdx} className="bg-slate-50/50 rounded-2xl p-8 border border-slate-100">
                       <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-start gap-3">
                         <span className="text-primary font-black">Q.</span>
@@ -281,20 +286,20 @@ export default function BlogDetailPage() {
             )}
 
             {/* CTA Section */}
-            {client.blog_json.cta && (
+            {blogData.cta && (
               <div className="mt-24 bg-slate-900 rounded-[40px] p-12 text-center text-white overflow-hidden relative group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -mr-32 -mt-32 rounded-full" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[100px] -ml-32 -mb-32 rounded-full" />
                 
-                <h2 className="text-3xl font-bold mb-6 relative z-10">{client.blog_json.cta.heading}</h2>
+                <h2 className="text-3xl font-bold mb-6 relative z-10">{blogData.cta.heading}</h2>
                 <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto relative z-10 leading-relaxed">
-                  {client.blog_json.cta.text}
+                  {blogData.cta.text}
                 </p>
                 <Link 
-                  href={client.blog_json.cta.url || "/contact"}
+                  href={blogData.cta.url || "/contact"}
                   className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-orange-600 transition-all shadow-xl shadow-primary/20 relative z-10 group"
                 >
-                  {client.blog_json.cta.button_text || "Get Started Today"}
+                  {blogData.cta.button_text || "Get Started Today"}
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>

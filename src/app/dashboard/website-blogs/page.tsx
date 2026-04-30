@@ -104,30 +104,50 @@ export default function WebsiteBlogsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredClients.map((client) => (
-          <Link
-            key={client.id}
-            href={`/dashboard/website-blogs/${client.id}`}
-            className="group bg-white border border-slate-100 rounded-2xl p-6 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                <Globe className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+        {filteredClients.map((client) => {
+          const isGenerating = client.blog_status === "Generating Blog";
+          
+          return (
+            <div
+              key={client.id}
+              onClick={() => {
+                if (!isGenerating) {
+                  window.location.href = `/dashboard/website-blogs/${client.id}`;
+                }
+              }}
+              className={`group bg-white border border-slate-100 rounded-[32px] p-8 transition-all duration-300 ${
+                isGenerating 
+                  ? "opacity-90 cursor-not-allowed border-blue-100 bg-blue-50/10 shadow-inner" 
+                  : "cursor-pointer hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10"
+              }`}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
+                  isGenerating ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary"
+                }`}>
+                  {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <Globe className="w-7 h-7" />}
+                </div>
+                <StatusBadge status={client.blog_status || "Idle"} />
               </div>
-              <StatusBadge status={client.blog_status || "Idle"} />
-            </div>
 
-            <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{client.business_name}</h3>
-            <p className="text-sm text-slate-500 mb-6 line-clamp-1">{client.industry_type}</p>
+              <h3 className="text-xl font-black text-slate-900 mb-2 line-clamp-1">{client.business_name}</h3>
+              <p className="text-sm font-medium text-slate-500 mb-8 line-clamp-1">{client.industry_type}</p>
 
-            <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                View Blog
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+              <div className={`pt-6 border-t flex items-center justify-between ${
+                isGenerating ? "border-blue-100/50" : "border-slate-50"
+              }`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${
+                  isGenerating ? "text-blue-500" : "text-slate-400"
+                }`}>
+                  {isGenerating ? "AI is Writing..." : "View Report"}
+                </span>
+                {!isGenerating && (
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+                )}
+              </div>
             </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

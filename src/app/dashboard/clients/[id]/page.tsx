@@ -274,10 +274,7 @@ export default function ClientDetailPage() {
       }
 
       setGenerateSuccess(true);
-
-      setTimeout(() => {
-        router.push(`/dashboard/website-blogs`);
-      }, 2000);
+      setGeneratingBlog(false);
     } catch (err: any) {
       console.error("Blog Webhook error:", err);
       setGenerateError(err.message || "Failed to trigger blog generation. Check n8n webhook URL.");
