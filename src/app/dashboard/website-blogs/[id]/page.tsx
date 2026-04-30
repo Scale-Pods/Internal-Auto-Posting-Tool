@@ -46,45 +46,49 @@ export default function BlogDetailPage() {
     
     try {
       const element = articleRef.current;
-      
-      // Capture the element with optimized settings
-      const canvas = await html2canvas(element, {
-        scale: 1.5, // Reduced from 2 for better compatibility
-        useCORS: true,
-        allowTaint: false,
-        logging: true, // Enable logging to see issues in console
-        backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: -window.scrollY, // Fix offset issues
-      });
-      
-      const imgData = canvas.toDataURL("image/jpeg", 0.75); // JPEG is smaller than PNG
       const pdf = new jsPDF("p", "mm", "a4");
-      
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      let heightLeft = pdfHeight;
-      let position = 0;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Add first page
-      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-      
-      // Add subsequent pages if content is too long
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      pdf.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
+      // Use the newer .html() method which handles complex CSS better
+      // and has internal workarounds for some color issues
+      await pdf.html(element, {
+        callback: (doc) => {
+          doc.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
+          setIsExporting(false);
+        },
+        x: 0,
+        y: 0,
+        width: pdfWidth,
+        windowWidth: 800, // Fixed width for consistent layout
+        autoPaging: 'text',
+        html2canvas: {
+          scale: 0.25, // Adjust scale for .html() method sizing
+          useCORS: true,
+          logging: false,
+          letterRendering: true,
+          // onclone is crucial to fix the "lab" color error in Tailwind v4
+          onclone: (clonedDoc) => {
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = `
+              * { 
+                color-scheme: light !important; 
+                /* Force standard colors for export */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              /* Override common Tailwind v4 colors that use oklch/lab */
+              :root {
+                --background: 255 255 255;
+                --foreground: 15 23 42;
+              }
+            `;
+            clonedDoc.head.appendChild(style);
+          }
+        }
+      });
     } catch (error: any) {
       console.error("PDF Export Error:", error);
-      alert(`Failed to export PDF: ${error.message || 'Unknown error'}. Try refreshing the page.`);
-    } finally {
+      alert(`Export Error: ${error.message}. TIP: If this persists, try using Ctrl+P and Save as PDF.`);
       setIsExporting(false);
     }
   };
