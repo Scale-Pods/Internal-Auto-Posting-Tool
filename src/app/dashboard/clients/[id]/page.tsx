@@ -230,11 +230,14 @@ export default function ClientDetailPage() {
 
   const handleGenerateBlog = async () => {
     if (!client) return;
+    console.log("handleGenerateBlog started for client:", client.id);
     setGeneratingBlog(true);
     setGenerateError("");
     setGenerateSuccess(false);
 
     const webhookUrl = process.env.NEXT_PUBLIC_N8N_BLOG_WEBHOOK;
+    console.log("Webhook URL from env:", webhookUrl);
+
     if (!webhookUrl) {
       setGenerateError("Blog Webhook URL not configured in environment variables. (NEXT_PUBLIC_N8N_BLOG_WEBHOOK)");
       setGeneratingBlog(false);
@@ -244,14 +247,16 @@ export default function ClientDetailPage() {
     try {
       const supabase = getSupabase();
       if (supabase) {
+        console.log("Updating Supabase blog_status...");
         await supabase
           .from("clients")
           .update({ blog_status: "Generating Blog" })
           .eq("id", client.id);
         setClient((prev) => prev ? { ...prev, blog_status: "Generating Blog" } : prev);
+        console.log("Supabase update complete.");
       }
 
-      console.log("Triggering Blog Webhook:", webhookUrl);
+      console.log("Triggering Blog Webhook fetch...");
 
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 10000); // 10s timeout
