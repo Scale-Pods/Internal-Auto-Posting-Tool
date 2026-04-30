@@ -251,20 +251,35 @@ export default function ClientDetailPage() {
         setClient((prev) => prev ? { ...prev, blog_status: "Generating Blog" } : prev);
       }
 
-      fetch(webhookUrl, {
+      const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ client_id: client.id }),
-      }).catch((err) => console.error("Blog Webhook error:", err));
+      });
+
+      if (!response.ok) {
+        throw new Error(`Webhook failed with status: ${response.status}`);
+      }
 
       setGenerateSuccess(true);
 
       setTimeout(() => {
         router.push(`/dashboard/website-blogs`);
       }, 2000);
-    } catch (err) {
-      setGenerateError("Failed to trigger blog generation. Check n8n webhook URL.");
+    } catch (err: any) {
+      console.error("Blog Webhook error:", err);
+      setGenerateError(err.message || "Failed to trigger blog generation. Check n8n webhook URL.");
       setGeneratingBlog(false);
+      
+      // Revert status in DB if fetch failed
+      const supabase = getSupabase();
+      if (supabase) {
+        await supabase
+          .from("clients")
+          .update({ blog_status: "Idle" })
+          .eq("id", client.id);
+        setClient((prev) => prev ? { ...prev, blog_status: "Idle" } : prev);
+      }
     }
   };
 
