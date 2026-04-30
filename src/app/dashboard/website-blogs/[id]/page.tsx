@@ -207,6 +207,11 @@ export default function BlogDetailPage() {
         .eq("id", client.id);
       
       setClient({ ...client, blog_status: "Approved" });
+
+      // Redirect to Ready to Post after a short confirmation delay
+      setTimeout(() => {
+        router.push("/dashboard/ready-to-post");
+      }, 1200);
     } catch (err) {
       console.error("Error approving blog:", err);
     }

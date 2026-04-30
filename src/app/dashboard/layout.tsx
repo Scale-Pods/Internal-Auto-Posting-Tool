@@ -57,6 +57,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router   = useRouter();
 
+  // Full-screen routes that bypass the sidebar layout
+  if (pathname.startsWith("/dashboard/blog-generating")) {
+    return <>{children}</>;
+  }
+
   // "pinned" = user manually pinned it open; "hovered" = auto-open on hover
   const [pinned,  setPinned]  = useState(true);
   const [hovered, setHovered] = useState(false);

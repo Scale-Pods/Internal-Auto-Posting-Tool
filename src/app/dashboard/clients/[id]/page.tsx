@@ -256,31 +256,21 @@ export default function ClientDetailPage() {
         console.log("Supabase update complete.");
       }
 
-      console.log("Triggering Blog Webhook fetch...");
-
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      const response = await fetch(webhookUrl, {
+      // Fire webhook (fire-and-forget — n8n takes 1-2 min)
+      fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ client_id: client.id }),
-        signal: controller.signal,
-      });
-      clearTimeout(id);
+      }).catch((err) => console.error("Blog webhook error:", err));
 
-      if (!response.ok) {
-        throw new Error(`Webhook failed with status: ${response.status}`);
-      }
-
-      setGenerateSuccess(true);
-      setGeneratingBlog(false);
+      // Redirect to the dedicated loading page which polls for completion
+      router.push(`/dashboard/blog-generating?id=${client.id}`);
     } catch (err: any) {
       console.error("Blog Webhook error:", err);
       setGenerateError(err.message || "Failed to trigger blog generation. Check n8n webhook URL.");
       setGeneratingBlog(false);
       
-      // Revert status in DB if fetch failed
+      // Revert status in DB if setup failed
       const supabase = getSupabase();
       if (supabase) {
         await supabase
