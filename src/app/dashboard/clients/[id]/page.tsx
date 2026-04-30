@@ -679,6 +679,10 @@ export default function ClientDetailPage() {
     }
   }
 
+  useEffect(() => {
+    console.log("Dashboard Client Page v1.2 Loaded - Real-time sync active");
+  }, []);
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-white">
@@ -739,6 +743,16 @@ export default function ClientDetailPage() {
             >
               Edit
             </Link>
+
+            {(client.status === "Generating" || client.status === "Generating Content" || client.blog_status === "Generating Blog") && (
+              <button 
+                onClick={handleResetStatus}
+                className="h-10 px-4 flex items-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 font-bold text-[12px] rounded-lg hover:bg-rose-100 transition-all shadow-sm"
+              >
+                <RefreshCw className="w-4 h-4 shrink-0" />
+                Reset Status
+              </button>
+            )}
 
             {client.strategy_json && (
               <>
