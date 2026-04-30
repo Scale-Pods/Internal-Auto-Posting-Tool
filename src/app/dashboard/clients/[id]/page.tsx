@@ -251,11 +251,18 @@ export default function ClientDetailPage() {
         setClient((prev) => prev ? { ...prev, blog_status: "Generating Blog" } : prev);
       }
 
+      console.log("Triggering Blog Webhook:", webhookUrl);
+
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ client_id: client.id }),
+        signal: controller.signal,
       });
+      clearTimeout(id);
 
       if (!response.ok) {
         throw new Error(`Webhook failed with status: ${response.status}`);
