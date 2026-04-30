@@ -155,6 +155,10 @@ export default function BlogDetailPage() {
               src={header_image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426"} 
               alt={title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426";
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-10 left-10 right-10">
@@ -229,7 +233,15 @@ export default function BlogDetailPage() {
                 {section.image && (
                   <div className="my-12 group/img">
                     <div className="rounded-3xl overflow-hidden border border-slate-100 shadow-2xl shadow-slate-200/50 transition-transform duration-500 group-hover/img:scale-[1.01]">
-                      <img src={section.image} alt={section.image_alt || section.heading} className="w-full" />
+                      <img 
+                        src={section.image} 
+                        alt={section.image_alt || section.heading} 
+                        className="w-full" 
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426";
+                        }}
+                      />
                     </div>
                     {section.image_caption && (
                       <p className="text-center text-xs text-slate-400 mt-4 font-medium tracking-wide uppercase italic">
