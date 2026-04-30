@@ -47,17 +47,18 @@ export default function BlogDetailPage() {
     try {
       const element = articleRef.current;
       
-      // Capture the element
+      // Capture the element with optimized settings
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 1.5, // Reduced from 2 for better compatibility
         useCORS: true,
-        logging: false,
+        allowTaint: false,
+        logging: true, // Enable logging to see issues in console
         backgroundColor: "#ffffff",
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        scrollX: 0,
+        scrollY: -window.scrollY, // Fix offset issues
       });
       
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/jpeg", 0.75); // JPEG is smaller than PNG
       const pdf = new jsPDF("p", "mm", "a4");
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -68,21 +69,21 @@ export default function BlogDetailPage() {
       const pageHeight = pdf.internal.pageSize.getHeight();
       
       // Add first page
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
       heightLeft -= pageHeight;
       
       // Add subsequent pages if content is too long
       while (heightLeft > 0) {
         position = heightLeft - pdfHeight;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
         heightLeft -= pageHeight;
       }
       
       pdf.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("PDF Export Error:", error);
-      alert("Failed to export PDF. Please try again.");
+      alert(`Failed to export PDF: ${error.message || 'Unknown error'}. Try refreshing the page.`);
     } finally {
       setIsExporting(false);
     }
