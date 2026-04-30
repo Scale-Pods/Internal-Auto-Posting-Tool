@@ -41,54 +41,138 @@ export default function BlogDetailPage() {
   const articleRef = useRef<HTMLDivElement>(null);
 
   const handleExportPdf = async () => {
-    if (!articleRef.current || !client) return;
+    if (!client || !blogData) return;
     setIsExporting(true);
     
     try {
-      const element = articleRef.current;
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      
-      // Use the newer .html() method which handles complex CSS better
-      // and has internal workarounds for some color issues
-      await pdf.html(element, {
-        callback: (doc) => {
-          doc.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
-          setIsExporting(false);
-        },
-        x: 0,
-        y: 0,
-        width: pdfWidth,
-        windowWidth: 800, // Fixed width for consistent layout
-        autoPaging: 'text',
-        html2canvas: {
-          scale: 0.25, // Adjust scale for .html() method sizing
-          useCORS: true,
-          logging: false,
-          letterRendering: true,
-          // onclone is crucial to fix the "lab" color error in Tailwind v4
-          onclone: (clonedDoc) => {
-            const style = clonedDoc.createElement('style');
-            style.innerHTML = `
-              * { 
-                color-scheme: light !important; 
-                /* Force standard colors for export */
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+      const doc = new jsPDF();
+      let y = 20;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+
+      // --- Helper: Fetch Image and Add to PDF ---
+      const addImageFromUrl = async (url: string, currentY: number) => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Image fetch failed");
+          const blob = await response.blob();
+          
+          return new Promise<number>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result as string;
+              const imgProps = doc.getImageProperties(base64);
+              const imgWidth = contentWidth;
+              const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+              
+              if (currentY + imgHeight > 270) {
+                doc.addPage();
+                currentY = 20;
               }
-              /* Override common Tailwind v4 colors that use oklch/lab */
-              :root {
-                --background: 255 255 255;
-                --foreground: 15 23 42;
-              }
-            `;
-            clonedDoc.head.appendChild(style);
-          }
+              
+              doc.addImage(base64, 'JPEG', margin, currentY, imgWidth, imgHeight);
+              resolve(currentY + imgHeight + 10);
+            };
+            reader.readAsDataURL(blob);
+          });
+        } catch (e) {
+          console.warn("Could not add image to PDF:", e);
+          return currentY;
         }
-      });
+      };
+
+      // --- Title Section ---
+      doc.setFontSize(24);
+      doc.setTextColor(249, 115, 22); // Primary orange
+      const titleLines = doc.splitTextToSize(blogData.title || "Untitled Blog", contentWidth);
+      doc.text(titleLines, margin, y);
+      y += (titleLines.length * 10) + 5;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`By ${blogData.author || "ScalePods AI Writer"} · Generated on ${new Date().toLocaleDateString()}`, margin, y);
+      y += 15;
+
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 15;
+
+      // --- Introduction ---
+      if (blogData.introduction) {
+        doc.setFontSize(12);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont("helvetica", "bold");
+        const hookLines = doc.splitTextToSize(blogData.introduction.hook || "", contentWidth);
+        doc.text(hookLines, margin, y);
+        y += (hookLines.length * 6) + 4;
+
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        const introLines = doc.splitTextToSize(blogData.introduction.context || "", contentWidth);
+        doc.text(introLines, margin, y);
+        y += (introLines.length * 5) + 12;
+      }
+
+      // --- Sections ---
+      if (blogData.sections && Array.isArray(blogData.sections)) {
+        for (const section of blogData.sections) {
+          if (y > 250) { doc.addPage(); y = 20; }
+
+          // Heading
+          doc.setFontSize(16);
+          doc.setTextColor(15, 23, 42);
+          doc.setFont("helvetica", "bold");
+          const hLines = doc.splitTextToSize(section.heading || "", contentWidth);
+          doc.text(hLines, margin, y);
+          y += (hLines.length * 8) + 6;
+
+          // Body
+          doc.setFontSize(10.5);
+          doc.setTextColor(71, 85, 105);
+          doc.setFont("helvetica", "normal");
+          const bLines = doc.splitTextToSize(section.body || "", contentWidth);
+          doc.text(bLines, margin, y);
+          y += (bLines.length * 5) + 10;
+
+          // Section Image
+          if (section.image) {
+            y = await addImageFromUrl(section.image, y);
+          }
+          
+          y += 5; // Spacing between sections
+        }
+      }
+
+      // --- Conclusion ---
+      if (blogData.conclusion) {
+        if (y > 240) { doc.addPage(); y = 20; }
+        doc.setFontSize(14);
+        doc.setTextColor(249, 115, 22);
+        doc.setFont("helvetica", "bold");
+        doc.text(blogData.conclusion.heading || "Conclusion", margin, y);
+        y += 8;
+
+        doc.setFontSize(10.5);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont("helvetica", "normal");
+        const concLines = doc.splitTextToSize(blogData.conclusion.summary || "", contentWidth);
+        doc.text(concLines, margin, y);
+        y += (concLines.length * 5) + 8;
+        
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        const finalLines = doc.splitTextToSize(blogData.conclusion.final_thought || "", contentWidth);
+        doc.text(finalLines, margin, y);
+        y += (finalLines.length * 6) + 10;
+      }
+
+      doc.save(`${client.business_name.replace(/\s+/g, '_')}_Blog.pdf`);
     } catch (error: any) {
-      console.error("PDF Export Error:", error);
-      alert(`Export Error: ${error.message}. TIP: If this persists, try using Ctrl+P and Save as PDF.`);
+      console.error("Manual PDF Export Error:", error);
+      alert("Failed to export PDF manually. Please check your internet connection for image loading.");
+    } finally {
       setIsExporting(false);
     }
   };
