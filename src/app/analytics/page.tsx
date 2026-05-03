@@ -30,6 +30,17 @@ type Deliverable = {
   clients?: { business_name: string };
 };
 
+type ClarityData = {
+  id: string;
+  total_sessions: number;
+  avg_engagement_time_seconds: number;
+  avg_scroll_depth: number;
+  browser_stats: { name: string; value: number }[];
+  device_stats: { name: string; value: number }[];
+  popular_pages: { url: string; views: number }[];
+  fetch_timestamp: string;
+};
+
 const PLATFORM_COLOR: Record<string, string> = {
   instagram: "text-pink-400",
   linkedin: "text-blue-400",
@@ -49,6 +60,7 @@ function platformKey(p?: string) {
 export default function AnalyticsDashboardPage() {
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
+  const [clarityData, setClarityData] = useState<ClarityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [platformFilter, setPlatformFilter] = useState("all");
 
@@ -74,8 +86,17 @@ export default function AnalyticsDashboardPage() {
       .order("created_at", { ascending: false })
       .limit(20);
 
+    // Fetch latest Clarity analytics cache
+    const { data: clarity } = await supabase
+      .from("clarity_analytics_cache")
+      .select("*")
+      .order("fetch_timestamp", { ascending: false })
+      .limit(1)
+      .single();
+
     setAnalytics(analyticsData || []);
     setDeliverables(delData || []);
+    setClarityData(clarity || null);
     setIsLoading(false);
   }
 
@@ -176,6 +197,93 @@ export default function AnalyticsDashboardPage() {
                 <h3 className="text-3xl font-[900] text-white">{isLoading ? "..." : metric.value}</h3>
               </div>
             ))}
+          </div>
+
+          {/* Microsoft Clarity Website Analytics Section */}
+          <div className="bg-surface-container-low border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <span className="material-symbols-outlined text-[120px]">analytics</span>
+            </div>
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative z-10">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-sp-primary/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-sp-primary">language</span>
+                  </div>
+                  <h2 className="text-2xl font-[900] text-white tracking-tight">Website Performance</h2>
+                </div>
+                <p className="text-on-surface-variant text-sm font-medium">
+                  Real-time visitor behavior from Microsoft Clarity (Synced via n8n)
+                </p>
+              </div>
+              
+              {clarityData && (
+                <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">
+                    Last Synced: {new Date(clarityData.fetch_timestamp).toLocaleString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {clarityData ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                {/* Clarity Metric 1 */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Engagement</p>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-5xl font-[900] text-white">{(clarityData.avg_engagement_time_seconds / 60).toFixed(1)}</h3>
+                    <span className="text-xl font-bold text-on-surface-variant">min</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-sp-primary rounded-full" style={{ width: '65%' }} />
+                  </div>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Average time users spent actively interacting with the site per session.
+                  </p>
+                </div>
+
+                {/* Clarity Metric 2 */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Scroll Depth</p>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-5xl font-[900] text-white">{clarityData.avg_scroll_depth}</h3>
+                    <span className="text-xl font-bold text-on-surface-variant">%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-sp-secondary rounded-full" style={{ width: `${clarityData.avg_scroll_depth}%` }} />
+                  </div>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Users are scrolling through more than half of your landing page content.
+                  </p>
+                </div>
+
+                {/* Clarity Metric 3 */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Total Traffic</p>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-5xl font-[900] text-white">{clarityData.total_sessions.toLocaleString()}</h3>
+                    <span className="text-xl font-bold text-on-surface-variant">visits</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-sp-tertiary rounded-full" style={{ width: '80%' }} />
+                  </div>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Total sessions recorded across all devices in the current tracking period.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-2xl bg-white/[0.02]">
+                <span className="material-symbols-outlined text-5xl text-white/10 mb-4 animate-pulse">cloud_sync</span>
+                <p className="text-white font-bold">Waiting for Clarity Data Sync</p>
+                <p className="text-sm text-on-surface-variant mt-1 text-center max-w-sm">
+                  Once your n8n workflow begins syncing data to the <code className="bg-white/10 px-1 rounded">clarity_analytics_cache</code> table, your website performance will appear here.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Main Dashboard Area */}

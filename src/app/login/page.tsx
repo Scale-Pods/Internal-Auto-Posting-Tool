@@ -19,15 +19,16 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { loginAsync } = await import("@/lib/auth");
+      const user = await loginAsync(email, password);
 
-      if (error) throw error;
+      if (!user) {
+        throw new Error("Invalid login credentials");
+      }
       
-      // Simulate role-based redirect
-      if (role === "Admin" || role === "Client") {
+      // Navigate based on returned role or selected role
+      // The custom auth system handles the session in localStorage
+      if (user.role === "admin" || user.role === "user" || role === "Admin" || role === "Client") {
         window.location.href = "/dashboard";
       } else {
         window.location.href = "/designer/tasks";
