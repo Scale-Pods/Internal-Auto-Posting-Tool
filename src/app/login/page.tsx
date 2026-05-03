@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Admin");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -168,14 +169,25 @@ export default function LoginPage() {
                   <label className="block text-sm font-bold text-slate-700">Password</label>
                   <Link href="#" className="text-sm font-bold text-primary-container hover:underline">Forgot password?</Link>
                 </div>
-                <input 
-                  type="password" 
-                  required
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-foreground bg-background"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-foreground bg-background pr-12"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div>

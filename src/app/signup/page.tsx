@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("Admin");
+  const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -193,21 +194,32 @@ export default function SignupPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="relative">
                   <label className="block text-[11px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Password</label>
-                  <input 
-                    type="password" 
-                    required
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      required
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white pr-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {showPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[11px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Confirm</label>
                   <input 
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     required
                     placeholder="••••••••"
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all text-slate-900 bg-white"

@@ -18,12 +18,14 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !user) {
-      console.error("Login lookup error:", error);
+      console.error(`Login failed: User not found for email ${email}. Error:`, error?.message);
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     // Compare the provided password with the hashed password in the DB
     const isValid = await bcrypt.compare(password, user.password_hash);
+    
+    console.log(`Bcrypt comparison for ${email}: ${isValid ? "SUCCESS" : "FAILED"}`);
 
     if (!isValid) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
