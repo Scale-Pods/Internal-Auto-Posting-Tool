@@ -1,7 +1,7 @@
 // Simple client-side auth utility
 // Handles login, logout, role checking
 
-export type UserRole = "user" | "designer";
+export type UserRole = "user" | "designer" | "admin";
 
 export interface AuthUser {
   email: string;
